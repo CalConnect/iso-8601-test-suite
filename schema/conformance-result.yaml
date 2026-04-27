@@ -1,0 +1,276 @@
+# YAML Schema for ISO 8601 Test Suite — Conformance Test Suite Result
+#
+# Records the results of running the test suite against a specific
+# implementation. Each result captures what was tested, how it was tested
+# (exact API calls), and what the implementation actually produced.
+#
+# This enables:
+#   1. Automated tools to run tests and record results
+#   2. Humans to verify results manually and fill them in
+#   3. Comparison between implementations
+#   4. Conformance claims backed by evidence
+---
+type: object
+required:
+  - id
+  - implementation
+  - date
+  - conformance_class_results
+properties:
+  id:
+    type: string
+    pattern: "^result:[a-z0-9-]+$"
+    description: "Unique identifier for this result set (e.g. result:ruby-date)"
+
+  implementation:
+    type: object
+    required:
+      - name
+      - language
+    description: "The software implementation being tested"
+    properties:
+      name:
+        type: string
+        description: "Human-readable implementation name"
+      description:
+        type: string
+        description: "Brief description of what the implementation covers"
+      language:
+        type: string
+        description: "Programming language (e.g. ruby, python, java)"
+      version:
+        type: string
+        description: "Version string (e.g. '3.3.0')"
+      url:
+        type: string
+        description: "URL to documentation or source"
+      modules:
+        type: array
+        description: "Modules/classes used for testing"
+        items:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              description: "Module/class name (e.g. Date, Time)"
+            class:
+              type: string
+              description: "Fully qualified class name"
+            methods:
+              type: array
+              items:
+                type: string
+              description: "Key methods used (e.g. parse, iso8601, new)"
+
+  date:
+    type: string
+    description: "Date when tests were executed or results recorded (ISO 8601)"
+
+  tester:
+    type: string
+    description: "Who or what ran the tests (e.g. 'Jane Doe', 'CI automation')"
+
+  verification:
+    type: string
+    enum: [automated, manual, inferred]
+    description: >-
+      How results were verified:
+      - automated: a test script executed the API calls
+      - manual: a human ran the code and recorded results
+      - inferred: results based on known behavior without execution
+
+  profiles_tested:
+    type: array
+    items:
+      type: string
+      pattern: "^profile:[a-z0-9-]+$"
+    description: "Profile(s) tested against"
+
+  profile_results:
+    type: array
+    description: "Results for profile-specific additional tests"
+    items:
+      type: object
+      required:
+        - profile
+        - status
+        - test_results
+      properties:
+        profile:
+          type: string
+          pattern: "^profile:[a-z0-9-]+$"
+          description: "Profile ID"
+
+        status:
+          type: string
+          enum: [passed, failed, partial, not-supported]
+          description: "Aggregate status for this profile's additional tests"
+
+        notes:
+          type: string
+          description: "Summary of implementation behavior for these profile tests"
+
+        test_results:
+          type: array
+          items:
+            type: object
+            required:
+              - test
+              - result
+            properties:
+              test:
+                type: string
+                pattern: "^conf-test:[a-z0-9-]+$"
+                description: "Profile additional test ID"
+
+              result:
+                type: string
+                enum: [pass, fail, error, not-supported, not-tested]
+
+              method:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  language:
+                    type: string
+                  api:
+                    type: string
+
+              actual:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  returned:
+                    type: string
+                  exception:
+                    type: string
+                  notes:
+                    type: string
+
+              notes:
+                type: string
+
+  conformance_class_results:
+    type: array
+    description: "Results grouped by conformance class"
+    items:
+      type: object
+      required:
+        - conformance_class
+        - status
+        - test_results
+      properties:
+        conformance_class:
+          type: string
+          pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
+          description: "Conformance class ID"
+
+        status:
+          type: string
+          enum: [passed, failed, partial, not-supported]
+          description: >-
+            Aggregate status for this conformance class:
+            - passed: all tested tests pass
+            - failed: one or more tests produce wrong results
+            - partial: some tests pass, some not-supported
+            - not-supported: implementation does not support this feature
+
+        notes:
+          type: string
+          description: "Summary of implementation behavior for this class"
+
+        default_method:
+          type: object
+          description: >-
+            Default method used for tests in this class.
+            Individual tests may override with their own method.
+            For not-supported classes, shows the API that was attempted.
+          properties:
+            language:
+              type: string
+            code:
+              type: string
+              description: "Code pattern with {expression} placeholder"
+            api:
+              type: string
+              description: "Primary API call (e.g. 'Date.parse')"
+
+        sample_method:
+          type: object
+          description: >-
+            For not-supported classes: shows one attempted API call
+            demonstrating why the feature is not supported.
+          properties:
+            language:
+              type: string
+            code:
+              type: string
+            api:
+              type: string
+            result:
+              type: string
+              description: "What happened when the method was attempted"
+
+        test_results:
+          type: array
+          items:
+            type: object
+            required:
+              - test
+              - result
+            properties:
+              test:
+                type: string
+                pattern: "^conf-test:[a-z0-9-]+$"
+                description: "Conformance test ID being reported"
+
+              result:
+                type: string
+                enum: [pass, fail, error, not-supported, not-tested]
+                description: >-
+                  Test result:
+                  - pass: implementation produced expected result
+                  - fail: implementation produced different result
+                  - error: implementation raised unexpected exception
+                  - not-supported: feature not provided by implementation
+                  - not-tested: test was skipped
+
+              method:
+                type: object
+                description: "Override class default_method for this test"
+                properties:
+                  code:
+                    type: string
+                    description: "Complete runnable code for this test"
+                  language:
+                    type: string
+                  api:
+                    type: string
+                    description: "API call used (e.g. 'Date.parse')"
+
+              actual:
+                type: object
+                description: "What the implementation actually produced"
+                properties:
+                  valid:
+                    type: boolean
+                    description: "Whether the implementation accepted the expression"
+                  returned:
+                    type: string
+                    description: "String representation of returned value"
+                  components:
+                    type: object
+                    description: "Components the implementation extracted"
+                  exception:
+                    type: string
+                    description: "Exception class and message, if raised"
+                  notes:
+                    type: string
+
+              notes:
+                type: string
+                description: "Additional context about this test result"

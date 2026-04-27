@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:calendar-date
+name: Calendar date
+description: >
+  Requirements for the representation of calendar dates in basic and extended
+  formats, including complete representations, reduced precision, and expanded
+  representations with signed years.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - req-class:fundamentals
+source: ISO 8601-1:2026 Clause 5.2.2
+requirements:
+  - id: req:cal-date-basic-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.1"
+    statement: >
+      A complete calendar date in basic format encodes the year, month, and day
+      as contiguous digit fields without separators: [year][month][day].
+    format: basic
+    pattern: "[YYYY][MM][DD]"
+  - id: req:cal-date-extended-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.1"
+    statement: >
+      A complete calendar date in extended format encodes the year, month, and day
+      with hyphen separators: [year]["-"][month]["-"][day].
+    format: extended
+    pattern: "[YYYY][\"-\"][MM][\"-\"][DD]"
+  - id: req:cal-date-reduced-month-ext
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.2"
+    statement: >
+      A calendar month with reduced precision (day omitted) in extended format
+      uses only year and month with hyphen separator: [year]["-"][month].
+    format: extended
+    pattern: "[YYYY][\"-\"][MM]"
+  - id: req:cal-date-reduced-year
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.2"
+    statement: >
+      A calendar year with reduced precision (month and day omitted) is expressed
+      in basic format as [year].
+    format: basic
+    pattern: "[YYYY]"
+  - id: req:cal-date-reduced-decade
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.2"
+    statement: >
+      A calendar decade with reduced precision is expressed in basic format as
+      [dec] (three digits).
+    format: basic
+    pattern: "[YYY]"
+  - id: req:cal-date-reduced-century
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.2"
+    statement: >
+      A calendar century with reduced precision is expressed in basic format as
+      [cent] (two digits).
+    format: basic
+    pattern: "[YY]"
+  - id: req:cal-date-expanded-basic-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar day in basic format encodes a signed expanded year
+      field with month and day: [±][year(expanded)][month][day].
+    format: basic
+    pattern: "[±][YYYYYY][MM][DD]"
+  - id: req:cal-date-expanded-extended-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar day in extended format encodes a signed expanded year
+      with hyphen-separated month and day: [±][year(expanded)]["-"][month]["-"][day].
+    format: extended
+    pattern: "[±][YYYYYY][\"-\"][MM][\"-\"][DD]"
+  - id: req:cal-date-expanded-extended-month
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar month in extended format encodes a signed expanded year
+      with hyphen separator and month: [±][year(expanded)]["-"][month].
+    format: extended
+    pattern: "[±][YYYYYY][\"-\"][MM]"
+  - id: req:cal-date-expanded-basic-year
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar year in basic format encodes a signed expanded year
+      without separators: [±][year(expanded)].
+    format: basic
+    pattern: "[±][YYYYYY]"
+  - id: req:cal-date-expanded-basic-decade
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar decade in basic format encodes a signed expanded
+      decade field: [±][dec(expanded)].
+    format: basic
+    pattern: "[±][YYYYY]"
+  - id: req:cal-date-expanded-basic-century
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.2.3"
+    statement: >
+      An expanded calendar century in basic format encodes a signed expanded
+      century field: [±][cent(expanded)].
+    format: basic
+    pattern: "[±][YYYY]"

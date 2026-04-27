@@ -1,0 +1,139 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:fundamentals
+name: Fundamentals
+description: >
+  Fundamental principles for ISO 8601 date and time representations, including
+  character set, calendar rules, time scale components, and expansion rules.
+standardization_target_type: iso-8601-date-time-processor
+source: ISO 8601-1:2026 Clauses 4, 5.1
+requirements:
+  - id: req:character-set
+    clause: "iso:8601:-1:ed-1:en:clause:4.1"
+    statement: >
+      The character set used in ISO 8601 representations shall be limited to
+      digits 0 through 9, and the separator and designator characters hyphen-minus
+      (-), colon (:), letter T, letter W, letter P, letter R, letter Z, plus sign (+),
+      and solidus (/).
+    format: any
+    pattern: "[0-9\\-:TWPQRZ+/]"
+  - id: req:decreasing-order
+    clause: "iso:8601:-1:ed-1:en:clause:4.1"
+    statement: >
+      The decreasing order of time scale components, left-to-right, is common to
+      all date and time representations.
+    format: any
+  - id: req:gregorian-calendar
+    clause: "iso:8601:-1:ed-1:en:clause:4.2.1"
+    statement: >
+      The Gregorian calendar governs the identification of calendar days. This
+      calendar structures time as a continuous sequence of calendar years, with
+      common years containing 365 days and leap years containing 366 days. Each
+      calendar year comprises 12 consecutive calendar months.
+    format: any
+  - id: req:leap-year-rules
+    clause: "iso:8601:-1:ed-1:en:clause:4.2.1"
+    statement: >
+      A calendar year is a leap year if it is divisible by 4, except that years
+      divisible by 100 are not leap years unless they are also divisible by 400.
+      A leap year has 366 days with February having 29 days; a common year has
+      365 days with February having 28 days.
+    format: any
+  - id: req:days-per-month
+    clause: "iso:8601:-1:ed-1:en:clause:4.2.1"
+    statement: >
+      Calendar months shall have the following number of days: January 31,
+      February 28 (29 in leap years), March 31, April 30, May 31, June 30,
+      July 31, August 31, September 30, October 31, November 30, December 31.
+    format: any
+  - id: req:week-calendar
+    clause: "iso:8601:-1:ed-1:en:clause:4.2.2"
+    statement: >
+      The week calendar is based on an unbounded series of contiguous calendar
+      weeks. Each calendar week has seven calendar days identified by ordinal
+      number from 1 (Monday) through 7 (Sunday). The reference point assigns
+      Saturday to 1 January 2000.
+    format: any
+  - id: req:24-hour-clock
+    clause: "iso:8601:-1:ed-1:en:clause:4.2.3"
+    statement: >
+      Time of day is expressed using a 24-hour clock. A clock hour is identified
+      by a two-digit ordinal number from '00' to '23'. A clock minute from '00'
+      to '59'. A clock second from '00' to '60' (60 accommodates leap seconds).
+    format: any
+  - id: req:year-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.2"
+    statement: >
+      Each Gregorian calendar year can be identified by a 4-digit ordinal number
+      beginning with '0000' for year zero, through '9999'. The year number may be
+      preceded by a minus sign to indicate a year preceding year zero.
+    format: any
+    pattern: "[YYYY]"
+  - id: req:month-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.3"
+    statement: >
+      Each calendar month within its calendar year is identified by a two-digit
+      ordinal number from '01' for January to '12' for December.
+    format: any
+    pattern: "[MM]"
+  - id: req:week-number-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.4"
+    statement: >
+      The calendar week of year is identified by a two-digit ordinal number from
+      '01' for the first calendar week through '52' or '53', depending on the
+      number of calendar weeks in that calendar year.
+    format: any
+    pattern: "[\"W\"][WW]"
+  - id: req:day-of-week-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.6"
+    statement: >
+      The calendar day of week is represented by a single digit ordinal number
+      from '1' (Monday) through '7' (Sunday).
+    format: any
+    pattern: "[K]"
+  - id: req:day-of-year-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.7"
+    statement: >
+      The calendar day of year is represented by a three-digit ordinal number
+      from '001' (January 1) through '365' (common year) or '366' (leap year).
+    format: any
+    pattern: "[OOO]"
+  - id: req:decade-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.11"
+    statement: >
+      Each Gregorian calendar decade is identified by a 3-digit ordinal number
+      beginning with '000', for decade zero, through '999'. The decade is
+      represented in implied form as [YYY].
+    format: basic
+    pattern: "[YYY]"
+  - id: req:century-representation
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.12"
+    statement: >
+      Each Gregorian calendar century is identified by a 2-digit ordinal number
+      beginning with '00', for century zero, through '99'. The century is
+      represented in implied form as [YY].
+    format: basic
+    pattern: "[YY]"
+  - id: req:time-shift
+    clause: "iso:8601:-1:ed-1:en:clause:4.3.13"
+    statement: >
+      A time shift is represented in basic format as [±][hour][min] or [±][hour],
+      and in extended format as [±][hour][":"][min] or ["Z"]. The UTC designator
+      ["Z"] indicates no time shift from UTC. The time shift shall be positive if
+      ahead of or equal to UTC, and negative if behind UTC.
+    format: any
+    pattern: "[±][hour][min]|[±][hour]|\"Z\""
+  - id: req:expansion
+    clause: "iso:8601:-1:ed-1:en:clause:4.4"
+    statement: >
+      By mutual agreement of the communicating partners, it is permitted to expand
+      the component identifying the calendar year, which is otherwise limited to
+      four digits. This enables reference to dates where the calendar year
+      identifier exceeds four digits.
+    format: any
+  - id: req:leading-zeros
+    clause: "iso:8601:-1:ed-1:en:clause:4.5"
+    statement: >
+      If a time scale component in an implied representation has a fixed length,
+      leading zeros shall be used as required.
+    format: any

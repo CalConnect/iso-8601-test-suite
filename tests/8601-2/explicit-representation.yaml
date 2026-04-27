@@ -1,0 +1,899 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:explicit-representation
+name: Explicit representation for date and time
+description: >
+  Tests for parsing, generation, and validity of explicit date and time
+  representations using designated symbols.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:fundamentals
+requirements_class: req-class:explicit-representation
+source: ISO 8601-2:2026 Clause 7
+tests:
+  # --- Calendar date (Clause 7.2) ---
+  - id: conf-test:explicit-calendar-date-parsing-001
+    description: "Parse explicit calendar date '1985Y4M12D'"
+    requirements:
+      - req:explicit-calendar-date
+    test_type: parsing
+    given:
+      expression: "1985Y4M12D"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+
+  - id: conf-test:explicit-calendar-date-generation-001
+    description: "Generate explicit calendar date from components"
+    requirements:
+      - req:explicit-calendar-date
+    test_type: generation
+    given:
+      components:
+        year: 1985
+        month: 4
+        day: 12
+    expect:
+      expression: "1985Y4M12D"
+
+  # --- Ordinal date (Clause 7.3) ---
+  - id: conf-test:explicit-ordinal-date-parsing-001
+    description: "Parse explicit ordinal date '1985Y102O'"
+    requirements:
+      - req:explicit-ordinal-date
+    test_type: parsing
+    given:
+      expression: "1985Y102O"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        day_of_year: 102
+
+  - id: conf-test:explicit-ordinal-date-generation-001
+    description: "Generate explicit ordinal date from components"
+    requirements:
+      - req:explicit-ordinal-date
+    test_type: generation
+    given:
+      components:
+        year: 1985
+        day_of_year: 102
+    expect:
+      expression: "1985Y102O"
+
+  # --- Week date (Clause 7.4) ---
+  - id: conf-test:explicit-week-date-parsing-001
+    description: "Parse explicit week date '1985Y15W5K'"
+    requirements:
+      - req:explicit-week-date
+    test_type: parsing
+    given:
+      expression: "1985Y15W5K"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        week: 15
+        day_of_week: 5
+
+  - id: conf-test:explicit-week-date-generation-001
+    description: "Generate explicit week date from components"
+    requirements:
+      - req:explicit-week-date
+    test_type: generation
+    given:
+      components:
+        year: 1985
+        week: 15
+        day_of_week: 5
+    expect:
+      expression: "1985Y15W5K"
+
+  # --- Local time of day (Clause 7.5.1) ---
+  - id: conf-test:explicit-local-time-parsing-001
+    description: "Parse explicit local time 'T23H20M50S'"
+    requirements:
+      - req:explicit-local-time
+    test_type: parsing
+    given:
+      expression: "T23H20M50S"
+    expect:
+      valid: true
+      components:
+        hour: 23
+        minute: 20
+        second: 50
+
+  - id: conf-test:explicit-local-time-parsing-002
+    description: "Parse explicit local time with reduced precision 'T23H20M'"
+    requirements:
+      - req:explicit-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "T23H20M"
+    expect:
+      valid: true
+      components:
+        hour: 23
+        minute: 20
+
+  - id: conf-test:explicit-local-time-generation-001
+    description: "Generate explicit local time from components"
+    requirements:
+      - req:explicit-local-time
+    test_type: generation
+    given:
+      components:
+        hour: 23
+        minute: 20
+        second: 50
+    expect:
+      expression: "T23H20M50S"
+
+  # --- Beginning of day (Clause 7.5.2) ---
+  - id: conf-test:explicit-beginning-of-day-parsing-001
+    description: "Parse beginning of day 'T0H0M0S'"
+    requirements:
+      - req:explicit-beginning-of-day
+    test_type: parsing
+    given:
+      expression: "T0H0M0S"
+    expect:
+      valid: true
+      components:
+        hour: 0
+        minute: 0
+        second: 0
+
+  - id: conf-test:explicit-beginning-of-day-parsing-002
+    description: "Parse beginning of day with zero omission 'T0S'"
+    requirements:
+      - req:explicit-beginning-of-day
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "T0S"
+    expect:
+      valid: true
+      components:
+        hour: 0
+        minute: 0
+        second: 0
+
+  # --- Time shift (Clause 7.6) ---
+  - id: conf-test:explicit-time-shift-parsing-001
+    description: "Parse time shift behind UTC 'Z-5H'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z-5H"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "-"
+          hour: 5
+
+  - id: conf-test:explicit-time-shift-parsing-002
+    description: "Parse time shift ahead of UTC 'Z8H'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z8H"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 8
+
+  - id: conf-test:explicit-time-shift-parsing-003
+    description: "Parse time shift of 28 hours ahead 'Z28H'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z28H"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 28
+
+  - id: conf-test:explicit-time-shift-parsing-004
+    description: "Parse time shift with minutes 'Z6H0M'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z6H0M"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 6
+          minute: 0
+
+  - id: conf-test:explicit-time-shift-parsing-005
+    description: "Parse time shift with full precision 'Z7H33M14S'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z7H33M14S"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 7
+          minute: 33
+          second: 14
+
+  - id: conf-test:explicit-time-shift-parsing-006
+    description: "Parse UTC zero shift 'Z'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 0
+          minute: 0
+          second: 0
+
+  - id: conf-test:explicit-time-shift-parsing-007
+    description: "Parse UTC zero shift with minute precision 'Z0H0M'"
+    requirements:
+      - req:explicit-time-shift
+    test_type: parsing
+    given:
+      expression: "Z0H0M"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 0
+          minute: 0
+
+  - id: conf-test:explicit-time-shift-parsing-008
+    description: "Parse UTC zero shift with second precision 'Z0S'"
+    requirements:
+      - req:explicit-time-shift
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "Z0S"
+    expect:
+      valid: true
+      components:
+        shift:
+          sign: "+"
+          hour: 0
+          minute: 0
+          second: 0
+
+  # --- Date with shift (Clause 7.7) ---
+  - id: conf-test:explicit-date-with-shift-parsing-001
+    description: "Parse date with shift behind UTC '1985Y4M12DZ-5H'"
+    requirements:
+      - req:explicit-date-with-shift
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DZ-5H"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+        shift:
+          sign: "-"
+          hour: 5
+
+  - id: conf-test:explicit-date-with-shift-parsing-002
+    description: "Parse date with shift ahead of UTC '2018Y9M12DZ8H'"
+    requirements:
+      - req:explicit-date-with-shift
+    test_type: parsing
+    given:
+      expression: "2018Y9M12DZ8H"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 9
+        day: 12
+        shift:
+          sign: "+"
+          hour: 8
+
+  # --- Time of day with shift (Clause 7.8) ---
+  - id: conf-test:explicit-time-with-shift-parsing-001
+    description: "Parse time of day at UTC 'T23H20M50SZ'"
+    requirements:
+      - req:explicit-time-with-shift
+    test_type: parsing
+    given:
+      expression: "T23H20M50SZ"
+    expect:
+      valid: true
+      components:
+        hour: 23
+        minute: 20
+        second: 50
+        shift:
+          sign: "+"
+          hour: 0
+          minute: 0
+          second: 0
+
+  - id: conf-test:explicit-time-with-shift-parsing-002
+    description: "Parse time of day with shift behind UTC 'T23H20M50SZ-5H0M'"
+    requirements:
+      - req:explicit-time-with-shift
+    test_type: parsing
+    given:
+      expression: "T23H20M50SZ-5H0M"
+    expect:
+      valid: true
+      components:
+        hour: 23
+        minute: 20
+        second: 50
+        shift:
+          sign: "-"
+          hour: 5
+          minute: 0
+
+  - id: conf-test:explicit-time-with-shift-parsing-003
+    description: "Parse time of day with shift ahead of UTC 'T23H20M50SZ8H'"
+    requirements:
+      - req:explicit-time-with-shift
+    test_type: parsing
+    given:
+      expression: "T23H20M50SZ8H"
+    expect:
+      valid: true
+      components:
+        hour: 23
+        minute: 20
+        second: 50
+        shift:
+          sign: "+"
+          hour: 8
+
+  # --- Date and time of day (Clause 7.9) ---
+  - id: conf-test:explicit-datetime-parsing-001
+    description: "Parse date and time '1985Y4M12DT23H20M30S'"
+    requirements:
+      - req:explicit-datetime
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DT23H20M30S"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+        hour: 23
+        minute: 20
+        second: 30
+
+  - id: conf-test:explicit-datetime-with-shift-parsing-001
+    description: "Parse date and time with shift '1985Y4M12DT23H20M30SZ8H'"
+    requirements:
+      - req:explicit-datetime-with-shift
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DT23H20M30SZ8H"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+        hour: 23
+        minute: 20
+        second: 30
+        shift:
+          sign: "+"
+          hour: 8
+
+  # --- Decade (Clause 7.10) ---
+  - id: conf-test:explicit-decade-parsing-001
+    description: "Parse decade '188J'"
+    requirements:
+      - req:explicit-decade
+    test_type: parsing
+    given:
+      expression: "188J"
+    expect:
+      valid: true
+      components:
+        decade: 188
+
+  - id: conf-test:explicit-decade-parsing-002
+    description: "Parse decade '18J'"
+    requirements:
+      - req:explicit-decade
+    test_type: parsing
+    given:
+      expression: "18J"
+    expect:
+      valid: true
+      components:
+        decade: 18
+
+  # --- Century (Clause 7.11) ---
+  - id: conf-test:explicit-century-parsing-001
+    description: "Parse century '13C'"
+    requirements:
+      - req:explicit-century
+    test_type: parsing
+    given:
+      expression: "13C"
+    expect:
+      valid: true
+      components:
+        century: 13
+
+  - id: conf-test:explicit-century-parsing-002
+    description: "Parse century '3C'"
+    requirements:
+      - req:explicit-century
+    test_type: parsing
+    given:
+      expression: "3C"
+    expect:
+      valid: true
+      components:
+        century: 3
+
+  # --- Additional explicit forms (Clause 4.3) ---
+  - id: conf-test:explicit-day-of-week-parsing-001
+    description: "Parse day of week '1K' (Monday)"
+    requirements:
+      - req:explicit-additional-forms-day-of-week
+    test_type: parsing
+    given:
+      expression: "1K"
+    expect:
+      valid: true
+      components:
+        day_of_week: 1
+
+  - id: conf-test:explicit-day-of-year-parsing-001
+    description: "Parse day of year '350O'"
+    requirements:
+      - req:explicit-additional-forms-day-of-year
+    test_type: parsing
+    given:
+      expression: "350O"
+    expect:
+      valid: true
+      components:
+        day_of_year: 350
+
+  - id: conf-test:explicit-decade-additional-parsing-001
+    description: "Parse decade '196J'"
+    requirements:
+      - req:explicit-additional-forms-decade
+    test_type: parsing
+    given:
+      expression: "196J"
+    expect:
+      valid: true
+      components:
+        decade: 196
+
+  - id: conf-test:explicit-decade-additional-parsing-002
+    description: "Parse decade '0J'"
+    requirements:
+      - req:explicit-additional-forms-decade
+    test_type: parsing
+    given:
+      expression: "0J"
+    expect:
+      valid: true
+      components:
+        decade: 0
+
+  - id: conf-test:explicit-century-additional-parsing-001
+    description: "Parse century '16C'"
+    requirements:
+      - req:explicit-additional-forms-century
+    test_type: parsing
+    given:
+      expression: "16C"
+    expect:
+      valid: true
+      components:
+        century: 16
+
+  - id: conf-test:explicit-century-additional-parsing-002
+    description: "Parse century '0C'"
+    requirements:
+      - req:explicit-additional-forms-century
+    test_type: parsing
+    given:
+      expression: "0C"
+    expect:
+      valid: true
+      components:
+        century: 0
+
+  # --- Value prefixing (Clause 4.3.2) ---
+  - id: conf-test:explicit-value-prefixing-parsing-001
+    description: "Parse month with zero padding '01M'"
+    requirements:
+      - req:explicit-value-prefixing
+    test_type: parsing
+    given:
+      expression: "01M"
+    expect:
+      valid: true
+      components:
+        month: 1
+
+  - id: conf-test:explicit-value-prefixing-parsing-002
+    description: "Parse month with extra zero padding '0001M'"
+    requirements:
+      - req:explicit-value-prefixing
+    test_type: parsing
+    given:
+      expression: "0001M"
+    expect:
+      valid: true
+      components:
+        month: 1
+
+  # --- Omission of zero-valued components (Clause 7.12) ---
+  - id: conf-test:explicit-omission-zero-parsing-001
+    description: "Parse date with omitted zero hour '2018Y8M8DT30M0SZ'"
+    requirements:
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "2018Y8M8DT30M0SZ"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+        day: 8
+        hour: 0
+        minute: 30
+        second: 0
+        shift:
+          sign: "+"
+          hour: 0
+          minute: 0
+          second: 0
+
+  - id: conf-test:explicit-omission-zero-parsing-002
+    description: "Parse date with omitted zero minute '1985Y4M15DT15H10S'"
+    requirements:
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "1985Y4M15DT15H10S"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 15
+        hour: 15
+        minute: 0
+        second: 10
+
+  - id: conf-test:explicit-omission-zero-validity-001
+    description: "Verify that '1988Y3M1DT2H0M0S' and '1988Y3M1DT2H' are unequal in precision"
+    requirements:
+      - req:explicit-omission-zero
+      - req:explicit-precision
+    test_type: validity
+    given:
+      expression: "1988Y3M1DT2H0M0S"
+    expect:
+      valid: true
+
+  # --- Indication of precision (Clause 7.13) ---
+  - id: conf-test:explicit-precision-parsing-001
+    description: "Parse with month precision '1985Y4M'"
+    requirements:
+      - req:explicit-precision
+    test_type: parsing
+    given:
+      expression: "1985Y4M"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+
+  - id: conf-test:explicit-precision-parsing-002
+    description: "Parse with hour precision '1985Y4M12DT2H'"
+    requirements:
+      - req:explicit-precision
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DT2H"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+        hour: 2
+
+  - id: conf-test:explicit-precision-parsing-003
+    description: "Parse with minute precision and omitted hour '1985Y4M12DT30M'"
+    requirements:
+      - req:explicit-precision
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DT30M"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day: 12
+        hour: 0
+        minute: 30
+
+  # --- Decimal fractions (Clause 7.14) ---
+  - id: conf-test:explicit-decimal-fractions-parsing-001
+    description: "Parse with comma decimal hour '2018Y8M8DT0,5H'"
+    requirements:
+      - req:explicit-decimal-fractions
+    test_type: parsing
+    given:
+      expression: "2018Y8M8DT0,5H"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+        day: 8
+        hour: 0.5
+
+  - id: conf-test:explicit-decimal-fractions-parsing-002
+    description: "Parse with period decimal minute '2018Y8M8DT10H30.5M'"
+    requirements:
+      - req:explicit-decimal-fractions
+    test_type: parsing
+    given:
+      expression: "2018Y8M8DT10H30.5M"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+        day: 8
+        hour: 10
+        minute: 30.5
+
+  - id: conf-test:explicit-decimal-fractions-parsing-003
+    description: "Parse with comma decimal second '2018Y8M8DT10H30M15,3S'"
+    requirements:
+      - req:explicit-decimal-fractions
+    test_type: parsing
+    given:
+      expression: "2018Y8M8DT10H30M15,3S"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+        day: 8
+        hour: 10
+        minute: 30
+        second: 15.3
+
+  # --- Reduced precision representations (Clause 7.15) ---
+  - id: conf-test:explicit-reduced-precision-parsing-001
+    description: "Parse month precision '2018Y8M'"
+    requirements:
+      - req:explicit-precision
+    test_type: parsing
+    given:
+      expression: "2018Y8M"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+
+  - id: conf-test:explicit-reduced-precision-parsing-002
+    description: "Parse minute precision with omitted hour '2018Y8M8DT30M'"
+    requirements:
+      - req:explicit-precision
+      - req:explicit-omission-zero
+    test_type: parsing
+    given:
+      expression: "2018Y8M8DT30M"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 8
+        day: 8
+        hour: 0
+        minute: 30
+
+  # --- Time intervals in explicit form (Clause 7.16) ---
+  - id: conf-test:explicit-time-interval-parsing-001
+    description: "Parse start and end time interval"
+    requirements:
+      - req:explicit-time-interval-start-end
+    test_type: parsing
+    given:
+      expression: "1985Y4M12DT23H20M50S/1985Y6M25DT10H30M0S"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 1985
+          month: 4
+          day: 12
+          hour: 23
+          minute: 20
+          second: 50
+        end:
+          year: 1985
+          month: 6
+          day: 25
+          hour: 10
+          minute: 30
+          second: 0
+
+  - id: conf-test:explicit-time-interval-component-order-parsing-001
+    description: "Parse time interval with inherited higher order components"
+    requirements:
+      - req:explicit-time-interval-component-order
+    test_type: parsing
+    given:
+      expression: "2018Y1M15D/2M20D"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 2018
+          month: 1
+          day: 15
+        end:
+          year: 2018
+          month: 2
+          day: 20
+
+  - id: conf-test:explicit-time-interval-component-order-validity-001
+    description: "Verify invalid time interval where end would be before start"
+    requirements:
+      - req:explicit-time-interval-component-order
+    test_type: validity
+    given:
+      expression: "2018Y1M15D/1M10D"
+    expect:
+      valid: false
+
+  - id: conf-test:explicit-time-interval-shift-parsing-001
+    description: "Parse time interval with shift inheritance"
+    requirements:
+      - req:explicit-time-interval-shift
+    test_type: parsing
+    given:
+      expression: "2018Y1M15DZ5H0M/2018Y2M20D"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 2018
+          month: 1
+          day: 15
+          shift:
+            sign: "+"
+            hour: 5
+            minute: 0
+        end:
+          year: 2018
+          month: 2
+          day: 20
+          shift:
+            sign: "+"
+            hour: 5
+            minute: 0
+
+  # --- Time interval start/duration (Clause 7.14.1) ---
+  - id: conf-test:explicit-time-interval-start-dur-parsing-001
+    description: "Parse time interval expressed by start and duration"
+    requirements:
+      - req:explicit-time-interval-start-duration
+    test_type: parsing
+    given:
+      expression: "2018Y1M15D/P2Y1M"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 2018
+          month: 1
+          day: 15
+        duration:
+          years: 2
+          months: 1
+
+  # --- Time interval duration/end (Clause 7.14.1) ---
+  - id: conf-test:explicit-time-interval-dur-end-parsing-001
+    description: "Parse time interval expressed by duration and end"
+    requirements:
+      - req:explicit-time-interval-end-duration
+    test_type: parsing
+    given:
+      expression: "P2Y1M/2020Y2M15D"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 2
+          months: 1
+        end:
+          year: 2020
+          month: 2
+          day: 15
+
+  # --- Recurring time interval (Clause 7.15) ---
+  - id: conf-test:explicit-recurring-parsing-001
+    description: "Parse recurring time interval in explicit form R5/2018Y1M15D/2020Y2M20D"
+    requirements:
+      - req:explicit-recurring-time-interval
+    test_type: parsing
+    given:
+      expression: "R5/2018Y1M15D/2020Y2M20D"
+    expect:
+      valid: true
+      components:
+        recurrence: 5
+        start:
+          year: 2018
+          month: 1
+          day: 15
+        end:
+          year: 2020
+          month: 2
+          day: 20
+
+  - id: conf-test:explicit-recurring-parsing-002
+    description: "Parse unbounded recurring time interval in explicit form R/2018Y1M15D/P1Y"
+    requirements:
+      - req:explicit-recurring-time-interval
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M15D/P1Y"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 15
+        duration:
+          years: 1

@@ -1,0 +1,66 @@
+# YAML Schema for ISO 8601 Test Suite — Profile
+---
+type: object
+required:
+  - id
+  - name
+  - standardization_target_type
+  - conformance_classes
+properties:
+  id:
+    type: string
+    pattern: "^profile:[a-z0-9-]+$"
+    description: "Local identifier for this profile (e.g. profile:rfc-3339)"
+  name:
+    type: string
+    description: "Human-readable name"
+  description:
+    type: string
+    description: "Description of the profile"
+  source:
+    type: string
+    description: "Source reference for the profile specification"
+  standardization_target_type:
+    type: string
+    description: "The type of implementation being tested"
+  conformance_classes:
+    type: array
+    items:
+      type: string
+      pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
+    description: "Conformance classes required by this profile"
+  additional_requirements:
+    type: array
+    items:
+      type: object
+      required: [id, statement]
+      properties:
+        id:
+          type: string
+          pattern: "^req:[a-z0-9-]+$"
+        statement:
+          type: string
+    description: "Additional profile-specific requirements"
+  additional_tests:
+    type: array
+    items:
+      type: object
+      required: [id, description, requirements, test_type, given, expect]
+      properties:
+        id:
+          type: string
+          pattern: "^conf-test:[a-z0-9-]+$"
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        test_type:
+          type: string
+          enum: [parsing, generation, validity, equivalence, arithmetic]
+        given:
+          type: object
+        expect:
+          type: object
+    description: "Additional profile-specific conformance tests"

@@ -1,0 +1,228 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:seasons
+name: Seasons and sub-year groupings
+description: >
+  Tests for parsing, generation, and validity of season and sub-year grouping
+  representations (values 21-41).
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:fundamentals
+requirements_class: req-class:seasons
+source: ISO 8601-2:2026 Clause 4.7
+tests:
+  # --- Basic seasons (21-24) ---
+  - id: conf-test:seasons-basic-spring-parsing-001
+    description: "Parse Spring of 2001 '2001-21'"
+    requirements:
+      - req:season-as-month-basic
+    test_type: parsing
+    given:
+      expression: "2001-21"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        season: 21
+
+  - id: conf-test:seasons-basic-summer-parsing-001
+    description: "Parse Summer of 2001 '2001-22'"
+    requirements:
+      - req:season-as-month-basic
+    test_type: parsing
+    given:
+      expression: "2001-22"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        season: 22
+
+  - id: conf-test:seasons-basic-autumn-parsing-001
+    description: "Parse Autumn of 2001 '2001-23'"
+    requirements:
+      - req:season-as-month-basic
+    test_type: parsing
+    given:
+      expression: "2001-23"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        season: 23
+
+  - id: conf-test:seasons-basic-winter-parsing-001
+    description: "Parse Winter of 2001 '2001-24'"
+    requirements:
+      - req:season-as-month-basic
+    test_type: parsing
+    given:
+      expression: "2001-24"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        season: 24
+
+  # --- Advanced sub-year groupings (25-41) ---
+  - id: conf-test:seasons-quarter-parsing-001
+    description: "Parse second quarter of 2001 '2001-34'"
+    requirements:
+      - req:season-as-month-advanced
+    test_type: parsing
+    given:
+      expression: "2001-34"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        ydivision: 34
+
+  - id: conf-test:seasons-northern-spring-parsing-001
+    description: "Parse Northern Hemisphere Spring '2001-25'"
+    requirements:
+      - req:season-as-month-advanced
+    test_type: parsing
+    given:
+      expression: "2001-25"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        ydivision: 25
+
+  - id: conf-test:seasons-quarter1-parsing-001
+    description: "Parse Quarter 1 '2001-33'"
+    requirements:
+      - req:season-as-month-advanced
+    test_type: parsing
+    given:
+      expression: "2001-33"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        ydivision: 33
+
+  - id: conf-test:seasons-semestral1-parsing-001
+    description: "Parse Semestral 1 '2001-40'"
+    requirements:
+      - req:season-as-month-advanced
+    test_type: parsing
+    given:
+      expression: "2001-40"
+    expect:
+      valid: true
+      components:
+        year: 2001
+        ydivision: 40
+
+  # --- Explicit season form ---
+  - id: conf-test:seasons-explicit-parsing-001
+    description: "Parse explicit season '21A'"
+    requirements:
+      - req:season-explicit
+    test_type: parsing
+    given:
+      expression: "21A"
+    expect:
+      valid: true
+      components:
+        season: 21
+
+  # --- Generation tests ---
+  - id: conf-test:seasons-generation-001
+    description: "Generate season expression from components"
+    requirements:
+      - req:season-as-month-basic
+    test_type: generation
+    given:
+      components:
+        year: 2001
+        season: 21
+    expect:
+      expression: "2001-21"
+
+  - id: conf-test:seasons-generation-002
+    description: "Generate quarter expression from components"
+    requirements:
+      - req:season-as-month-advanced
+    test_type: generation
+    given:
+      components:
+        year: 2001
+        ydivision: 34
+    expect:
+      expression: "2001-34"
+
+  # --- Validity tests ---
+  - id: conf-test:seasons-validity-001
+    description: "Verify season value below range is invalid"
+    requirements:
+      - req:season-basic-values
+    test_type: validity
+    given:
+      expression: "2001-20"
+    expect:
+      valid: false
+
+  - id: conf-test:seasons-validity-002
+    description: "Verify season value above range is invalid"
+    requirements:
+      - req:season-basic-values
+      - req:season-advanced-values
+    test_type: validity
+    given:
+      expression: "2001-42"
+    expect:
+      valid: false
+
+  # --- Implicit basic season form (Clause 4.8.2) ---
+  - id: conf-test:seasons-implicit-basic-parsing-001
+    description: "Parse implicit basic season Spring '21'"
+    requirements:
+      - req:season-implicit-basic
+    test_type: parsing
+    given:
+      expression: "21"
+    expect:
+      valid: true
+      components:
+        season: 21
+
+  - id: conf-test:seasons-implicit-basic-parsing-002
+    description: "Parse implicit basic season Winter '24'"
+    requirements:
+      - req:season-implicit-basic
+    test_type: parsing
+    given:
+      expression: "24"
+    expect:
+      valid: true
+      components:
+        season: 24
+
+  # --- Implicit advanced season form (Clause 4.8.2) ---
+  - id: conf-test:seasons-implicit-advanced-parsing-001
+    description: "Parse implicit advanced ydivision '34'"
+    requirements:
+      - req:season-implicit-advanced
+    test_type: parsing
+    given:
+      expression: "34"
+    expect:
+      valid: true
+      components:
+        ydivision: 34
+
+  - id: conf-test:seasons-implicit-advanced-parsing-002
+    description: "Parse implicit advanced hemispheric spring '25'"
+    requirements:
+      - req:season-implicit-advanced
+    test_type: parsing
+    given:
+      expression: "25"
+    expect:
+      valid: true
+      components:
+        ydivision: 25

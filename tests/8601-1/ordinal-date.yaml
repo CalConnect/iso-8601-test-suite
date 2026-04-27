@@ -1,0 +1,211 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:ordinal-date
+name: Ordinal date conformance tests
+description: >
+  Tests for ordinal date representations including complete basic/extended
+  formats and expanded representations.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:fundamentals
+requirements_class: req-class:ordinal-date
+source: ISO 8601-1:2026 Clause 5.2.3
+tests:
+  # Parsing tests
+  - id: conf-test:ord-date-parse-001
+    description: "Parse basic format ordinal date 1985102 (day 102 of 1985)"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: parsing
+    given:
+      expression: "1985102"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+
+  - id: conf-test:ord-date-parse-002
+    description: "Parse extended format ordinal date 1985-102"
+    requirements:
+      - req:ord-date-extended-full
+    test_type: parsing
+    given:
+      expression: "1985-102"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+
+  - id: conf-test:ord-date-parse-003
+    description: "Parse expanded basic format ordinal date +001985102"
+    requirements:
+      - req:ord-date-expanded-basic
+    test_type: parsing
+    given:
+      expression: "+001985102"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+
+  - id: conf-test:ord-date-parse-004
+    description: "Parse expanded extended format ordinal date +001985-102"
+    requirements:
+      - req:ord-date-expanded-extended
+    test_type: parsing
+    given:
+      expression: "+001985-102"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+
+  # Parsing boundary values
+  - id: conf-test:ord-date-parse-005
+    description: "Parse ordinal date with day 001 (January 1)"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: parsing
+    given:
+      expression: "1985001"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 1
+
+  - id: conf-test:ord-date-parse-006
+    description: "Parse ordinal date with day 365 (last day of common year)"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: parsing
+    given:
+      expression: "1985365"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 365
+
+  - id: conf-test:ord-date-parse-007
+    description: "Parse ordinal date with day 366 (last day of leap year)"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: parsing
+    given:
+      expression: "1984366"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1984
+          day_of_year: 366
+
+  # Generation tests
+  - id: conf-test:ord-date-gen-001
+    description: "Generate basic format ordinal date"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: generation
+    given:
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+    expect:
+      expression: "1985102"
+
+  - id: conf-test:ord-date-gen-002
+    description: "Generate extended format ordinal date"
+    requirements:
+      - req:ord-date-extended-full
+    test_type: generation
+    given:
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+    expect:
+      expression: "1985-102"
+
+  - id: conf-test:ord-date-gen-003
+    description: "Generate expanded basic format ordinal date"
+    requirements:
+      - req:ord-date-expanded-basic
+    test_type: generation
+    given:
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        expanded: true
+    expect:
+      expression: "+001985102"
+
+  - id: conf-test:ord-date-gen-004
+    description: "Generate expanded extended format ordinal date"
+    requirements:
+      - req:ord-date-expanded-extended
+    test_type: generation
+    given:
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        expanded: true
+    expect:
+      expression: "+001985-102"
+
+  # Validity tests
+  - id: conf-test:ord-date-valid-001
+    description: "Verify day 366 is invalid for a common year"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985366"
+    expect:
+      valid: false
+
+  - id: conf-test:ord-date-valid-002
+    description: "Verify day 000 is invalid"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985000"
+    expect:
+      valid: false
+
+  - id: conf-test:ord-date-valid-003
+    description: "Verify day 367 is invalid even for leap year"
+    requirements:
+      - req:ord-date-basic-full
+    test_type: validity
+    given:
+      expression: "1984367"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:ord-date-equiv-001
+    description: "Basic and extended format represent the same ordinal date"
+    requirements:
+      - req:ord-date-basic-full
+      - req:ord-date-extended-full
+    test_type: equivalence
+    given:
+      expression_a: "1985102"
+      expression_b: "1985-102"
+    expect:
+      equivalent: true

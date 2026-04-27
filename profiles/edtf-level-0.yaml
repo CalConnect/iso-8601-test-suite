@@ -1,0 +1,143 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:edtf-level-0
+name: EDTF Level 0
+description: >-
+  Extended Date/Time Format Level 0 as defined in Annex A of ISO 8601-2
+  (Library of Congress EDTF specification). EDTF Level 0 is a subset of
+  ISO 8601-1 supporting only extended format representations with
+  restricted granularity options.
+source: ISO 8601-2:2019 Annex A (EDTF Level 0)
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:time-interval
+additional_requirements:
+  - id: req:edtf-level-0-extended-format-only
+    statement: >-
+      Only extended format representations shall be used. Basic format
+      representations (without delimiters) are not permitted.
+  - id: req:edtf-level-0-four-digit-year
+    statement: >-
+      Calendar year representations shall be exactly four digits. Year
+      expansion (agreed number of digits) and reduced precision below
+      day in intervals are not permitted.
+  - id: req:edtf-level-0-mandatory-time-separator
+    statement: >-
+      The time designator "T" shall be mandatory between the date and
+      time components in date-and-time representations.
+  - id: req:edtf-level-0-time-minutes-required
+    statement: >-
+      Time-of-day representations shall include at least hours and
+      minutes (hh:mm minimum). Representations with hour-only precision
+      are not permitted.
+  - id: req:edtf-level-0-no-hour-24
+    statement: >-
+      The hour value 24 is not allowed. Midnight shall be represented
+      as 00:00 of the following day.
+  - id: req:edtf-level-0-offset-with-minutes
+    statement: >-
+      UTC offset shall be represented either as "Z" or as a numeric
+      offset with both hours and minutes (±hh:mm). Offset without
+      minutes (±hh) is not permitted.
+additional_tests:
+  - id: conf-test:edtf-level-0-valid-001
+    description: "Valid extended-format year-month representation"
+    requirements:
+      - req:edtf-level-0-extended-format-only
+    test_type: validity
+    given:
+      expression: "2010-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-0-valid-002
+    description: "Valid extended-format calendar date"
+    requirements:
+      - req:edtf-level-0-extended-format-only
+    test_type: validity
+    given:
+      expression: "2010-01-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-0-valid-003
+    description: "Valid date and time with UTC designator Z"
+    requirements:
+      - req:edtf-level-0-mandatory-time-separator
+      - req:edtf-level-0-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T00:00:00Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-0-valid-004
+    description: "Valid date and time with numeric UTC offset"
+    requirements:
+      - req:edtf-level-0-mandatory-time-separator
+      - req:edtf-level-0-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T00:00:00+01:00"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-0-invalid-001
+    description: >-
+      Basic format calendar date is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-extended-format-only
+    test_type: validity
+    given:
+      expression: "20100101"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-0-invalid-002
+    description: >-
+      Basic format year-month is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-extended-format-only
+    test_type: validity
+    given:
+      expression: "201001"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-0-invalid-003
+    description: >-
+      Time representation without minutes is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-time-minutes-required
+    test_type: validity
+    given:
+      expression: "2010-01-01T00Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-0-invalid-004
+    description: >-
+      UTC offset without minutes is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T00:00:00+01"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-0-invalid-005
+    description: >-
+      Hour value 24 is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-no-hour-24
+    test_type: validity
+    given:
+      expression: "2010-01-01T24:00:00"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-0-invalid-006
+    description: >-
+      Year with more than four digits is invalid in EDTF Level 0
+    requirements:
+      - req:edtf-level-0-four-digit-year
+    test_type: validity
+    given:
+      expression: "+002010"
+    expect:
+      valid: false

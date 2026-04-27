@@ -1,0 +1,239 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:edtf-level-1
+name: EDTF Level 1
+description: >-
+  Extended Date/Time Format Level 1 as defined in Annex A of ISO 8601-2
+  (Library of Congress EDTF specification). EDTF Level 1 extends Level 0
+  with uncertain/approximate qualification, unspecified digits, and season
+  representations drawn from ISO 8601-2.
+source: ISO 8601-2:2019 Annex A (EDTF Level 1)
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:time-interval
+  - 8601-2:conf-class:qualification
+  - 8601-2:conf-class:unspecified-digits
+  - 8601-2:conf-class:seasons
+additional_requirements:
+  - id: req:edtf-level-1-extended-format-only
+    statement: >-
+      Only extended format representations shall be used. Basic format
+      representations (without delimiters) are not permitted.
+  - id: req:edtf-level-1-four-digit-year
+    statement: >-
+      Calendar year representations shall be exactly four digits.
+  - id: req:edtf-level-1-mandatory-time-separator
+    statement: >-
+      The time designator "T" shall be mandatory between the date and
+      time components in date-and-time representations.
+  - id: req:edtf-level-1-time-minutes-required
+    statement: >-
+      Time-of-day representations shall include at least hours and
+      minutes (hh:mm minimum).
+  - id: req:edtf-level-1-no-hour-24
+    statement: >-
+      The hour value 24 is not allowed.
+  - id: req:edtf-level-1-offset-with-minutes
+    statement: >-
+      UTC offset shall be represented either as "Z" or as a numeric
+      offset with both hours and minutes (±hh:mm).
+  - id: req:edtf-level-1-qualification-markers
+    statement: >-
+      The qualification markers "?" (uncertain) and "~" (approximate)
+      may be appended to a date or date component value. The marker "?"
+      indicates uncertainty about the value; the marker "~" indicates
+      the value is approximate.
+  - id: req:edtf-level-1-unspecified-digits-xx
+    statement: >-
+      Unspecified digits shall be represented by "X" characters. For a
+      two-digit field (month or day), exactly two "X" characters ("XX")
+      shall be used to indicate the entire field is unspecified. A
+      single "X" in a two-digit field is not permitted.
+  - id: req:edtf-level-1-season-codes
+    statement: >-
+      Seasons shall be represented using the values 21 (Spring), 22
+      (Summer), 23 (Autumn/Fall), 24 (Winter) appended to a year with
+      hyphen separator (e.g. 2001-21 for Spring 2001).
+additional_tests:
+  - id: conf-test:edtf-level-1-valid-001
+    description: "Valid uncertain year"
+    requirements:
+      - req:edtf-level-1-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004?"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-002
+    description: "Valid uncertain year-month"
+    requirements:
+      - req:edtf-level-1-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004-06?"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-003
+    description: "Valid approximate day"
+    requirements:
+      - req:edtf-level-1-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004-06-11~"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-004
+    description: "Valid unspecified month"
+    requirements:
+      - req:edtf-level-1-unspecified-digits-xx
+    test_type: validity
+    given:
+      expression: "2018-XX"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-005
+    description: "Valid unspecified day"
+    requirements:
+      - req:edtf-level-1-unspecified-digits-xx
+    test_type: validity
+    given:
+      expression: "2018-03-XX"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-006
+    description: "Valid season representation"
+    requirements:
+      - req:edtf-level-1-season-codes
+    test_type: validity
+    given:
+      expression: "2001-21"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-001
+    description: >-
+      Percent sign is not a valid qualification marker in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004%"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-invalid-002
+    description: >-
+      Single X in a two-digit field is invalid; XX required for
+      unspecified month
+    requirements:
+      - req:edtf-level-1-unspecified-digits-xx
+    test_type: validity
+    given:
+      expression: "2018-X"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-valid-007
+    description: "Extended format date is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-extended-format-only
+    test_type: validity
+    given:
+      expression: "2010-01-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-003
+    description: >-
+      Basic format date is invalid in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-extended-format-only
+    test_type: validity
+    given:
+      expression: "20100101"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-valid-008
+    description: "Four-digit year is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-four-digit-year
+    test_type: validity
+    given:
+      expression: "2010-01-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-valid-009
+    description: "Date-time with T designator is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-mandatory-time-separator
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-004
+    description: >-
+      Date-time without T designator is invalid in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-mandatory-time-separator
+    test_type: validity
+    given:
+      expression: "2010-01-01 12:00:00Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-valid-010
+    description: "Time with hours and minutes is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-time-minutes-required
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-005
+    description: >-
+      Time with hours only (no minutes) is invalid in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-time-minutes-required
+    test_type: validity
+    given:
+      expression: "2010-01-01T12Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-valid-011
+    description: "Hour 23 is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-no-hour-24
+    test_type: validity
+    given:
+      expression: "2010-01-01T23:59:59Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-006
+    description: >-
+      Hour value 24 is invalid in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-no-hour-24
+    test_type: validity
+    given:
+      expression: "2010-01-01T24:00:00Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-1-valid-012
+    description: "UTC offset with minutes is valid in EDTF Level 1"
+    requirements:
+      - req:edtf-level-1-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00+05:30"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-1-invalid-007
+    description: >-
+      UTC offset without minutes is invalid in EDTF Level 1
+    requirements:
+      - req:edtf-level-1-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00+05"
+    expect:
+      valid: false

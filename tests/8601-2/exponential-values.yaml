@@ -1,0 +1,174 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:exponential-values
+name: Exponential values for time scale components
+description: >
+  Tests for parsing, generation, and validity of exponential (E) notation
+  in time scale component values.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:explicit-representation
+requirements_class: req-class:exponential-values
+source: ISO 8601-2:2026 Clause 4.4.2
+tests:
+  # --- Exponential notation (Clause 4.4.2) ---
+  - id: conf-test:exponential-notation-parsing-001
+    description: "Parse exponential value '3E3' (3000)"
+    requirements:
+      - req:exponential-notation
+    test_type: parsing
+    given:
+      expression: "3E3"
+    expect:
+      valid: true
+      components:
+        exponential:
+          mantissa: 3
+          exponent: 3
+
+  - id: conf-test:exponential-notation-parsing-002
+    description: "Parse negative exponential value '-82E9' (-82000000000)"
+    requirements:
+      - req:exponential-notation
+    test_type: parsing
+    given:
+      expression: "-82E9"
+    expect:
+      valid: true
+      components:
+        exponential:
+          mantissa: -82
+          exponent: 9
+
+  # --- Exponential calendar year (Clause 4.4.2) ---
+  - id: conf-test:exponential-year-parsing-001
+    description: "Parse exponential year '3E8Y'"
+    requirements:
+      - req:exponential-calendar-year
+    test_type: parsing
+    given:
+      expression: "3E8Y"
+    expect:
+      valid: true
+      components:
+        year:
+          exponential:
+            mantissa: 3
+            exponent: 8
+
+  - id: conf-test:exponential-year-generation-001
+    description: "Generate exponential year from components"
+    requirements:
+      - req:exponential-calendar-year
+    test_type: generation
+    given:
+      components:
+        year:
+          exponential:
+            mantissa: 3
+            exponent: 8
+    expect:
+      expression: "3E8Y"
+
+  # --- Exponential letter-prefixed calendar year (Clause 4.5.3) ---
+  - id: conf-test:exponential-letter-year-parsing-001
+    description: "Parse exponential letter-prefixed year 'Y17E7'"
+    requirements:
+      - req:exponential-letter-prefixed-year
+    test_type: parsing
+    given:
+      expression: "Y17E7"
+    expect:
+      valid: true
+      components:
+        year:
+          exponential:
+            mantissa: 17
+            exponent: 7
+
+  - id: conf-test:exponential-letter-year-parsing-002
+    description: "Parse negative exponential letter-prefixed year 'Y-17E7'"
+    requirements:
+      - req:exponential-letter-prefixed-year
+    test_type: parsing
+    given:
+      expression: "Y-17E7"
+    expect:
+      valid: true
+      components:
+        year:
+          exponential:
+            mantissa: -17
+            exponent: 7
+
+  # --- Letter-prefixed calendar year (Clause 4.5.2) ---
+  - id: conf-test:exponential-letter-year-basic-parsing-001
+    description: "Parse letter-prefixed year 'Y1700000002'"
+    requirements:
+      - req:exponential-letter-prefixed-year
+    test_type: parsing
+    given:
+      expression: "Y1700000002"
+    expect:
+      valid: true
+      components:
+        year: 1700000002
+
+  - id: conf-test:exponential-letter-year-basic-parsing-002
+    description: "Parse negative letter-prefixed year 'Y-1700000002'"
+    requirements:
+      - req:exponential-letter-prefixed-year
+    test_type: parsing
+    given:
+      expression: "Y-1700000002"
+    expect:
+      valid: true
+      components:
+        year: -1700000002
+
+  # --- Validity tests ---
+  - id: conf-test:exponential-validity-001
+    description: "Verify that exponent must be a positive integer"
+    requirements:
+      - req:exponential-notation
+    test_type: validity
+    given:
+      expression: "3E-2Y"
+    expect:
+      valid: false
+
+  - id: conf-test:exponential-validity-002
+    description: "Verify that mantissa is required"
+    requirements:
+      - req:exponential-notation
+    test_type: validity
+    given:
+      expression: "E3Y"
+    expect:
+      valid: false
+
+  # --- Exponential time scale component (Clause 4.4.2) ---
+  - id: conf-test:exponential-time-scale-parsing-001
+    description: "Parse exponential value used as time scale component '3E3Y'"
+    requirements:
+      - req:exponential-time-scale-component
+    test_type: parsing
+    given:
+      expression: "3E3Y"
+    expect:
+      valid: true
+      components:
+        year:
+          exponential:
+            mantissa: 3
+            exponent: 3
+
+  - id: conf-test:exponential-time-scale-validity-001
+    description: "Verify exponential value is accepted in duration component"
+    requirements:
+      - req:exponential-time-scale-component
+    test_type: validity
+    given:
+      expression: "P5E3Y"
+    expect:
+      valid: true

@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=schema/suite.yaml
+#
+# ISO 8601 Machine-Readable Test Suite Manifest
+# Describes the overall test suite for machine consumption.
+#
+# Developed by CalConnect TC DATETIME in collaboration with ISO/TC 154/WG 5.
+# Repository: git@github.com:CalConnect/iso-8601-test-suite.git
+#
+# Requirement statements are independent paraphrases of the ISO 8601 provisions,
+# written in original professional language. They do not reproduce verbatim text
+# from the ISO standards.
+---
+id: suite:iso-8601
+name: ISO 8601 Machine-Readable Test Suite
+description: >
+  Conformance test suite for ISO 8601-1:2026 (Date and time — Representations
+  for information interchange — Part 1: Basic rules) and ISO 8601-2:2026
+  (Part 2: Extensions), developed by CalConnect TC DATETIME in collaboration
+  with ISO/TC 154/WG 5.
+maintainer: CalConnect TC DATETIME / ISO/TC 154/WG 5
+repository: git@github.com:CalConnect/iso-8601-test-suite.git
+version: 0.1.0
+date: "2026-04-27"
+standardization_target_type: iso-8601-date-time-processor
+
+standards:
+  - id: iso-8601-1
+    title: "ISO 8601-1:2026 — Date and time — Basic rules"
+    edition: 1
+    clause_prefix: "8601-1"
+  - id: iso-8601-2
+    title: "ISO 8601-2:2026 — Date and time — Extensions"
+    edition: 1
+    clause_prefix: "8601-2"
+
+identifier_scheme:
+  base_urn: "urn:iso:std:iso:8601:-{part}:ed-1:en:tech:tc154.wg5:{type}:{name}"
+  prefixes:
+    req-class: "Requirements class"
+    req: "Requirement"
+    conf-class: "Conformance class"
+    conf-test: "Conformance test"
+    profile: "Profile"
+    result: "Conformance result set"
+
+statistics:
+  requirements:
+    part1: 99
+    part2: 158
+    total: 257
+  conformance_tests:
+    part1: 275
+    part2: 363
+    profiles: 75
+    total: 713
+  requirements_classes:
+    part1: 9
+    part2: 13
+    total: 22
+  profiles: 7
+
+file_counts:
+  schemas: 5
+  requirements_files: 22
+  conformance_class_files: 22
+  profile_files: 7
+
+directory_layout:
+  schema: "YAML Schema definitions"
+  requirements: "Requirements classes organized by standard part"
+  tests: "Conformance classes (test definitions) organized by standard part"
+  profiles: "Profile definitions combining conformance classes"
+  results: "Conformance test results per implementation"
+
+test_types:
+  - id: parsing
+    description: "Parse an expression and validate extracted components"
+  - id: generation
+    description: "Build an expression from components"
+  - id: validity
+    description: "Check if expression is syntactically valid"
+  - id: equivalence
+    description: "Two expressions resolve to the same instant"
+  - id: arithmetic
+    description: "Date/time arithmetic operations"

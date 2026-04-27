@@ -1,0 +1,167 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:w3c-datetime
+name: W3C Date and Time Formats
+description: >-
+  Profile of ISO 8601-1 for date and time formats as defined in the W3C
+  NOTE-datetime. This profile defines six permitted granularity levels
+  using extended format only, with either uppercase or lowercase "T" as
+  the time designator.
+source: W3C NOTE-datetime (https://www.w3.org/TR/NOTE-datetime)
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+additional_requirements:
+  - id: req:w3c-datetime-extended-format-only
+    statement: >-
+      Only extended format representations shall be used. Basic format
+      representations (without hyphens or colons as delimiters) are not
+      permitted.
+  - id: req:w3c-datetime-six-permitted-forms
+    statement: >-
+      Only the following six forms are permitted: YYYY, YYYY-MM,
+      YYYY-MM-DD, YYYY-MM-DDThh:mmTZD, YYYY-MM-DDThh:mm:ssTZD,
+      YYYY-MM-DDThh:mm:ss.sTZD. No other forms are permitted.
+  - id: req:w3c-datetime-time-zone-designator
+    statement: >-
+      When time is present, the time zone designator (TZD) shall be
+      either "Z" (for UTC) or a numeric offset in the form ±hh:mm.
+      Time representations without a time zone designator are not
+      permitted.
+  - id: req:w3c-datetime-time-designator
+    statement: >-
+      The time designator between the date and time components shall be
+      "T" (uppercase or lowercase).
+  - id: req:w3c-datetime-fractional-seconds
+    statement: >-
+      Fractional seconds, when present, shall consist of a decimal
+      point followed by one or more digits.
+additional_tests:
+  - id: conf-test:w3c-datetime-valid-001
+    description: "Valid year-only representation"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+    test_type: validity
+    given:
+      expression: "1997"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-002
+    description: "Valid year-month representation"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+    test_type: validity
+    given:
+      expression: "1997-07"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-003
+    description: "Valid full calendar date"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+    test_type: validity
+    given:
+      expression: "1997-07-16"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-004
+    description: "Valid date-time with minutes and UTC offset"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+      - req:w3c-datetime-time-zone-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20+01:00"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-005
+    description: "Valid date-time with seconds and UTC offset"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+      - req:w3c-datetime-time-zone-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20:30+01:00"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-006
+    description: "Valid date-time with fractional seconds and UTC offset"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+      - req:w3c-datetime-fractional-seconds
+      - req:w3c-datetime-time-zone-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20:30.45+01:00"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-007
+    description: "Valid date-time with seconds and UTC designator Z"
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+      - req:w3c-datetime-time-zone-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20:30Z"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-invalid-001
+    description: >-
+      Basic format year-month is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-extended-format-only
+    test_type: validity
+    given:
+      expression: "199707"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-002
+    description: >-
+      Basic format full date is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-extended-format-only
+    test_type: validity
+    given:
+      expression: "19970716"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-003
+    description: >-
+      Date-time without time zone designator is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-time-zone-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-004
+    description: >-
+      Time with only hours (no minutes) is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-six-permitted-forms
+    test_type: validity
+    given:
+      expression: "1997-07-16T19"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-valid-008
+    description: "Date-time with uppercase T designator is valid"
+    requirements:
+      - req:w3c-datetime-time-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16T19:20:30Z"
+    expect:
+      valid: true
+  - id: conf-test:w3c-datetime-valid-009
+    description: "Date-time with lowercase t designator is valid"
+    requirements:
+      - req:w3c-datetime-time-designator
+    test_type: validity
+    given:
+      expression: "1997-07-16t19:20:30Z"
+    expect:
+      valid: true

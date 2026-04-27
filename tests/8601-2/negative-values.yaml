@@ -1,0 +1,267 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:negative-values
+name: Negative values for time scale components
+description: >
+  Tests for parsing, generation, and validity of negative time scale component values.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:explicit-representation
+requirements_class: req-class:negative-values
+source: ISO 8601-2:2026 Clause 4.4.1
+tests:
+  # --- Negative calendar year (Clause 4.4.1.2) ---
+  - id: conf-test:negative-year-implicit-parsing-001
+    description: "Parse negative calendar year in implicit form"
+    requirements:
+      - req:negative-year-implicit
+    test_type: parsing
+    given:
+      expression: "-1985"
+    expect:
+      valid: true
+      components:
+        year: -1985
+
+  - id: conf-test:negative-year-explicit-parsing-001
+    description: "Parse negative calendar year in explicit form"
+    requirements:
+      - req:negative-year-explicit
+    test_type: parsing
+    given:
+      expression: "-2018Y"
+    expect:
+      valid: true
+      components:
+        year: -2018
+
+  - id: conf-test:negative-year-implicit-parsing-002
+    description: "Parse year preceding year zero in implicit form '-0001'"
+    requirements:
+      - req:negative-year-implicit
+    test_type: parsing
+    given:
+      expression: "-0001"
+    expect:
+      valid: true
+      components:
+        year: -1
+
+  - id: conf-test:negative-year-explicit-parsing-002
+    description: "Parse year preceding year zero in explicit form '-1Y'"
+    requirements:
+      - req:negative-year-explicit
+    test_type: parsing
+    given:
+      expression: "-1Y"
+    expect:
+      valid: true
+      components:
+        year: -1
+
+  # --- Negative calendar week of year (Clause 4.4.1.3) ---
+  - id: conf-test:negative-week-parsing-001
+    description: "Parse negative calendar week '-3W' (third last week)"
+    requirements:
+      - req:negative-week-explicit
+    test_type: parsing
+    given:
+      expression: "-3W"
+    expect:
+      valid: true
+      components:
+        week: -3
+
+  # --- Negative calendar day of month (Clause 4.4.1.4) ---
+  - id: conf-test:negative-day-of-month-parsing-001
+    description: "Parse negative calendar day of month '-5D' (fifth last day)"
+    requirements:
+      - req:negative-day-of-month-explicit
+    test_type: parsing
+    given:
+      expression: "-5D"
+    expect:
+      valid: true
+      components:
+        day: -5
+
+  # --- Negative calendar day of year (Clause 4.4.1.5) ---
+  - id: conf-test:negative-day-of-year-parsing-001
+    description: "Parse negative calendar day of year '-7O' (seventh last day, Dec 25)"
+    requirements:
+      - req:negative-day-of-year-explicit
+    test_type: parsing
+    given:
+      expression: "-7O"
+    expect:
+      valid: true
+      components:
+        day_of_year: -7
+
+  - id: conf-test:negative-day-of-year-parsing-002
+    description: "Parse negative calendar day of year '-306O' (Feb 28/29)"
+    requirements:
+      - req:negative-day-of-year-explicit
+    test_type: parsing
+    given:
+      expression: "-306O"
+    expect:
+      valid: true
+      components:
+        day_of_year: -306
+
+  # --- Calendar year before year one (Clause 4.4.1.6) ---
+  - id: conf-test:negative-year-before-one-parsing-001
+    description: "Parse year before year one '1YB'"
+    requirements:
+      - req:negative-year-before-one-explicit
+    test_type: parsing
+    given:
+      expression: "1YB"
+    expect:
+      valid: true
+      components:
+        year_before_one: 1
+
+  - id: conf-test:negative-year-before-one-parsing-002
+    description: "Parse twelfth year before year one '12YB'"
+    requirements:
+      - req:negative-year-before-one-explicit
+    test_type: parsing
+    given:
+      expression: "12YB"
+    expect:
+      valid: true
+      components:
+        year_before_one: 12
+
+  # --- Negative decade (Clause 4.4.1.7) ---
+  - id: conf-test:negative-decade-implicit-parsing-001
+    description: "Parse negative decade in implicit form '-019'"
+    requirements:
+      - req:negative-decade-implicit
+    test_type: parsing
+    given:
+      expression: "-019"
+    expect:
+      valid: true
+      components:
+        decade: -19
+
+  - id: conf-test:negative-decade-explicit-parsing-001
+    description: "Parse negative decade in explicit form '-12J'"
+    requirements:
+      - req:negative-decade-explicit
+    test_type: parsing
+    given:
+      expression: "-12J"
+    expect:
+      valid: true
+      components:
+        decade: -12
+
+  - id: conf-test:negative-decade-zero-parsing-001
+    description: "Parse negative zero decade '-0J'"
+    requirements:
+      - req:negative-decade-explicit
+    test_type: parsing
+    given:
+      expression: "-0J"
+    expect:
+      valid: true
+      components:
+        decade: 0
+        negative_zero: true
+
+  # --- Negative century (Clause 4.4.1.8) ---
+  - id: conf-test:negative-century-implicit-parsing-001
+    description: "Parse negative century in implicit form '-19'"
+    requirements:
+      - req:negative-century-implicit
+    test_type: parsing
+    given:
+      expression: "-19"
+    expect:
+      valid: true
+      components:
+        century: -19
+
+  - id: conf-test:negative-century-explicit-parsing-001
+    description: "Parse negative century in explicit form '-12C'"
+    requirements:
+      - req:negative-century-explicit
+    test_type: parsing
+    given:
+      expression: "-12C"
+    expect:
+      valid: true
+      components:
+        century: -12
+
+  - id: conf-test:negative-century-zero-parsing-001
+    description: "Parse negative zero century '-0C'"
+    requirements:
+      - req:negative-century-explicit
+    test_type: parsing
+    given:
+      expression: "-0C"
+    expect:
+      valid: true
+      components:
+        century: 0
+        negative_zero: true
+
+  # --- Negative duration (Clause 4.4.1.9) ---
+  - id: conf-test:negative-duration-parsing-001
+    description: "Parse negative duration '-P100D'"
+    requirements:
+      - req:negative-duration
+    test_type: parsing
+    given:
+      expression: "-P100D"
+    expect:
+      valid: true
+      components:
+        duration:
+          day: -100
+
+  - id: conf-test:negative-duration-parsing-002
+    description: "Parse negative duration '-P1Y3D'"
+    requirements:
+      - req:negative-duration
+    test_type: parsing
+    given:
+      expression: "-P1Y3D"
+    expect:
+      valid: true
+      components:
+        duration:
+          year: -1
+          day: -3
+
+  - id: conf-test:negative-duration-arithmetic-001
+    description: "Duration subtraction with negative result: P365D - P100D = P265D"
+    requirements:
+      - req:negative-duration
+    test_type: arithmetic
+    given:
+      expression: "P365D - P100D"
+    expect:
+      valid: true
+      components:
+        duration:
+          day: 265
+
+  - id: conf-test:negative-duration-arithmetic-002
+    description: "Duration subtraction with mixed units: P5Y6D - P1Y3D = P4Y3D"
+    requirements:
+      - req:negative-duration
+    test_type: arithmetic
+    given:
+      expression: "P5Y6D - P1Y3D"
+    expect:
+      valid: true
+      components:
+        duration:
+          year: 4
+          day: 3

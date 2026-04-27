@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:ordinal-date
+name: Ordinal date
+description: >
+  Requirements for the representation of ordinal dates (year and day-of-year),
+  including complete representations in basic and extended formats, and
+  expanded representations.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - req-class:fundamentals
+source: ISO 8601-1:2026 Clause 5.2.3
+requirements:
+  - id: req:ord-date-basic-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.3.1"
+    statement: >
+      A complete ordinal date in basic format encodes the year and day-of-year
+      as contiguous digit fields: [year][dayo].
+    format: basic
+    pattern: "[YYYY][OOO]"
+  - id: req:ord-date-extended-full
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.3.1"
+    statement: >
+      A complete ordinal date in extended format encodes the year and day-of-year
+      with a hyphen separator: [year]["-"][dayo].
+    format: extended
+    pattern: "[YYYY][\"-\"][OOO]"
+  - id: req:ord-date-expanded-basic
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.3.2"
+    statement: >
+      An expanded ordinal date in basic format encodes a signed expanded year
+      and day-of-year: [±][year(expanded)][dayo].
+    format: basic
+    pattern: "[±][YYYYYY][OOO]"
+  - id: req:ord-date-expanded-extended
+    clause: "iso:8601:-1:ed-1:en:clause:5.2.3.2"
+    statement: >
+      An expanded ordinal date in extended format encodes a signed expanded year
+      and day-of-year with a hyphen separator: [±][year(expanded)]["-"][dayo].
+    format: extended
+    pattern: "[±][YYYYYY][\"-\"][OOO]"

@@ -1,0 +1,374 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:duration
+name: Duration conformance tests
+description: >
+  Tests for duration representations including complete PnYnMnDTnHnMnS format,
+  week-only format, reduced forms, decimal fractions, and alternative formats.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:fundamentals
+requirements_class: req-class:duration
+source: ISO 8601-1:2026 Clause 5.5
+tests:
+  # Parsing tests: complete date-time duration
+  - id: conf-test:dur-parse-001
+    description: "Parse complete duration P1Y2M10DT2H30M"
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-reduced
+    test_type: parsing
+    given:
+      expression: "P1Y2M10DT2H30M"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 1
+          months: 2
+          days: 10
+          hours: 2
+          minutes: 30
+
+  - id: conf-test:dur-parse-002
+    description: "Parse complete duration with all components P1Y2M15DT12H30M0S"
+    requirements:
+      - req:dur-complete-datetime
+    test_type: parsing
+    given:
+      expression: "P1Y2M15DT12H30M0S"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 1
+          months: 2
+          days: 15
+          hours: 12
+          minutes: 30
+          seconds: 0
+
+  # Parsing tests: week duration
+  - id: conf-test:dur-parse-003
+    description: "Parse week-only duration P1W"
+    requirements:
+      - req:dur-complete-week
+    test_type: parsing
+    given:
+      expression: "P1W"
+    expect:
+      valid: true
+      components:
+        duration:
+          weeks: 1
+
+  - id: conf-test:dur-parse-004
+    description: "Parse week duration P10W"
+    requirements:
+      - req:dur-complete-week
+    test_type: parsing
+    given:
+      expression: "P10W"
+    expect:
+      valid: true
+      components:
+        duration:
+          weeks: 10
+
+  # Parsing tests: reduced forms
+  - id: conf-test:dur-parse-005
+    description: "Parse time-only duration PT15M (15 minutes)"
+    requirements:
+      - req:dur-reduced
+      - req:dur-time-designator
+    test_type: parsing
+    given:
+      expression: "PT15M"
+    expect:
+      valid: true
+      components:
+        duration:
+          minutes: 15
+
+  - id: conf-test:dur-parse-006
+    description: "Parse days-only duration P3D"
+    requirements:
+      - req:dur-reduced
+    test_type: parsing
+    given:
+      expression: "P3D"
+    expect:
+      valid: true
+      components:
+        duration:
+          days: 3
+
+  - id: conf-test:dur-parse-007
+    description: "Parse hours and seconds duration PT5H30S"
+    requirements:
+      - req:dur-reduced
+      - req:dur-time-designator
+    test_type: parsing
+    given:
+      expression: "PT5H30S"
+    expect:
+      valid: true
+      components:
+        duration:
+          hours: 5
+          seconds: 30
+
+  - id: conf-test:dur-parse-008
+    description: "Parse date-only duration P1Y2M"
+    requirements:
+      - req:dur-reduced
+    test_type: parsing
+    given:
+      expression: "P1Y2M"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 1
+          months: 2
+
+  - id: conf-test:dur-parse-009
+    description: "Parse seconds-only duration PT30S"
+    requirements:
+      - req:dur-reduced
+      - req:dur-time-designator
+    test_type: parsing
+    given:
+      expression: "PT30S"
+    expect:
+      valid: true
+      components:
+        duration:
+          seconds: 30
+
+  # Parsing tests: alternative format
+  - id: conf-test:dur-parse-010
+    description: "Parse alternative format duration basic P00020110T223355"
+    requirements:
+      - req:dur-alt-calendar-basic
+    test_type: parsing
+    given:
+      expression: "P00020110T223355"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 2
+          months: 1
+          days: 10
+          hours: 22
+          minutes: 33
+          seconds: 55
+
+  - id: conf-test:dur-parse-011
+    description: "Parse alternative format duration extended P0002-01-10T22:33:55"
+    requirements:
+      - req:dur-alt-calendar-extended
+    test_type: parsing
+    given:
+      expression: "P0002-01-10T22:33:55"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 2
+          months: 1
+          days: 10
+          hours: 22
+          minutes: 33
+          seconds: 55
+
+  - id: conf-test:dur-parse-012
+    description: "Parse alternative format ordinal duration basic P0002178T223355"
+    requirements:
+      - req:dur-alt-ordinal-basic
+    test_type: parsing
+    given:
+      expression: "P0002178T223355"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 2
+          days: 178
+          hours: 22
+          minutes: 33
+          seconds: 55
+
+  - id: conf-test:dur-parse-013
+    description: "Parse alternative format ordinal duration extended P0002-178T22:33:55"
+    requirements:
+      - req:dur-alt-ordinal-extended
+    test_type: parsing
+    given:
+      expression: "P0002-178T22:33:55"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 2
+          days: 178
+          hours: 22
+          minutes: 33
+          seconds: 55
+
+  # Generation tests
+  - id: conf-test:dur-gen-001
+    description: "Generate complete duration with selected components"
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-reduced
+    test_type: generation
+    given:
+      components:
+        duration:
+          years: 1
+          months: 2
+          days: 10
+          hours: 2
+          minutes: 30
+    expect:
+      expression: "P1Y2M10DT2H30M"
+
+  - id: conf-test:dur-gen-002
+    description: "Generate week-only duration"
+    requirements:
+      - req:dur-complete-week
+    test_type: generation
+    given:
+      components:
+        duration:
+          weeks: 1
+    expect:
+      expression: "P1W"
+
+  - id: conf-test:dur-gen-003
+    description: "Generate time-only duration"
+    requirements:
+      - req:dur-reduced
+      - req:dur-time-designator
+    test_type: generation
+    given:
+      components:
+        duration:
+          minutes: 15
+    expect:
+      expression: "PT15M"
+
+  - id: conf-test:dur-gen-004
+    description: "Generate complete duration with all components"
+    requirements:
+      - req:dur-complete-datetime
+    test_type: generation
+    given:
+      components:
+        duration:
+          years: 1
+          months: 2
+          days: 15
+          hours: 12
+          minutes: 30
+          seconds: 0
+    expect:
+      expression: "P1Y2M15DT12H30M0S"
+
+  # Validity tests
+  - id: conf-test:dur-valid-001
+    description: "Verify duration without P designator is invalid"
+    requirements:
+      - req:dur-complete-datetime
+    test_type: validity
+    given:
+      expression: "1Y2M10D"
+    expect:
+      valid: false
+
+  - id: conf-test:dur-valid-002
+    description: "Verify empty duration is invalid"
+    requirements:
+      - req:dur-complete-datetime
+    test_type: validity
+    given:
+      expression: "P"
+    expect:
+      valid: false
+
+  - id: conf-test:dur-valid-003
+    description: "Verify combining weeks with other units is invalid"
+    requirements:
+      - req:dur-complete-week
+    test_type: validity
+    given:
+      expression: "P1Y2W"
+    expect:
+      valid: false
+
+  - id: conf-test:dur-valid-004
+    description: "Verify time component without T designator is invalid"
+    requirements:
+      - req:dur-time-designator
+    test_type: validity
+    given:
+      expression: "P1Y2M10D2H30M"
+    expect:
+      valid: false
+
+  - id: conf-test:dur-valid-005
+    description: "Verify zero duration PT0S is valid"
+    requirements:
+      - req:dur-reduced
+      - req:dur-time-designator
+    test_type: validity
+    given:
+      expression: "PT0S"
+    expect:
+      valid: true
+      components:
+        duration:
+          seconds: 0
+
+  # Equivalence tests
+  - id: conf-test:dur-equiv-001
+    description: "Alternative format is equivalent to standard duration format"
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-alt-calendar-basic
+    test_type: equivalence
+    given:
+      expression_a: "P00020110T223355"
+      expression_b: "P2Y1M10DT22H33M55S"
+    expect:
+      equivalent: true
+
+  # Decimal fraction tests
+  - id: conf-test:dur-parse-014
+    description: "Parse duration with fractional seconds PT15M30.5S"
+    requirements:
+      - req:dur-fraction
+    test_type: parsing
+    given:
+      expression: "PT15M30.5S"
+    expect:
+      valid: true
+      components:
+        duration:
+          minutes: 15
+          seconds: 30.5
+
+  - id: conf-test:dur-parse-015
+    description: "Parse duration with fractional hours PT1.5H"
+    requirements:
+      - req:dur-fraction
+    test_type: parsing
+    given:
+      expression: "PT1.5H"
+    expect:
+      valid: true
+      components:
+        duration:
+          hours: 1.5

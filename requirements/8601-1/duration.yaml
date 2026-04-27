@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:duration
+name: Duration
+description: >
+  Requirements for the representation of durations, including the complete
+  PnYnMnDTnHnMnS format, week-only format PnW, representations other than
+  complete, decimal fractions, and the alternative date-time form.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - req-class:fundamentals
+source: ISO 8601-1:2026 Clause 5.5.2
+requirements:
+  - id: req:dur-complete-datetime
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.2"
+    statement: >
+      A complete duration expression uses the period designator followed by
+      date and time unit groups:
+      ["P"][i]["Y"][i]["M"][i]["D"]["T"][i]["H"][i]["M"][i]["S"],
+      where each [i] is a positive integer.
+    format: any
+    pattern: "[\"P\"][i][\"Y\"][i][\"M\"][i][\"D\"][\"T\"][i][\"H\"][i][\"M\"][i][\"S\"]"
+  - id: req:dur-complete-week
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.2"
+    statement: >
+      A duration may also be expressed using only weeks: ["P"][i]["W"].
+      Week-based and date-time-based expressions are mutually exclusive within
+      a single duration.
+    format: any
+    pattern: "[\"P\"][i][\"W\"]"
+  - id: req:dur-reduced
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.3"
+    statement: >
+      Components with a value of zero may be omitted along with their designator,
+      provided at least one component with its designator remains present.
+    format: any
+  - id: req:dur-fraction
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.3"
+    statement: >
+      The lowest-order component may include a decimal fraction, separated from
+      the integer part by a decimal sign (period or comma) with at least one
+      fractional digit.
+    format: any
+  - id: req:dur-time-designator
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.3"
+    statement: >
+      The time designator ["T"] separates date-unit components from time-unit
+      components within a duration. If no time components are present, the time
+      designator is omitted.
+    format: any
+  - id: req:dur-alt-calendar-basic
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.4"
+    statement: >
+      By mutual agreement, a duration may use the alternative form with calendar
+      date in basic format: ["P"][date]["T"][time].
+    format: basic
+    pattern: "[\"P\"][YYYY][MM][DD][\"T\"][hh][mm][ss]"
+  - id: req:dur-alt-calendar-extended
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.4"
+    statement: >
+      By mutual agreement, a duration may use the alternative form with calendar
+      date in extended format: ["P"][dateX]["T"][timeX].
+    format: extended
+    pattern: "[\"P\"][YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss]"
+  - id: req:dur-alt-ordinal-basic
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.4"
+    statement: >
+      By mutual agreement, a duration may use the alternative form with ordinal
+      date in basic format: ["P"][odate]["T"][time].
+    format: basic
+    pattern: "[\"P\"][YYYY][OOO][\"T\"][hh][mm][ss]"
+  - id: req:dur-alt-ordinal-extended
+    clause: "iso:8601:-1:ed-1:en:clause:5.5.2.4"
+    statement: >
+      By mutual agreement, a duration may use the alternative form with ordinal
+      date in extended format: ["P"][odateX]["T"][timeX].
+    format: extended
+    pattern: "[\"P\"][YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss]"

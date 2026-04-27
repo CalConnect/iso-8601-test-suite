@@ -1,0 +1,468 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:recurring-time-intervals-with-rules
+name: Recurring time intervals with repeat rules
+description: >
+  Tests for parsing, generation, and validity of recurring time intervals
+  with repeat rules using the F-designator for eligibility and selection rules.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:recurring-time-interval
+requirements_class: req-class:recurring-time-intervals-with-rules
+source: ISO 8601-2:2026 Clause 13
+tests:
+  # --- Basic repeat rule representations (Clause 13.5) ---
+  - id: conf-test:recurring-start-end-parsing-001
+    description: "Parse recurring interval with start and end 'R12/20150929T140000/20150929T153000/F2W'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R12/20150929T140000/20150929T153000/F2W"
+    expect:
+      valid: true
+      components:
+        recurrence: 12
+        start:
+          year: 2015
+          month: 9
+          day: 29
+          hour: 14
+          minute: 0
+          second: 0
+        end:
+          year: 2015
+          month: 9
+          day: 29
+          hour: 15
+          minute: 30
+          second: 0
+        repeat_rule:
+          eligibility:
+            value: 2
+            unit: week
+
+  - id: conf-test:recurring-start-duration-parsing-001
+    description: "Parse recurring interval with start and duration 'R12/20150929T140000/P1H30M0S/F2W'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R12/20150929T140000/P1H30M0S/F2W"
+    expect:
+      valid: true
+      components:
+        recurrence: 12
+        start:
+          year: 2015
+          month: 9
+          day: 29
+          hour: 14
+          minute: 0
+          second: 0
+        duration:
+          hour: 1
+          minute: 30
+          second: 0
+        repeat_rule:
+          eligibility:
+            value: 2
+            unit: week
+
+  - id: conf-test:recurring-duration-end-parsing-001
+    description: "Parse recurring interval with duration and end 'R12/P2H30M0S/20150929T153000/F2W'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R12/P2H30M0S/20150929T153000/F2W"
+    expect:
+      valid: true
+      components:
+        recurrence: 12
+        duration:
+          hour: 2
+          minute: 30
+          second: 0
+        end:
+          year: 2015
+          month: 9
+          day: 29
+          hour: 15
+          minute: 30
+          second: 0
+        repeat_rule:
+          eligibility:
+            value: 2
+            unit: week
+
+  # --- Eligibility part (Clause 13.4.2) ---
+  - id: conf-test:recurring-eligibility-parsing-001
+    description: "Parse eligibility with 2-year cycle 'F2Y'"
+    requirements:
+      - req:recurring-rule-eligibility
+    test_type: parsing
+    given:
+      expression: "F2Y"
+    expect:
+      valid: true
+      components:
+        eligibility:
+          value: 2
+          unit: year
+
+  - id: conf-test:recurring-eligibility-parsing-002
+    description: "Parse eligibility with 8-day cycle 'F8D'"
+    requirements:
+      - req:recurring-rule-eligibility
+    test_type: parsing
+    given:
+      expression: "F8D"
+    expect:
+      valid: true
+      components:
+        eligibility:
+          value: 8
+          unit: day
+
+  - id: conf-test:recurring-eligibility-parsing-003
+    description: "Parse eligibility with yearly cycle 'F1Y'"
+    requirements:
+      - req:recurring-rule-eligibility
+    test_type: parsing
+    given:
+      expression: "F1Y"
+    expect:
+      valid: true
+      components:
+        eligibility:
+          value: 1
+          unit: year
+
+  # --- Selection with repeat rules ---
+  - id: conf-test:recurring-selection-parsing-001
+    description: "Parse recurring interval with selection 'R/2018-08-08/P1D/F1YL{3,8}M8DN'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R/2018-08-08/P1D/F1YL{3,8}M8DN"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 8
+          day: 8
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: month
+                set:
+                  type: enumeration
+                  members: [3, 8]
+              - type: day_of_month
+                value: 8
+
+  - id: conf-test:recurring-selection-parsing-002
+    description: "Parse recurring interval with monthly selection 'R/2018-08-01T10:20:00/PT10M/F1ML{1,10}DT10H20M0SN'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R/2018-08-01T10:20:00/PT10M/F1ML{1,10}DT10H20M0SN"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 8
+          day: 1
+          hour: 10
+          minute: 20
+          second: 0
+        duration:
+          minute: 10
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: month
+          selection:
+            rules:
+              - type: day_of_month
+                set:
+                  type: enumeration
+                  members: [1, 10]
+              - type: hour
+                value: 10
+              - type: minute
+                value: 20
+              - type: second
+                value: 0
+
+  # --- Precision (Clause 13.6.2) ---
+  - id: conf-test:recurring-precision-parsing-001
+    description: "Parse recurring with month precision 'R/2018Y1M/P1M/F3M'"
+    requirements:
+      - req:recurring-rule-precision
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M/P1M/F3M"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+        duration:
+          month: 1
+        repeat_rule:
+          eligibility:
+            value: 3
+            unit: month
+
+  - id: conf-test:recurring-precision-parsing-002
+    description: "Parse recurring with day precision 'R/2018Y1M1D/P1D/F3M'"
+    requirements:
+      - req:recurring-rule-precision
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M1D/P1D/F3M"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 3
+            unit: month
+
+  - id: conf-test:recurring-precision-parsing-003
+    description: "Parse recurring with minute precision 'R/2018Y1M1DT0M/PT10M/F1M'"
+    requirements:
+      - req:recurring-rule-precision
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M1DT0M/PT10M/F1M"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 1
+          minute: 0
+        duration:
+          minute: 10
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: month
+
+  # --- Selection with Wednesday in September ---
+  - id: conf-test:recurring-selection-september-parsing-001
+    description: "Parse recurring first Wednesday in September 'R/2018-09-05/P1D/F1YL9M3K1IN'"
+    requirements:
+      - req:recurring-rule-representation
+    test_type: parsing
+    given:
+      expression: "R/2018-09-05/P1D/F1YL9M3K1IN"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 9
+          day: 5
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: month
+                value: 9
+              - type: week_day
+                value: 3
+              - type: position
+                value: 1
+
+  # --- Method structure (Clause 13.2) ---
+  - id: conf-test:recurring-method-parsing-001
+    description: "Parse recurring time interval with occurrences and repeat rule"
+    requirements:
+      - req:recurring-rule-method
+    test_type: parsing
+    given:
+      expression: "R10/2018Y1M1D/P1D/F1M"
+    expect:
+      valid: true
+      components:
+        recurrence: 10
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: month
+
+  # --- Repeat rule structure (Clause 13.4.1) ---
+  - id: conf-test:recurring-repeat-rule-parsing-001
+    description: "Parse repeat rule with eligibility only (no selection)"
+    requirements:
+      - req:recurring-rule-repeat-rule
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M1D/P1D/F1M"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: month
+
+  - id: conf-test:recurring-repeat-rule-parsing-002
+    description: "Parse repeat rule with eligibility and selection"
+    requirements:
+      - req:recurring-rule-repeat-rule
+      - req:recurring-rule-selection
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M1D/P1D/F1YL{1,3}K1IN"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: week_day
+                set:
+                  type: enumeration
+                  members: [1, 3]
+              - type: position
+                value: 1
+
+  # --- Selection rules (Clause 13.4.3) ---
+  - id: conf-test:recurring-selection-month-parsing-001
+    description: "Parse selection rules within repeat rule"
+    requirements:
+      - req:recurring-rule-selection
+    test_type: parsing
+    given:
+      expression: "R/2018Y1M1D/P1D/F1YL6N"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: month
+                value: 6
+
+  # --- Inheritance (Clause 13.6.3) ---
+  - id: conf-test:recurring-inheritance-parsing-001
+    description: "Parse recurring interval where selection inherits day from start"
+    requirements:
+      - req:recurring-rule-inheritance
+    test_type: parsing
+    given:
+      expression: "R/2018Y5M15D/P1D/F1YL5N"
+    expect:
+      valid: true
+      components:
+        recurrence: null
+        start:
+          year: 2018
+          month: 5
+          day: 15
+        duration:
+          day: 1
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: month
+                value: 5
+
+  # --- Evaluation (Clause 13.6) ---
+  - id: conf-test:recurring-evaluation-parsing-001
+    description: "Parse complete recurring interval with evaluation structure"
+    requirements:
+      - req:recurring-rule-evaluation
+    test_type: parsing
+    given:
+      expression: "R3/2018Y1M1D/P5D/F1YL{1,3}K2IN"
+    expect:
+      valid: true
+      components:
+        recurrence: 3
+        start:
+          year: 2018
+          month: 1
+          day: 1
+        duration:
+          day: 5
+        repeat_rule:
+          eligibility:
+            value: 1
+            unit: year
+          selection:
+            rules:
+              - type: week_day
+                set:
+                  type: enumeration
+                  members: [1, 3]
+              - type: position
+                value: 2

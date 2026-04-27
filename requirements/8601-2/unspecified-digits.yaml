@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:unspecified-digits
+name: Unspecified calendar date digits
+description: >
+  Applies the rules of unspecified digits to date and time expressions.
+  The unspecified value character "X" indicates unspecified digits or values in time
+  scale components. "X*" indicates the entire value is unspecified.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:req-class:calendar-date
+source: ISO 8601-2:2026 Clause 9
+requirements:
+  - id: req:unspecified-explicit-forms-x-star
+    clause: "iso:8601:-2:ed-1:en:clause:4.6.2"
+    statement: >
+      In explicit forms, "X*" marks an entire time scale component value as
+      unspecified.
+    format: any
+  - id: req:unspecified-explicit-forms-single-x
+    clause: "iso:8601:-2:ed-1:en:clause:4.6.2"
+    statement: >
+      In explicit forms, "X" replaces any single digit within a time scale
+      component value to indicate that digit is unspecified.
+    format: any
+  - id: req:unspecified-implicit-forms
+    clause: "iso:8601:-2:ed-1:en:clause:4.6.3"
+    statement: >
+      In implicit forms, "X" replaces individual digits to mark them as
+      unspecified. Replacing all digits of a component indicates the entire
+      component is unspecified.
+    format: any
+  - id: req:unspecified-right-day-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with unspecified day in implicit form:
+      [year]["-"][month]["-"]["XX"].
+    format: extended
+    pattern: '[year]["-"][month]["-"]["XX"]'
+  - id: req:unspecified-right-day-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with unspecified day in explicit form:
+      [yearE][monthE]["X*D"].
+    format: any
+    pattern: '[yearE][monthE]["X*D"]'
+  - id: req:unspecified-right-month-day-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with unspecified month and day in implicit form:
+      [year]["-"]["XX"]["-"]["XX"].
+    format: extended
+    pattern: '[year]["-"]["XX"]["-"]["XX"]'
+  - id: req:unspecified-right-month-day-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with unspecified month and day in explicit form:
+      [yearE]["X*M"]["X*D"].
+    format: any
+    pattern: '[yearE]["X*M"]["X*D"]'
+  - id: req:unspecified-right-all-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with all components unspecified in implicit form:
+      ["XXXX"]["-"]["XX"]["-"]["XX"].
+    format: extended
+    pattern: '["XXXX"]["-"]["XX"]["-"]["XX"]'
+  - id: req:unspecified-right-all-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.1"
+    statement: >
+      A calendar date with all components unspecified in explicit form:
+      ["X*Y"]["X*M"]["X*D"].
+    format: any
+    pattern: '["X*Y"]["X*M"]["X*D"]'
+  - id: req:unspecified-reduced-month-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.2"
+    statement: >
+      Reduced precision with unspecified calendar month in implicit form:
+      [year]["-"]["XX"].
+    format: extended
+    pattern: '[year]["-"]["XX"]'
+  - id: req:unspecified-reduced-month-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.2"
+    statement: >
+      Reduced precision with unspecified calendar month in explicit form:
+      [yearE]["X*M"].
+    format: any
+    pattern: '[yearE]["X*M"]'
+  - id: req:unspecified-reduced-year-digits
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.1.2"
+    statement: >
+      One to four rightmost digits of the calendar year may be replaced with "X"
+      to indicate those digits are unspecified.
+    format: any
+  - id: req:unspecified-anywhere-calendar-date
+    clause: "iso:8601:-2:ed-1:en:clause:9.2.2"
+    statement: >
+      Unspecified digits may appear at any position within a calendar date
+      representation, not limited to rightmost components.
+    format: any
+  - id: req:unspecified-datetime-expression
+    clause: "iso:8601:-2:ed-1:en:clause:9.3"
+    statement: >
+      The unspecified digit rules extend to any date and time expression,
+      including time-of-day components.
+    format: any

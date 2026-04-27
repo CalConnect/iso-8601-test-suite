@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=../schema/conformance-result.yaml
+#
+# TEMPLATE — Conformance test result file.
+# Copy this file to results/{implementation}.yaml and fill in your results.
+# See README.adoc for detailed instructions.
+#
+# Verification modes:
+#   automated — a test script executed the API calls
+#   manual    — a human ran the code and recorded results
+#   inferred  — results based on known behavior without execution
+#
+# Per-test results:
+#   pass         — implementation produced expected result
+#   fail         — implementation produced different result
+#   error        — implementation raised unexpected exception
+#   not-supported — feature not provided by implementation
+#   not-tested   — test was skipped
+---
+id: result:IMPLEMENTATION-NAME
+implementation:
+  name: "Implementation Name"
+  description: "Brief description"
+  language: "e.g. ruby, python, java, javascript"
+  version: "e.g. 3.3.0"
+  url: "https://example.com/docs"
+  modules:
+    - name: "ModuleName"
+      class: "fully.qualified.ClassName"
+      methods:
+        - "parse"
+        - "iso8601"
+
+date: "2026-01-01"
+tester: "Your Name"
+verification: manual  # or: automated, inferred
+
+profiles_tested:
+  - profile:rfc-3339
+
+conformance_class_results:
+  # ── Part 1: Fundamentals ──
+  - conformance_class: conf-class:fundamentals
+    status: partial  # passed | failed | partial | not-supported
+    notes: "Summary of implementation behavior for this class"
+    default_method:
+      language: ruby
+      code: 'ModuleName.parse("{expression}")'
+      api: ModuleName.parse
+
+    test_results:
+      # For tests with individual results, use block format:
+      - test: conf-test:fundamentals-parse-001
+        result: pass
+        method:
+          code: 'ModuleName.parse("19850412")'
+          language: ruby
+          api: ModuleName.parse
+        actual:
+          valid: true
+          returned: "1985-04-12"
+          notes: "Optional note about the result"
+
+      # For uniform results (e.g. all not-supported), use compact flow format:
+      # { test: conf-test:fundamentals-parse-001, result: not-supported }
+
+  # ── Part 1: Calendar date ──
+  - conformance_class: conf-class:calendar-date
+    status: not-supported
+    notes: "Implementation does not support ISO 8601 calendar date parsing"
+    sample_method:
+      language: ruby
+      code: 'ModuleName.parse("1985-04-12")'
+      api: ModuleName.parse
+      result: "Raises ArgumentError: invalid date"
+    test_results:
+      - test: conf-test:cal-date-parse-001
+        result: not-supported
+
+  # ── Part 2 (use cross-part prefix) ──
+  - conformance_class: 8601-2:conf-class:qualification
+    status: not-supported
+    notes: "No Part 2 qualification support"
+    sample_method:
+      language: ruby
+      code: 'ModuleName.parse("1985?-04-12")'
+      api: ModuleName.parse
+      result: "Raises ArgumentError: invalid date"
+    test_results:
+      - test: conf-test:qual-uncertain-date-001
+        result: not-supported

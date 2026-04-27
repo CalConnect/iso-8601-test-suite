@@ -1,0 +1,429 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:grouped-time-scale-units
+name: Grouped time scale units
+description: >
+  Tests for parsing, generation, and validity of grouped time scale units
+  using the G/U designator pattern.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:fundamentals
+requirements_class: req-class:grouped-time-scale-units
+source: ISO 8601-2:2026 Clause 5
+tests:
+  # --- Unit definition (Clause 5.2) ---
+  - id: conf-test:grouped-unit-definition-parsing-001
+    description: "Parse grouped unit definition 'G11DU' (11-day groups)"
+    requirements:
+      - req:grouped-unit-definition
+    test_type: parsing
+    given:
+      expression: "G11DU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          designator: "G"
+          duration_units:
+            day: 11
+          suffix: "U"
+
+  - id: conf-test:grouped-unit-definition-parsing-002
+    description: "Parse grouped unit definition 'GT30MU' (30-minute groups)"
+    requirements:
+      - req:grouped-unit-definition
+    test_type: parsing
+    given:
+      expression: "GT30MU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          designator: "G"
+          duration_units:
+            minute: 30
+          suffix: "U"
+
+  - id: conf-test:grouped-unit-definition-parsing-003
+    description: "Parse grouped unit definition 'G2DT6HU' (2-day-6-hour groups)"
+    requirements:
+      - req:grouped-unit-definition
+    test_type: parsing
+    given:
+      expression: "G2DT6HU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          designator: "G"
+          duration_units:
+            day: 2
+            hour: 6
+          suffix: "U"
+
+  # --- Unit value (Clause 5.3) ---
+  - id: conf-test:grouped-unit-value-parsing-001
+    description: "Parse grouped unit value '5G10DU' (5th 10-day group)"
+    requirements:
+      - req:grouped-unit-value
+    test_type: parsing
+    given:
+      expression: "5G10DU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          coefficient: 5
+          duration_units:
+            day: 10
+
+  - id: conf-test:grouped-unit-value-parsing-002
+    description: "Parse grouped unit value '20GT30MU' (20th 30-minute group)"
+    requirements:
+      - req:grouped-unit-value
+    test_type: parsing
+    given:
+      expression: "20GT30MU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          coefficient: 20
+          duration_units:
+            minute: 30
+
+  - id: conf-test:grouped-unit-value-parsing-003
+    description: "Parse grouped unit value '2G2DT6HU' (2nd 2-day-6-hour group)"
+    requirements:
+      - req:grouped-unit-value
+    test_type: parsing
+    given:
+      expression: "2G2DT6HU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          coefficient: 2
+          duration_units:
+            day: 2
+            hour: 6
+
+  # --- Application in date representations (Clause 5.4) ---
+  - id: conf-test:grouped-date-parsing-001
+    description: "Parse date with grouped unit '2018Y4G60DU6D'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "2018Y4G60DU6D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 4
+          duration_units:
+            day: 60
+        day: 6
+
+  - id: conf-test:grouped-datetime-parsing-001
+    description: "Parse datetime with grouped time unit '2018Y9M2DT3GT8HU0H30M'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "2018Y9M2DT3GT8HU0H30M"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 9
+        day: 2
+        grouping:
+          coefficient: 3
+          duration_units:
+            hour: 8
+        hour: 0
+        minute: 30
+
+  - id: conf-test:grouped-implicit-parsing-001
+    description: "Parse implicit date with grouped unit '2018-02-2G14DU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "2018-02-2G14DU"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 2
+        grouping:
+          coefficient: 2
+          duration_units:
+            day: 14
+
+  - id: conf-test:grouped-implicit-parsing-002
+    description: "Parse implicit date with 10-day grouping '2018-03-3G10DU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "2018-03-3G10DU"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 3
+        grouping:
+          coefficient: 3
+          duration_units:
+            day: 10
+
+  - id: conf-test:grouped-time-implicit-parsing-001
+    description: "Parse implicit time with grouped unit '16:1GT15MU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "16:1GT15MU"
+    expect:
+      valid: true
+      components:
+        hour: 16
+        grouping:
+          coefficient: 1
+          duration_units:
+            minute: 15
+
+  - id: conf-test:grouped-6month-parsing-001
+    description: "Parse 6-month grouping '2018-1G6MU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "2018-1G6MU"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 1
+          duration_units:
+            month: 6
+
+  # --- Grouped unit equivalence (Clause 5.3) ---
+  - id: conf-test:grouped-equivalence-001
+    description: "Verify '2018-34' is equivalent to '2018-2G3MU'"
+    requirements:
+      - req:grouped-unit-value
+    test_type: equivalence
+    given:
+      expression_a: "2018-34"
+      expression_b: "2018-2G3MU"
+    expect:
+      equivalent: true
+
+  # --- Precision-only grouped units ---
+  - id: conf-test:grouped-precision-parsing-001
+    description: "Parse 80-day group precision '1933Y1G80DU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "1933Y1G80DU"
+    expect:
+      valid: true
+      components:
+        year: 1933
+        grouping:
+          coefficient: 1
+          duration_units:
+            day: 80
+
+  - id: conf-test:grouped-precision-parsing-002
+    description: "Parse 5-day group in month '1543Y1M3G5DU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "1543Y1M3G5DU"
+    expect:
+      valid: true
+      components:
+        year: 1543
+        month: 1
+        grouping:
+          coefficient: 3
+          duration_units:
+            day: 5
+
+  - id: conf-test:grouped-precision-parsing-003
+    description: "Parse 3-month group in year '110Y2G3MU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "110Y2G3MU"
+    expect:
+      valid: true
+      components:
+        year: 110
+        grouping:
+          coefficient: 2
+          duration_units:
+            month: 3
+
+  - id: conf-test:grouped-precision-parsing-004
+    description: "Parse 2-hour group '6GT2HU'"
+    requirements:
+      - req:grouped-application-date
+    test_type: parsing
+    given:
+      expression: "6GT2HU"
+    expect:
+      valid: true
+      components:
+        grouping:
+          coefficient: 6
+          duration_units:
+            hour: 2
+
+  # --- Lower order components within grouped units ---
+  - id: conf-test:grouped-lower-order-parsing-001
+    description: "Parse day within 60-day group '2018Y3G60DU6D'"
+    requirements:
+      - req:grouped-application-order
+    test_type: parsing
+    given:
+      expression: "2018Y3G60DU6D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 3
+          duration_units:
+            day: 60
+        day: 6
+
+  - id: conf-test:grouped-lower-order-parsing-002
+    description: "Parse hour within 12-hour group '2018Y20GT12HU3H'"
+    requirements:
+      - req:grouped-application-order
+    test_type: parsing
+    given:
+      expression: "2018Y20GT12HU3H"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 20
+          duration_units:
+            hour: 12
+        hour: 3
+
+  # --- With time shift (Clause 5.4.4) ---
+  - id: conf-test:grouped-with-shift-parsing-001
+    description: "Parse grouped unit with shift '2018Y1G60DUZ-5H'"
+    requirements:
+      - req:grouped-representation-with-shift
+    test_type: parsing
+    given:
+      expression: "2018Y1G60DUZ-5H"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 1
+          duration_units:
+            day: 60
+        shift:
+          sign: "-"
+          hour: 5
+
+  - id: conf-test:grouped-with-shift-parsing-002
+    description: "Parse grouped unit with day and shift '2018Y3G60DU6DZ8H'"
+    requirements:
+      - req:grouped-representation-with-shift
+    test_type: parsing
+    given:
+      expression: "2018Y3G60DU6DZ8H"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 3
+          duration_units:
+            day: 60
+        day: 6
+        shift:
+          sign: "+"
+          hour: 8
+
+  # --- Boundary adherence (Clause 5.4.3) ---
+  - id: conf-test:grouped-boundary-valid-parsing-001
+    description: "Parse valid day within 2-month group '2018Y1G2MU30D'"
+    requirements:
+      - req:grouped-boundary-adherence
+    test_type: parsing
+    given:
+      expression: "2018Y1G2MU30D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 1
+          duration_units:
+            month: 2
+        day: 30
+
+  - id: conf-test:grouped-boundary-invalid-validity-001
+    description: "Verify invalid day exceeding 2-month group '2018Y1G2MU60D'"
+    requirements:
+      - req:grouped-boundary-adherence
+    test_type: validity
+    given:
+      expression: "2018Y1G2MU60D"
+    expect:
+      valid: false
+
+  # --- Truncation partial (Clause 5.4.5.2) ---
+  - id: conf-test:grouped-truncation-parsing-001
+    description: "Parse grouped unit with partial truncation '2018Y3G2MU40D'"
+    requirements:
+      - req:grouped-truncation-partial
+    test_type: parsing
+    given:
+      expression: "2018Y3G2MU40D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 3
+          duration_units:
+            month: 2
+        day: 40
+
+  # --- Conversion to interval (Clause 5.4.5) ---
+  - id: conf-test:grouped-conversion-parsing-001
+    description: "Parse grouped unit that converts to interval '2018Y1G12MU15D'"
+    requirements:
+      - req:grouped-conversion-to-interval
+    test_type: parsing
+    given:
+      expression: "2018Y1G12MU15D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        grouping:
+          coefficient: 1
+          duration_units:
+            month: 12
+        day: 15

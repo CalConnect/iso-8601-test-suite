@@ -1,0 +1,509 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:recurring-time-interval
+name: Recurring time interval conformance tests
+description: >
+  Tests for recurring time interval representations including bounded and
+  unbounded recurrences, with start/end, start/duration, and duration/end
+  interval specifications.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:time-interval
+requirements_class: req-class:recurring-time-interval
+source: ISO 8601-1:2026 Clause 5.7
+tests:
+  # Parsing tests: start/end with recurrences
+  - id: conf-test:recur-parse-001
+    description: "Parse basic format recurring interval with recurrences R12/19850412T232050/19850625T103000"
+    requirements:
+      - req:recur-start-end-basic
+    test_type: parsing
+    given:
+      expression: "R12/19850412T232050/19850625T103000"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            end:
+              calendar:
+                year: 1985
+                month: 6
+                day: 25
+              time:
+                hour: 10
+                minute: 30
+                second: 0
+
+  - id: conf-test:recur-parse-002
+    description: "Parse extended format recurring interval with recurrences R12/1985-04-12T23:20:50/1985-06-25T10:30:00"
+    requirements:
+      - req:recur-start-end-extended
+    test_type: parsing
+    given:
+      expression: "R12/1985-04-12T23:20:50/1985-06-25T10:30:00"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            end:
+              calendar:
+                year: 1985
+                month: 6
+                day: 25
+              time:
+                hour: 10
+                minute: 30
+                second: 0
+
+  # Parsing tests: start/duration with recurrences
+  - id: conf-test:recur-parse-003
+    description: "Parse basic format recurring interval start/duration R12/19850412T232050/P1Y2M15DT12H30M0S"
+    requirements:
+      - req:recur-start-dur-basic
+    test_type: parsing
+    given:
+      expression: "R12/19850412T232050/P1Y2M15DT12H30M0S"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+
+  - id: conf-test:recur-parse-004
+    description: "Parse extended format recurring interval start/duration R12/1985-04-12T23:20:50/P1Y2M15DT12H30M0S"
+    requirements:
+      - req:recur-start-dur-extended
+    test_type: parsing
+    given:
+      expression: "R12/1985-04-12T23:20:50/P1Y2M15DT12H30M0S"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+
+  # Parsing tests: duration/end with recurrences
+  - id: conf-test:recur-parse-005
+    description: "Parse basic format recurring interval duration/end R12/P1Y2M15DT12H30M0S/19850412T232050"
+    requirements:
+      - req:recur-dur-end-basic
+    test_type: parsing
+    given:
+      expression: "R12/P1Y2M15DT12H30M0S/19850412T232050"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+
+  - id: conf-test:recur-parse-006
+    description: "Parse extended format recurring interval duration/end R12/P1Y2M15DT12H30M0S/1985-04-12T23:20:50"
+    requirements:
+      - req:recur-dur-end-extended
+    test_type: parsing
+    given:
+      expression: "R12/P1Y2M15DT12H30M0S/1985-04-12T23:20:50"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+
+  # Parsing tests: unbounded recurrences
+  - id: conf-test:recur-parse-007
+    description: "Parse unbounded recurring interval R/1985-04-12T23:20:50/1985-06-25T10:30:00"
+    requirements:
+      - req:recur-start-end-extended
+      - req:recur-unbounded
+    test_type: parsing
+    given:
+      expression: "R/1985-04-12T23:20:50/1985-06-25T10:30:00"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: null
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            end:
+              calendar:
+                year: 1985
+                month: 6
+                day: 25
+              time:
+                hour: 10
+                minute: 30
+                second: 0
+
+  - id: conf-test:recur-parse-008
+    description: "Parse unbounded recurring interval with start/duration R/1985-04-12/P1Y2M10D"
+    requirements:
+      - req:recur-start-dur-extended
+      - req:recur-unbounded
+    test_type: parsing
+    given:
+      expression: "R/1985-04-12/P1Y2M10D"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: null
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+            duration:
+              years: 1
+              months: 2
+              days: 10
+
+  - id: conf-test:recur-parse-009
+    description: "Parse unbounded recurring interval with duration/end R/P1Y2M10D/19850425"
+    requirements:
+      - req:recur-dur-end-basic
+      - req:recur-unbounded
+    test_type: parsing
+    given:
+      expression: "R/P1Y2M10D/19850425"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: null
+          interval:
+            duration:
+              years: 1
+              months: 2
+              days: 10
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 25
+
+  # Parsing tests: date-only intervals
+  - id: conf-test:recur-parse-010
+    description: "Parse recurring date-only interval R5/19850412/19850425"
+    requirements:
+      - req:recur-start-end-basic
+    test_type: parsing
+    given:
+      expression: "R5/19850412/19850425"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 5
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 25
+
+  - id: conf-test:recur-parse-011
+    description: "Parse recurring interval with start/duration date-only R12/P1Y2M10D/19850425"
+    requirements:
+      - req:recur-dur-end-basic
+    test_type: parsing
+    given:
+      expression: "R12/P1Y2M10D/19850425"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            duration:
+              years: 1
+              months: 2
+              days: 10
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 25
+
+  - id: conf-test:recur-parse-012
+    description: "Parse recurring interval with start/duration date-only R/1985-04-12/P1Y2M10D"
+    requirements:
+      - req:recur-start-dur-extended
+      - req:recur-unbounded
+    test_type: parsing
+    given:
+      expression: "R/1985-04-12/P1Y2M10D"
+    expect:
+      valid: true
+      components:
+        recurring:
+          repetitions: null
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+            duration:
+              years: 1
+              months: 2
+              days: 10
+
+  # Generation tests
+  - id: conf-test:recur-gen-001
+    description: "Generate basic format recurring interval with recurrences"
+    requirements:
+      - req:recur-start-end-basic
+    test_type: generation
+    given:
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            end:
+              calendar:
+                year: 1985
+                month: 6
+                day: 25
+              time:
+                hour: 10
+                minute: 30
+                second: 0
+    expect:
+      expression: "R12/19850412T232050/19850625T103000"
+
+  - id: conf-test:recur-gen-002
+    description: "Generate extended format recurring interval with recurrences"
+    requirements:
+      - req:recur-start-end-extended
+    test_type: generation
+    given:
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            end:
+              calendar:
+                year: 1985
+                month: 6
+                day: 25
+              time:
+                hour: 10
+                minute: 30
+                second: 0
+    expect:
+      expression: "R12/1985-04-12T23:20:50/1985-06-25T10:30:00"
+
+  - id: conf-test:recur-gen-003
+    description: "Generate basic format recurring interval start/duration"
+    requirements:
+      - req:recur-start-dur-basic
+    test_type: generation
+    given:
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            start:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+    expect:
+      expression: "R12/19850412T232050/P1Y2M15DT12H30M0S"
+
+  - id: conf-test:recur-gen-004
+    description: "Generate basic format recurring interval duration/end"
+    requirements:
+      - req:recur-dur-end-basic
+    test_type: generation
+    given:
+      components:
+        recurring:
+          repetitions: 12
+          interval:
+            duration:
+              years: 1
+              months: 2
+              days: 15
+              hours: 12
+              minutes: 30
+              seconds: 0
+            end:
+              calendar:
+                year: 1985
+                month: 4
+                day: 12
+              time:
+                hour: 23
+                minute: 20
+                second: 50
+    expect:
+      expression: "R12/P1Y2M15DT12H30M0S/19850412T232050"
+
+  # Validity tests
+  - id: conf-test:recur-valid-001
+    description: "Verify recurring interval without R designator is invalid"
+    requirements:
+      - req:recur-designator
+    test_type: validity
+    given:
+      expression: "12/19850412/19850425"
+    expect:
+      valid: false
+
+  - id: conf-test:recur-valid-002
+    description: "Verify recurring interval without separator is invalid"
+    requirements:
+      - req:recur-designator
+    test_type: validity
+    given:
+      expression: "R519850412/19850425"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:recur-equiv-001
+    description: "Basic and extended recurring intervals are equivalent"
+    requirements:
+      - req:recur-start-end-basic
+      - req:recur-start-end-extended
+    test_type: equivalence
+    given:
+      expression_a: "R12/19850412T232050/19850625T103000"
+      expression_b: "R12/1985-04-12T23:20:50/1985-06-25T10:30:00"
+    expect:
+      equivalent: true

@@ -1,0 +1,837 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:time-of-day
+name: Time of day conformance tests
+description: >
+  Tests for time of day representations including local time, UTC, offset,
+  reduced precision, decimal fractions, beginning and ending of the day.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:fundamentals
+requirements_class: req-class:time-of-day
+source: ISO 8601-1:2026 Clause 5.3
+tests:
+  # Parsing tests: complete local time representations
+  - id: conf-test:time-parse-001
+    description: "Parse basic format complete time T232050"
+    requirements:
+      - req:time-basic-full
+    test_type: parsing
+    given:
+      expression: "T232050"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 50
+
+  - id: conf-test:time-parse-002
+    description: "Parse extended format complete time T23:20:50"
+    requirements:
+      - req:time-extended-full
+    test_type: parsing
+    given:
+      expression: "T23:20:50"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 50
+
+  # Parsing tests: reduced precision
+  - id: conf-test:time-parse-003
+    description: "Parse basic format hour and minute T2320"
+    requirements:
+      - req:time-basic-hm
+    test_type: parsing
+    given:
+      expression: "T2320"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+
+  - id: conf-test:time-parse-004
+    description: "Parse extended format hour and minute 23:20"
+    requirements:
+      - req:time-extended-hm
+    test_type: parsing
+    given:
+      expression: "23:20"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+
+  - id: conf-test:time-parse-005
+    description: "Parse basic format hour only T23"
+    requirements:
+      - req:time-basic-h
+    test_type: parsing
+    given:
+      expression: "T23"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+
+  # Parsing tests: decimal fractions
+  - id: conf-test:time-parse-006
+    description: "Parse basic format time with decimal fraction of second T232030,5"
+    requirements:
+      - req:time-fraction-second
+    test_type: parsing
+    given:
+      expression: "T232030,5"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          fractional_second:
+            value: 5
+            precision: 1
+
+  - id: conf-test:time-parse-007
+    description: "Parse extended format time with decimal fraction of second 23:20:30.5"
+    requirements:
+      - req:time-fraction-second
+    test_type: parsing
+    given:
+      expression: "23:20:30.5"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          fractional_second:
+            value: 5
+            precision: 1
+
+  - id: conf-test:time-parse-008
+    description: "Parse basic format time with decimal fraction of minute T2320,8"
+    requirements:
+      - req:time-fraction-minute
+    test_type: parsing
+    given:
+      expression: "T2320,8"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          fractional_minute:
+            value: 8
+            precision: 1
+
+  - id: conf-test:time-parse-009
+    description: "Parse extended format time with decimal fraction of minute 23:20,8"
+    requirements:
+      - req:time-fraction-minute
+    test_type: parsing
+    given:
+      expression: "23:20,8"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          fractional_minute:
+            value: 8
+            precision: 1
+
+  - id: conf-test:time-parse-010
+    description: "Parse basic format time with decimal fraction of hour T23.3"
+    requirements:
+      - req:time-fraction-hour
+    test_type: parsing
+    given:
+      expression: "T23.3"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          fractional_hour:
+            value: 3
+            precision: 1
+
+  # Parsing tests: beginning and ending of the day
+  - id: conf-test:time-parse-011
+    description: "Parse beginning of the day in basic format T000000"
+    requirements:
+      - req:time-beginning-of-day
+    test_type: parsing
+    given:
+      expression: "T000000"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+          minute: 0
+          second: 0
+
+  - id: conf-test:time-parse-012
+    description: "Parse beginning of the day in extended format 00:00:00"
+    requirements:
+      - req:time-beginning-of-day
+    test_type: parsing
+    given:
+      expression: "00:00:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+          minute: 0
+          second: 0
+
+  - id: conf-test:time-parse-013
+    description: "Parse ending of the day in basic format T240000"
+    requirements:
+      - req:time-ending-of-day
+    test_type: parsing
+    given:
+      expression: "T240000"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+          minute: 0
+          second: 0
+
+  - id: conf-test:time-parse-014
+    description: "Parse ending of the day in extended format 24:00:00"
+    requirements:
+      - req:time-ending-of-day
+    test_type: parsing
+    given:
+      expression: "24:00:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+          minute: 0
+          second: 0
+
+  # Parsing tests: UTC of day
+  - id: conf-test:time-parse-015
+    description: "Parse basic format UTC time T232030Z"
+    requirements:
+      - req:time-utc
+    test_type: parsing
+    given:
+      expression: "T232030Z"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:time-parse-016
+    description: "Parse extended format UTC time 23:20:30Z"
+    requirements:
+      - req:time-utc
+    test_type: parsing
+    given:
+      expression: "23:20:30Z"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:time-parse-017
+    description: "Parse basic format UTC time reduced precision T2320Z"
+    requirements:
+      - req:time-utc
+    test_type: parsing
+    given:
+      expression: "T2320Z"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:time-parse-018
+    description: "Parse basic format UTC time hours only T23Z"
+    requirements:
+      - req:time-utc
+    test_type: parsing
+    given:
+      expression: "T23Z"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:time-parse-019
+    description: "Parse extended format UTC time reduced precision 23:20Z"
+    requirements:
+      - req:time-utc
+    test_type: parsing
+    given:
+      expression: "23:20Z"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  # Parsing tests: time with UTC offset
+  - id: conf-test:time-parse-020
+    description: "Parse basic format time with positive offset T152746+0100"
+    requirements:
+      - req:time-offset-basic
+    test_type: parsing
+    given:
+      expression: "T152746+0100"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+            minutes: 0
+
+  - id: conf-test:time-parse-021
+    description: "Parse basic format time with negative offset T152746-0500"
+    requirements:
+      - req:time-offset-basic
+    test_type: parsing
+    given:
+      expression: "T152746-0500"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+            minutes: 0
+
+  - id: conf-test:time-parse-022
+    description: "Parse extended format time with positive offset 15:27:46+01:00"
+    requirements:
+      - req:time-offset-extended
+    test_type: parsing
+    given:
+      expression: "15:27:46+01:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+            minutes: 0
+
+  - id: conf-test:time-parse-023
+    description: "Parse extended format time with negative offset 15:27:46-05:00"
+    requirements:
+      - req:time-offset-extended
+    test_type: parsing
+    given:
+      expression: "15:27:46-05:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+            minutes: 0
+
+  - id: conf-test:time-parse-024
+    description: "Parse basic format time with hours-only offset T152746+01"
+    requirements:
+      - req:time-offset-basic
+    test_type: parsing
+    given:
+      expression: "T152746+01"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+
+  - id: conf-test:time-parse-025
+    description: "Parse basic format time with hours-only negative offset T152746-05"
+    requirements:
+      - req:time-offset-basic
+    test_type: parsing
+    given:
+      expression: "T152746-05"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+
+  - id: conf-test:time-parse-026
+    description: "Parse extended format time with hours-only offset 15:27:46+01"
+    requirements:
+      - req:time-offset-extended
+    test_type: parsing
+    given:
+      expression: "15:27:46+01"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+
+  - id: conf-test:time-parse-027
+    description: "Parse extended format time with hours-only negative offset 15:27:46-05"
+    requirements:
+      - req:time-offset-extended
+    test_type: parsing
+    given:
+      expression: "15:27:46-05"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+
+  # Parsing tests: reduced precision beginning/ending of day
+  - id: conf-test:time-parse-028
+    description: "Parse beginning of the day reduced precision T00"
+    requirements:
+      - req:time-beginning-of-day
+    test_type: parsing
+    given:
+      expression: "T00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+
+  - id: conf-test:time-parse-029
+    description: "Parse beginning of the day reduced precision T00:00"
+    requirements:
+      - req:time-beginning-of-day
+    test_type: parsing
+    given:
+      expression: "T00:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+          minute: 0
+
+  - id: conf-test:time-parse-030
+    description: "Parse ending of the day reduced precision T24"
+    requirements:
+      - req:time-ending-of-day
+    test_type: parsing
+    given:
+      expression: "T24"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+
+  - id: conf-test:time-parse-031
+    description: "Parse ending of the day reduced precision 24:00"
+    requirements:
+      - req:time-ending-of-day
+    test_type: parsing
+    given:
+      expression: "24:00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+          minute: 0
+
+  # Parsing tests: beginning/ending of day with decimal fraction
+  - id: conf-test:time-parse-032
+    description: "Parse beginning of the day with decimal fraction T000000.000"
+    requirements:
+      - req:time-beginning-of-day
+      - req:time-fraction-second
+    test_type: parsing
+    given:
+      expression: "T000000.000"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+          minute: 0
+          second: 0
+          fractional_second:
+            value: 0
+            precision: 3
+
+  - id: conf-test:time-parse-033
+    description: "Parse ending of the day with decimal fraction T240000.000"
+    requirements:
+      - req:time-ending-of-day
+      - req:time-fraction-second
+    test_type: parsing
+    given:
+      expression: "T240000.000"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+          minute: 0
+          second: 0
+          fractional_second:
+            value: 0
+            precision: 3
+
+  # Parsing tests: leap second
+  - id: conf-test:time-parse-034
+    description: "Parse leap second time T235960"
+    requirements:
+      - req:time-basic-full
+    test_type: parsing
+    given:
+      expression: "T235960"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 59
+          second: 60
+
+  # Generation tests
+  - id: conf-test:time-gen-001
+    description: "Generate basic format complete time"
+    requirements:
+      - req:time-basic-full
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 50
+    expect:
+      expression: "T232050"
+
+  - id: conf-test:time-gen-002
+    description: "Generate extended format complete time"
+    requirements:
+      - req:time-extended-full
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 50
+    expect:
+      expression: "T23:20:50"
+
+  - id: conf-test:time-gen-003
+    description: "Generate basic format hour and minute"
+    requirements:
+      - req:time-basic-hm
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+    expect:
+      expression: "T2320"
+
+  - id: conf-test:time-gen-004
+    description: "Generate extended format hour and minute"
+    requirements:
+      - req:time-extended-hm
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+    expect:
+      expression: "23:20"
+
+  - id: conf-test:time-gen-005
+    description: "Generate basic format UTC time"
+    requirements:
+      - req:time-utc
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+    expect:
+      expression: "T232030Z"
+
+  - id: conf-test:time-gen-006
+    description: "Generate extended format UTC time"
+    requirements:
+      - req:time-utc
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+    expect:
+      expression: "T23:20:30Z"
+
+  - id: conf-test:time-gen-007
+    description: "Generate basic format time with positive UTC offset"
+    requirements:
+      - req:time-offset-basic
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+            minutes: 0
+    expect:
+      expression: "T152746+0100"
+
+  - id: conf-test:time-gen-008
+    description: "Generate extended format time with positive UTC offset"
+    requirements:
+      - req:time-offset-extended
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "+"
+            hours: 1
+            minutes: 0
+    expect:
+      expression: "15:27:46+01:00"
+
+  - id: conf-test:time-gen-009
+    description: "Generate basic format time with negative UTC offset"
+    requirements:
+      - req:time-offset-basic
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+            minutes: 0
+    expect:
+      expression: "T152746-0500"
+
+  - id: conf-test:time-gen-010
+    description: "Generate extended format time with negative UTC offset"
+    requirements:
+      - req:time-offset-extended
+    test_type: generation
+    given:
+      components:
+        time:
+          hour: 15
+          minute: 27
+          second: 46
+          utc_offset:
+            sign: "-"
+            hours: 5
+            minutes: 0
+    expect:
+      expression: "15:27:46-05:00"
+
+  # Validity tests
+  - id: conf-test:time-valid-001
+    description: "Verify hour 25 is invalid"
+    requirements:
+      - req:time-basic-full
+    test_type: validity
+    given:
+      expression: "T250000"
+    expect:
+      valid: false
+
+  - id: conf-test:time-valid-002
+    description: "Verify minute 60 is invalid"
+    requirements:
+      - req:time-basic-full
+    test_type: validity
+    given:
+      expression: "T236000"
+    expect:
+      valid: false
+
+  - id: conf-test:time-valid-003
+    description: "Verify second 61 is invalid (beyond leap second)"
+    requirements:
+      - req:time-basic-full
+    test_type: validity
+    given:
+      expression: "T235961"
+    expect:
+      valid: false
+
+  - id: conf-test:time-valid-004
+    description: "Verify hour 24 with non-zero minutes is invalid"
+    requirements:
+      - req:time-ending-of-day
+    test_type: validity
+    given:
+      expression: "T240001"
+    expect:
+      valid: false
+
+  - id: conf-test:time-valid-005
+    description: "Verify hour 24 with non-zero seconds is invalid"
+    requirements:
+      - req:time-ending-of-day
+    test_type: validity
+    given:
+      expression: "T240001"
+    expect:
+      valid: false
+
+  - id: conf-test:time-valid-006
+    description: "Verify time designator disambiguation (1920 vs T1920)"
+    requirements:
+      - req:time-designator-omission
+    test_type: validity
+    given:
+      expression: "T1920"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 19
+          minute: 20
+
+  # Equivalence tests
+  - id: conf-test:time-equiv-001
+    description: "Basic and extended format represent the same time"
+    requirements:
+      - req:time-basic-full
+      - req:time-extended-full
+    test_type: equivalence
+    given:
+      expression_a: "T232050"
+      expression_b: "T23:20:50"
+    expect:
+      equivalent: true
+
+  - id: conf-test:time-equiv-002
+    description: "Z designator is equivalent to +00:00 offset"
+    requirements:
+      - req:time-utc
+      - req:time-offset-extended
+    test_type: equivalence
+    given:
+      expression_a: "T232030Z"
+      expression_b: "T232030+0000"
+    expect:
+      equivalent: true

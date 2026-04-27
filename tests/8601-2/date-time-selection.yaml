@@ -1,0 +1,549 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:date-time-selection
+name: Selection of date and time
+description: >
+  Tests for parsing, generation, and validity of date and time selection rules
+  using L/N designators for selecting specific days, months, weeks, etc.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:date-and-time
+requirements_class: req-class:date-time-selection
+source: ISO 8601-2:2026 Clause 12
+tests:
+  # --- Selection rule set (Clause 12.2) ---
+  - id: conf-test:selection-set-parsing-001
+    description: "Parse selection rule set 'L{1,3,5}KN' (Mon, Wed, Fri)"
+    requirements:
+      - req:selection-rule-set
+    test_type: parsing
+    given:
+      expression: "L{1,3,5}KN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week_day
+              set:
+                type: enumeration
+                members: [1, 3, 5]
+
+  - id: conf-test:selection-set-parsing-002
+    description: "Parse selection rule set 'L{1,2}MN' (Jan, Feb)"
+    requirements:
+      - req:selection-rule-set
+    test_type: parsing
+    given:
+      expression: "L{1,2}MN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: month
+              set:
+                type: enumeration
+                members: [1, 2]
+
+  # --- Selection of position (Clause 12.3.9) ---
+  - id: conf-test:selection-position-parsing-001
+    description: "Parse position selection 'L1K1IN' (first Monday)"
+    requirements:
+      - req:selection-position
+    test_type: parsing
+    given:
+      expression: "L1K1IN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week_day
+              value: 1
+            - type: position
+              value: 1
+
+  - id: conf-test:selection-position-parsing-002
+    description: "Parse position selection with set 'L1K{1,2}IN'"
+    requirements:
+      - req:selection-position
+    test_type: parsing
+    given:
+      expression: "L1K{1,2}IN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week_day
+              value: 1
+            - type: position
+              set:
+                type: enumeration
+                members: [1, 2]
+
+  # --- Last work day of month ---
+  - id: conf-test:selection-position-parsing-003
+    description: "Parse last work day of month 'L{1..31}D{1..5}K-1IN'"
+    requirements:
+      - req:selection-position
+    test_type: parsing
+    given:
+      expression: "L{1..31}D{1..5}K-1IN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: day_of_month
+              set:
+                type: between
+                start: 1
+                end: 31
+            - type: week_day
+              set:
+                type: between
+                start: 1
+                end: 5
+            - type: position
+              value: -1
+
+  # --- Selection with time interval (Clause 12.3.10) ---
+  - id: conf-test:selection-time-interval-parsing-001
+    description: "Parse selection with time interval 'LL3K4IN/P5DN'"
+    requirements:
+      - req:selection-time-interval
+    test_type: parsing
+    given:
+      expression: "LL3K4IN/P5DN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week_day
+              value: 3
+            - type: position
+              value: 4
+          duration:
+            day: 5
+
+  # --- Application in date expressions (Clause 12.4.1) ---
+  - id: conf-test:selection-application-parsing-001
+    description: "Parse date with selection '2018Y3ML1K1IN' (first Monday of March 2018)"
+    requirements:
+      - req:selection-application
+    test_type: parsing
+    given:
+      expression: "2018Y3ML1K1IN"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 3
+        selection:
+          rules:
+            - type: week_day
+              value: 1
+            - type: position
+              value: 1
+
+  - id: conf-test:selection-application-parsing-002
+    description: "Parse datetime with selection '2018Y9MTLT8H20MN3I'"
+    requirements:
+      - req:selection-application
+    test_type: parsing
+    given:
+      expression: "2018Y9MTLT8H20MN3I"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 9
+        selection:
+          rules:
+            - type: time
+              hour: 8
+              minute: 20
+            - type: position
+              value: 3
+
+  # --- Election Day example ---
+  - id: conf-test:selection-election-day-parsing-001
+    description: "Parse Election Day expression 'XXX{0,2,4,6,8}Y11MLLL1K1IN/P9DN2K1IN'"
+    requirements:
+      - req:selection-application
+      - req:selection-time-interval
+    test_type: parsing
+    given:
+      expression: "XXX{0,2,4,6,8}Y11MLLL1K1IN/P9DN2K1IN"
+    expect:
+      valid: true
+      components:
+        year:
+          unspecified: [X, X, X]
+          last_digit: {set: {type: enumeration, members: [0, 2, 4, 6, 8]}}
+        month: 11
+        start:
+          selection:
+            rules:
+              - type: week_day
+                value: 1
+              - type: position
+                value: 1
+        duration:
+          day: 9
+        end:
+          selection:
+            rules:
+              - type: week_day
+                value: 2
+              - type: position
+                value: 1
+
+  # --- Context set by selection (Clause 12.4.2) ---
+  - id: conf-test:selection-context-parsing-001
+    description: "Parse selection with trailing time '2018YL1K1INT10H0M0S'"
+    requirements:
+      - req:selection-context-set
+    test_type: parsing
+    given:
+      expression: "2018YL1K1INT10H0M0S"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        selection:
+          rules:
+            - type: week_day
+              value: 1
+            - type: position
+              value: 1
+        hour: 10
+        minute: 0
+        second: 0
+
+  # --- Within time intervals (Clause 12.4.3) ---
+  - id: conf-test:selection-within-interval-parsing-001
+    description: "Parse time interval with selection '2018Y9ML1K1IN/P5D'"
+    requirements:
+      - req:selection-within-interval
+    test_type: parsing
+    given:
+      expression: "2018Y9ML1K1IN/P5D"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 2018
+          month: 9
+          selection:
+            rules:
+              - type: week_day
+                value: 1
+              - type: position
+                value: 1
+        duration:
+          day: 5
+
+  - id: conf-test:selection-within-interval-parsing-002
+    description: "Parse time interval with multiple selection '2018Y9ML{1,3}K1IN/P5D'"
+    requirements:
+      - req:selection-within-interval
+    test_type: parsing
+    given:
+      expression: "2018Y9ML{1,3}K1IN/P5D"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 2018
+          month: 9
+          selection:
+            rules:
+              - type: week_day
+                set:
+                  type: enumeration
+                  members: [1, 3]
+              - type: position
+                value: 1
+        duration:
+          day: 5
+
+  # --- Mothers Day example ---
+  - id: conf-test:selection-mothers-day-parsing-001
+    description: "Parse Mother's Day expression 'X*YL5M7K2IN'"
+    requirements:
+      - req:selection-application
+    test_type: parsing
+    given:
+      expression: "X*YL5M7K2IN"
+    expect:
+      valid: true
+      components:
+        year:
+          unspecified: true
+        selection:
+          rules:
+            - type: month
+              value: 5
+            - type: week_day
+              value: 7
+            - type: position
+              value: 2
+
+  # --- Thanksgiving example ---
+  - id: conf-test:selection-thanksgiving-parsing-001
+    description: "Parse Thanksgiving expression 'X*YL11M4K4INT17HZ-5H'"
+    requirements:
+      - req:selection-application
+    test_type: parsing
+    given:
+      expression: "X*YL11M4K4INT17HZ-5H"
+    expect:
+      valid: true
+      components:
+        year:
+          unspecified: true
+        selection:
+          rules:
+            - type: month
+              value: 11
+            - type: week_day
+              value: 4
+            - type: position
+              value: 4
+        time:
+          hour: 17
+          utc_offset:
+            sign: "-"
+            hours: 5
+
+  # --- Month selection (Clause 12.2.1) ---
+  - id: conf-test:selection-month-parsing-001
+    description: "Parse selection of calendar month 'L6N'"
+    requirements:
+      - req:selection-month
+    test_type: parsing
+    given:
+      expression: "L6N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: month
+              value: 6
+
+  - id: conf-test:selection-month-validity-001
+    description: "Verify month selection value 13 is invalid"
+    requirements:
+      - req:selection-month
+    test_type: validity
+    given:
+      expression: "L13N"
+    expect:
+      valid: false
+
+  # --- Week selection (Clause 12.2.2) ---
+  - id: conf-test:selection-week-parsing-001
+    description: "Parse selection of calendar week 'LW20N'"
+    requirements:
+      - req:selection-week
+    test_type: parsing
+    given:
+      expression: "LW20N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week
+              value: 20
+
+  - id: conf-test:selection-week-parsing-002
+    description: "Parse selection of negative week 'LW-5N'"
+    requirements:
+      - req:selection-week
+    test_type: parsing
+    given:
+      expression: "LW-5N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week
+              value: -5
+
+  # --- Day of month selection (Clause 12.3) ---
+  - id: conf-test:selection-day-of-month-parsing-001
+    description: "Parse selection of calendar day of month 'LD15N'"
+    requirements:
+      - req:selection-day-of-month
+    test_type: parsing
+    given:
+      expression: "LD15N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: day_of_month
+              value: 15
+
+  - id: conf-test:selection-day-of-month-parsing-002
+    description: "Parse selection of negative day of month 'LD-1N'"
+    requirements:
+      - req:selection-day-of-month
+    test_type: parsing
+    given:
+      expression: "LD-1N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: day_of_month
+              value: -1
+
+  # --- Week day selection (Clause 12.4) ---
+  - id: conf-test:selection-week-day-parsing-001
+    description: "Parse selection of week day (Monday) 'LK1N'"
+    requirements:
+      - req:selection-week-day
+    test_type: parsing
+    given:
+      expression: "LK1N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: week_day
+              value: 1
+
+  - id: conf-test:selection-week-day-validity-001
+    description: "Verify week day selection value 8 is invalid"
+    requirements:
+      - req:selection-week-day
+    test_type: validity
+    given:
+      expression: "LK8N"
+    expect:
+      valid: false
+
+  # --- Ordinal day selection (Clause 12.5) ---
+  - id: conf-test:selection-ordinal-day-parsing-001
+    description: "Parse selection of ordinal day 'LO100N'"
+    requirements:
+      - req:selection-ordinal-day
+    test_type: parsing
+    given:
+      expression: "LO100N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: ordinal_day
+              value: 100
+
+  - id: conf-test:selection-ordinal-day-parsing-002
+    description: "Parse selection of negative ordinal day 'LO-10N'"
+    requirements:
+      - req:selection-ordinal-day
+    test_type: parsing
+    given:
+      expression: "LO-10N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: ordinal_day
+              value: -10
+
+  # --- Hour selection (Clause 12.6) ---
+  - id: conf-test:selection-hour-parsing-001
+    description: "Parse selection of hour 'LH14N'"
+    requirements:
+      - req:selection-hour
+    test_type: parsing
+    given:
+      expression: "LH14N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: hour
+              value: 14
+
+  - id: conf-test:selection-hour-validity-001
+    description: "Verify hour selection value 24 is invalid"
+    requirements:
+      - req:selection-hour
+    test_type: validity
+    given:
+      expression: "LH24N"
+    expect:
+      valid: false
+
+  # --- Minute selection (Clause 12.7) ---
+  - id: conf-test:selection-minute-parsing-001
+    description: "Parse selection of minute 'LM30N'"
+    requirements:
+      - req:selection-minute
+    test_type: parsing
+    given:
+      expression: "LM30N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: minute
+              value: 30
+
+  - id: conf-test:selection-minute-validity-001
+    description: "Verify minute selection value 60 is invalid"
+    requirements:
+      - req:selection-minute
+    test_type: validity
+    given:
+      expression: "LM60N"
+    expect:
+      valid: false
+
+  # --- Second selection (Clause 12.8) ---
+  - id: conf-test:selection-second-parsing-001
+    description: "Parse selection of second 'LS45N'"
+    requirements:
+      - req:selection-second
+    test_type: parsing
+    given:
+      expression: "LS45N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: second
+              value: 45
+
+  - id: conf-test:selection-second-parsing-002
+    description: "Parse selection of second value 60 (leap second)"
+    requirements:
+      - req:selection-second
+    test_type: parsing
+    given:
+      expression: "LS60N"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: second
+              value: 60

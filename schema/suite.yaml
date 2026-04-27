@@ -1,0 +1,92 @@
+# YAML Schema for ISO 8601 Test Suite — Suite Manifest
+#
+# Describes the overall test suite: standards covered, statistics,
+# and metadata for machine consumption.
+---
+type: object
+required:
+  - id
+  - name
+  - description
+  - version
+  - date
+  - standardization_target_type
+  - standards
+  - statistics
+properties:
+  id:
+    type: string
+    pattern: "^suite:[a-z0-9-]+$"
+    description: "Unique identifier for this test suite"
+
+  name:
+    type: string
+    description: "Human-readable name"
+
+  description:
+    type: string
+    description: "Brief description of the test suite"
+
+  maintainer:
+    type: string
+    description: "Organization or group maintaining this suite"
+
+  version:
+    type: string
+    description: "Semantic version of the test suite"
+
+  date:
+    type: string
+    description: "Date of this version (ISO 8601)"
+
+  standardization_target_type:
+    type: string
+    description: "Type of implementation being tested"
+
+  standards:
+    type: array
+    description: "Standards covered by this test suite"
+    items:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        edition:
+          type: integer
+        clause_prefix:
+          type: string
+
+  identifier_scheme:
+    type: object
+    description: "Identifier scheme used in the test suite"
+
+  statistics:
+    type: object
+    description: "Counts of tests, requirements, classes"
+
+  file_counts:
+    type: object
+    description: "Counts of files in each directory"
+
+  directory_layout:
+    type: object
+    description: "Purpose of each directory"
+
+  test_types:
+    type: array
+    description: "Test types used in the suite"
+    items:
+      type: object
+      required:
+        - id
+        - description
+      properties:
+        id:
+          type: string
+        description:
+          type: string

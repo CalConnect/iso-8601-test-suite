@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:iso-8601-1-complete
+name: ISO 8601-1 Complete
+description: >-
+  Profile covering all conformance classes defined in ISO 8601-1 (Date and time
+  — Representations for information interchange — Part 1: Basic rules).
+source: ISO 8601-1:2019
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:fundamentals
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:ordinal-date
+  - 8601-1:conf-class:week-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:duration
+  - 8601-1:conf-class:time-interval
+  - 8601-1:conf-class:recurring-time-interval
+additional_requirements: []
+additional_tests: []

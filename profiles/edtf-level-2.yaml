@@ -1,0 +1,300 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:edtf-level-2
+name: EDTF Level 2
+description: >-
+  Extended Date/Time Format Level 2 as defined in Annex A of ISO 8601-2
+  (Library of Congress EDTF specification). EDTF Level 2 extends Level 1
+  with partial uncertain/approximate qualification, sets and ranges,
+  extended time intervals, and exponential values.
+source: ISO 8601-2:2019 Annex A (EDTF Level 2)
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:time-interval
+  - 8601-2:conf-class:qualification
+  - 8601-2:conf-class:unspecified-digits
+  - 8601-2:conf-class:seasons
+  - 8601-2:conf-class:set-representation
+  - 8601-2:conf-class:exponential-values
+  - 8601-2:conf-class:extended-time-intervals
+additional_requirements:
+  - id: req:edtf-level-2-extended-format-only
+    statement: >-
+      Only extended format representations shall be used. Basic format
+      representations (without delimiters) are not permitted.
+  - id: req:edtf-level-2-four-digit-year
+    statement: >-
+      Calendar year representations shall be exactly four digits.
+  - id: req:edtf-level-2-mandatory-time-separator
+    statement: >-
+      The time designator "T" shall be mandatory between the date and
+      time components in date-and-time representations.
+  - id: req:edtf-level-2-time-minutes-required
+    statement: >-
+      Time-of-day representations shall include at least hours and
+      minutes (hh:mm minimum).
+  - id: req:edtf-level-2-no-hour-24
+    statement: >-
+      The hour value 24 is not allowed.
+  - id: req:edtf-level-2-offset-with-minutes
+    statement: >-
+      UTC offset shall be represented either as "Z" or as a numeric
+      offset with both hours and minutes (±hh:mm).
+  - id: req:edtf-level-2-qualification-markers
+    statement: >-
+      The qualification markers "?" (uncertain) and "~" (approximate)
+      may be appended to a date or date component value.
+  - id: req:edtf-level-2-unspecified-digits-xx
+    statement: >-
+      Unspecified digits shall be represented by "X" characters. For a
+      two-digit field, exactly "XX" shall be used.
+  - id: req:edtf-level-2-season-codes
+    statement: >-
+      Seasons shall be represented using the values 21 (Spring), 22
+      (Summer), 23 (Autumn/Fall), 24 (Winter).
+  - id: req:edtf-level-2-partial-uncertain-approximate
+    statement: >-
+      Qualification markers may be applied to individual components
+      within a date by enclosing the qualified component in parentheses,
+      e.g. "2004-(06)?-11" indicates uncertainty only about the month.
+  - id: req:edtf-level-2-partial-unspecified
+    statement: >-
+      Unspecified digits ("XX") may be applied independently to the
+      month or day field, e.g. "2018-XX-03" (month unspecified, day
+      known) or "2018-03-XX" (day unspecified, month known).
+  - id: req:edtf-level-2-set-and-range-notation
+    statement: >-
+      Sets and ranges shall use square brackets for inclusive ranges
+      ("[..]") and curly braces for enumerated sets ("{},"). Open-ended
+      ranges are indicated by omitting the start or end value within
+      brackets, e.g. "[..1760]" or "[1760..]".
+  - id: req:edtf-level-2-exponential-values
+    statement: >-
+      Year values may use exponential notation in the form of "yEy"
+      where E is a signed or unsigned integer exponent, e.g. "y-5E7"
+      represents the year -50000000.
+additional_tests:
+  - id: conf-test:edtf-level-2-valid-001
+    description: "Valid partial uncertain month in date"
+    requirements:
+      - req:edtf-level-2-partial-uncertain-approximate
+    test_type: validity
+    given:
+      expression: "2004-(06)?-11"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-002
+    description: "Valid partial approximate month and uncertain day"
+    requirements:
+      - req:edtf-level-2-partial-uncertain-approximate
+    test_type: validity
+    given:
+      expression: "(2004-(06)~11)"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-003
+    description: "Valid unspecified day"
+    requirements:
+      - req:edtf-level-2-partial-unspecified
+    test_type: validity
+    given:
+      expression: "2018-03-XX"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-004
+    description: "Valid unspecified month with known day"
+    requirements:
+      - req:edtf-level-2-partial-unspecified
+    test_type: validity
+    given:
+      expression: "2018-XX-03"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-005
+    description: "Valid inclusive range"
+    requirements:
+      - req:edtf-level-2-set-and-range-notation
+    test_type: validity
+    given:
+      expression: "[1667..1760]"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-006
+    description: "Valid enumerated set"
+    requirements:
+      - req:edtf-level-2-set-and-range-notation
+    test_type: validity
+    given:
+      expression: "{1667,1760}"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-007
+    description: "Valid open-ended range with no start"
+    requirements:
+      - req:edtf-level-2-set-and-range-notation
+    test_type: validity
+    given:
+      expression: "[..1760]"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-008
+    description: "Valid open-ended range with no end"
+    requirements:
+      - req:edtf-level-2-set-and-range-notation
+    test_type: validity
+    given:
+      expression: "[1760..]"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-009
+    description: "Extended format date is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-extended-format-only
+    test_type: validity
+    given:
+      expression: "2010-01-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-invalid-001
+    description: >-
+      Basic format date is invalid in EDTF Level 2
+    requirements:
+      - req:edtf-level-2-extended-format-only
+    test_type: validity
+    given:
+      expression: "20100101"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-2-valid-010
+    description: "Four-digit year is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-four-digit-year
+    test_type: validity
+    given:
+      expression: "2010-01-01"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-011
+    description: "Date-time with T designator is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-mandatory-time-separator
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-invalid-002
+    description: >-
+      Date-time without T designator is invalid in EDTF Level 2
+    requirements:
+      - req:edtf-level-2-mandatory-time-separator
+    test_type: validity
+    given:
+      expression: "2010-01-01 12:00:00Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-2-valid-012
+    description: "Time with hours and minutes is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-time-minutes-required
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-invalid-003
+    description: >-
+      Time with hours only (no minutes) is invalid in EDTF Level 2
+    requirements:
+      - req:edtf-level-2-time-minutes-required
+    test_type: validity
+    given:
+      expression: "2010-01-01T12Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-2-valid-013
+    description: "Hour 23 is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-no-hour-24
+    test_type: validity
+    given:
+      expression: "2010-01-01T23:59:59Z"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-invalid-004
+    description: >-
+      Hour value 24 is invalid in EDTF Level 2
+    requirements:
+      - req:edtf-level-2-no-hour-24
+    test_type: validity
+    given:
+      expression: "2010-01-01T24:00:00Z"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-2-valid-014
+    description: "UTC offset with minutes is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00+05:30"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-invalid-005
+    description: >-
+      UTC offset without minutes is invalid in EDTF Level 2
+    requirements:
+      - req:edtf-level-2-offset-with-minutes
+    test_type: validity
+    given:
+      expression: "2010-01-01T12:00:00+05"
+    expect:
+      valid: false
+  - id: conf-test:edtf-level-2-valid-015
+    description: "Uncertain year with question mark is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004?"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-016
+    description: "Approximate year with tilde is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-qualification-markers
+    test_type: validity
+    given:
+      expression: "2004~"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-017
+    description: "Unspecified day XX is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-unspecified-digits-xx
+    test_type: validity
+    given:
+      expression: "2018-03-XX"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-018
+    description: "Season code 21 (Spring) is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-season-codes
+    test_type: validity
+    given:
+      expression: "2001-21"
+    expect:
+      valid: true
+  - id: conf-test:edtf-level-2-valid-019
+    description: "Exponential year value is valid in EDTF Level 2"
+    requirements:
+      - req:edtf-level-2-exponential-values
+    test_type: validity
+    given:
+      expression: "Y-5E7"
+    expect:
+      valid: true

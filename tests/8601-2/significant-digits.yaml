@@ -1,0 +1,158 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:significant-digits
+name: Significant digits for time scale components
+description: >
+  Tests for parsing, generation, and validity of significant digit (S) notation
+  in time scale component values.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:explicit-representation
+requirements_class: req-class:significant-digits
+source: ISO 8601-2:2026 Clause 4.4.3
+tests:
+  # --- Significant digits notation (Clause 4.4.3) ---
+  - id: conf-test:significant-digits-parsing-001
+    description: "Parse significant digits '1230S2' (value 1200-1299)"
+    requirements:
+      - req:significant-digits-notation
+    test_type: parsing
+    given:
+      expression: "1230S2"
+    expect:
+      valid: true
+      components:
+        significant_digits:
+          value: 1230
+          digits: 2
+
+  - id: conf-test:significant-digits-parsing-002
+    description: "Parse significant digits '3141592653S4'"
+    requirements:
+      - req:significant-digits-notation
+    test_type: parsing
+    given:
+      expression: "3141592653S4"
+    expect:
+      valid: true
+      components:
+        significant_digits:
+          value: 3141592653
+          digits: 4
+
+  - id: conf-test:significant-digits-parsing-003
+    description: "Parse significant digits with exponential '271828E5S6'"
+    requirements:
+      - req:significant-digits-notation
+    test_type: parsing
+    given:
+      expression: "271828E5S6"
+    expect:
+      valid: true
+      components:
+        significant_digits:
+          value: 271828
+          exponent: 5
+          digits: 6
+
+  # --- Significant digits in year (Clause 4.4.3) ---
+  - id: conf-test:significant-digits-year-parsing-001
+    description: "Parse year with significant digits '6633110S3Y'"
+    requirements:
+      - req:significant-digits-time-scale-component
+    test_type: parsing
+    given:
+      expression: "6633110S3Y"
+    expect:
+      valid: true
+      components:
+        year:
+          significant_digits:
+            value: 6633110
+            digits: 3
+
+  # --- Four-digit year with significant digits (Clause 4.5.4) ---
+  - id: conf-test:significant-digits-four-digit-year-parsing-001
+    description: "Parse four-digit year with significant digits '1950S2'"
+    requirements:
+      - req:significant-digits-four-digit-year
+    test_type: parsing
+    given:
+      expression: "1950S2"
+    expect:
+      valid: true
+      components:
+        year:
+          significant_digits:
+            value: 1950
+            digits: 2
+
+  # --- Letter-prefixed year with significant digits (Clause 4.5.4) ---
+  - id: conf-test:significant-digits-letter-year-parsing-001
+    description: "Parse letter-prefixed year with significant digits 'Y171010000S3'"
+    requirements:
+      - req:significant-digits-letter-prefixed-year
+    test_type: parsing
+    given:
+      expression: "Y171010000S3"
+    expect:
+      valid: true
+      components:
+        year:
+          significant_digits:
+            value: 171010000
+            digits: 3
+
+  # --- Exponential year with significant digits (Clause 4.5.4) ---
+  - id: conf-test:significant-digits-exponential-year-parsing-001
+    description: "Parse exponential year with significant digits 'Y3388E2S3'"
+    requirements:
+      - req:significant-digits-exponential-year
+    test_type: parsing
+    given:
+      expression: "Y3388E2S3"
+    expect:
+      valid: true
+      components:
+        year:
+          exponential:
+            mantissa: 3388
+            exponent: 2
+          significant_digits:
+            digits: 3
+
+  # --- Generation tests ---
+  - id: conf-test:significant-digits-generation-001
+    description: "Generate four-digit year with significant digits"
+    requirements:
+      - req:significant-digits-four-digit-year
+    test_type: generation
+    given:
+      components:
+        year:
+          significant_digits:
+            value: 1950
+            digits: 2
+    expect:
+      expression: "1950S2"
+
+  # --- Validity tests ---
+  - id: conf-test:significant-digits-validity-001
+    description: "Verify significant digits count must be positive"
+    requirements:
+      - req:significant-digits-notation
+    test_type: validity
+    given:
+      expression: "1950S0"
+    expect:
+      valid: false
+
+  - id: conf-test:significant-digits-validity-002
+    description: "Verify significant digits count cannot exceed value length"
+    requirements:
+      - req:significant-digits-notation
+    test_type: validity
+    given:
+      expression: "1950S5"
+    expect:
+      valid: false

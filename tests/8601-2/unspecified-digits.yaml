@@ -1,0 +1,636 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:unspecified-digits
+name: Unspecified calendar date digits
+description: >
+  Tests for parsing, generation, and validity of date and time expressions with
+  unspecified digits (X and X*).
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:calendar-date
+requirements_class: req-class:unspecified-digits
+source: ISO 8601-2:2026 Clause 9
+tests:
+  # --- Unspecified explicit forms (Clause 4.6.2) ---
+  - id: conf-test:unspecified-explicit-parsing-001
+    description: "Parse unspecified year in 1950s explicit '195XY'"
+    requirements:
+      - req:unspecified-explicit-forms-single-x
+    test_type: parsing
+    given:
+      expression: "195XY"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "195X"
+          unspecified: [4]
+
+  - id: conf-test:unspecified-explicit-parsing-002
+    description: "Parse unspecified month in explicit '1390YXXM'"
+    requirements:
+      - req:unspecified-explicit-forms-single-x
+    test_type: parsing
+    given:
+      expression: "1390YXXM"
+    expect:
+      valid: true
+      components:
+        year: 1390
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-explicit-parsing-003
+    description: "Parse unspecified day in explicit '2052Y1MX*D'"
+    requirements:
+      - req:unspecified-explicit-forms-x-star
+    test_type: parsing
+    given:
+      expression: "2052Y1MX*D"
+    expect:
+      valid: true
+      components:
+        year: 2052
+        month: 1
+        day:
+          value: "X*"
+          unspecified: true
+
+  - id: conf-test:unspecified-explicit-parsing-004
+    description: "Parse multiple unspecified components explicit 'XXXYX*MXD'"
+    requirements:
+      - req:unspecified-explicit-forms-single-x
+      - req:unspecified-explicit-forms-x-star
+    test_type: parsing
+    given:
+      expression: "XXXYX*MXD"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXX"
+          unspecified: [1, 2, 3]
+        month:
+          value: "X*"
+          unspecified: true
+        day:
+          value: "X"
+          unspecified: [1]
+
+  - id: conf-test:unspecified-explicit-parsing-005
+    description: "Parse fully unspecified year explicit 'X*Y12M28D'"
+    requirements:
+      - req:unspecified-explicit-forms-x-star
+    test_type: parsing
+    given:
+      expression: "X*Y12M28D"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "X*"
+          unspecified: true
+        month: 12
+        day: 28
+
+  # --- Unspecified implicit forms (Clause 4.6.3) ---
+  - id: conf-test:unspecified-implicit-parsing-001
+    description: "Parse unspecified year in 1990s implicit '199X'"
+    requirements:
+      - req:unspecified-implicit-forms
+    test_type: parsing
+    given:
+      expression: "199X"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "199X"
+          unspecified: [4]
+
+  - id: conf-test:unspecified-implicit-parsing-002
+    description: "Parse unspecified month in 1999 implicit '1999-XX'"
+    requirements:
+      - req:unspecified-implicit-forms
+    test_type: parsing
+    given:
+      expression: "1999-XX"
+    expect:
+      valid: true
+      components:
+        year: 1999
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-implicit-parsing-003
+    description: "Parse unspecified day in January 1999 implicit '1999-01-XX'"
+    requirements:
+      - req:unspecified-implicit-forms
+    test_type: parsing
+    given:
+      expression: "1999-01-XX"
+    expect:
+      valid: true
+      components:
+        year: 1999
+        month: 1
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-implicit-parsing-004
+    description: "Parse unspecified year with known month/day 'XXXX-01-01'"
+    requirements:
+      - req:unspecified-implicit-forms
+    test_type: parsing
+    given:
+      expression: "XXXX-01-01"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXXX"
+          unspecified: [1, 2, 3, 4]
+        month: 1
+        day: 1
+
+  # --- Unspecified rightmost component, complete representations (Clause 9.2.1.1) ---
+  - id: conf-test:unspecified-right-day-parsing-001
+    description: "Parse unspecified day, complete implicit '1985-04-XX'"
+    requirements:
+      - req:unspecified-right-day-implicit
+    test_type: parsing
+    given:
+      expression: "1985-04-XX"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-right-day-parsing-002
+    description: "Parse unspecified day, complete explicit '1985Y04MX*D'"
+    requirements:
+      - req:unspecified-right-day-explicit
+    test_type: parsing
+    given:
+      expression: "1985Y04MX*D"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day:
+          value: "X*"
+          unspecified: true
+
+  - id: conf-test:unspecified-right-month-day-parsing-001
+    description: "Parse unspecified month and day, complete implicit '1985-XX-XX'"
+    requirements:
+      - req:unspecified-right-month-day-implicit
+    test_type: parsing
+    given:
+      expression: "1985-XX-XX"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-right-month-day-parsing-002
+    description: "Parse unspecified month and day, complete explicit '1985YX*MX*D'"
+    requirements:
+      - req:unspecified-right-month-day-explicit
+    test_type: parsing
+    given:
+      expression: "1985YX*MX*D"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month:
+          value: "X*"
+          unspecified: true
+        day:
+          value: "X*"
+          unspecified: true
+
+  - id: conf-test:unspecified-right-all-parsing-001
+    description: "Parse all unspecified, complete implicit 'XXXX-XX-XX'"
+    requirements:
+      - req:unspecified-right-all-implicit
+    test_type: parsing
+    given:
+      expression: "XXXX-XX-XX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXXX"
+          unspecified: [1, 2, 3, 4]
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-right-all-parsing-002
+    description: "Parse all unspecified, complete explicit 'X*YX*MX*D'"
+    requirements:
+      - req:unspecified-right-all-explicit
+    test_type: parsing
+    given:
+      expression: "X*YX*MX*D"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "X*"
+          unspecified: true
+        month:
+          value: "X*"
+          unspecified: true
+        day:
+          value: "X*"
+          unspecified: true
+
+  # --- Reduced precision dates (Clause 9.2.1.2) ---
+  - id: conf-test:unspecified-reduced-month-parsing-001
+    description: "Parse reduced precision with unspecified month implicit '2004-XX'"
+    requirements:
+      - req:unspecified-reduced-month-implicit
+    test_type: parsing
+    given:
+      expression: "2004-XX"
+    expect:
+      valid: true
+      components:
+        year: 2004
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-reduced-month-parsing-002
+    description: "Parse reduced precision with unspecified month explicit '2004YX*M'"
+    requirements:
+      - req:unspecified-reduced-month-explicit
+    test_type: parsing
+    given:
+      expression: "2004YX*M"
+    expect:
+      valid: true
+      components:
+        year: 2004
+        month:
+          value: "X*"
+          unspecified: true
+
+  # --- Reduced precision: year digit unspecified ---
+  - id: conf-test:unspecified-reduced-year-1digit-parsing-001
+    description: "Parse one unspecified year digit implicit '201X'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "201X"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "201X"
+          unspecified: [4]
+
+  - id: conf-test:unspecified-reduced-year-1digit-parsing-002
+    description: "Parse one unspecified year digit explicit '201XY'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "201XY"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "201X"
+          unspecified: [4]
+
+  - id: conf-test:unspecified-reduced-year-2digits-parsing-001
+    description: "Parse two unspecified year digits implicit '20XX'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "20XX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "20XX"
+          unspecified: [3, 4]
+
+  - id: conf-test:unspecified-reduced-year-2digits-parsing-002
+    description: "Parse two unspecified year digits explicit '20XXY'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "20XXY"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "20XX"
+          unspecified: [3, 4]
+
+  - id: conf-test:unspecified-reduced-year-3digits-parsing-001
+    description: "Parse three unspecified year digits implicit '2XXX'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "2XXX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "2XXX"
+          unspecified: [2, 3, 4]
+
+  - id: conf-test:unspecified-reduced-year-4digits-parsing-001
+    description: "Parse four unspecified year digits implicit 'XXXX'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "XXXX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXXX"
+          unspecified: [1, 2, 3, 4]
+
+  - id: conf-test:unspecified-reduced-year-4digits-parsing-002
+    description: "Parse four unspecified year digits explicit 'XXXXY'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "XXXXY"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXXX"
+          unspecified: [1, 2, 3, 4]
+
+  - id: conf-test:unspecified-reduced-year-unbounded-parsing-001
+    description: "Parse unbounded unspecified year explicit 'X*Y'"
+    requirements:
+      - req:unspecified-reduced-year-digits
+    test_type: parsing
+    given:
+      expression: "X*Y"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "X*"
+          unspecified: true
+
+  # --- Unspecified anywhere in calendar date (Clause 9.2.2) ---
+  - id: conf-test:unspecified-anywhere-parsing-001
+    description: "Parse unspecified year digit in 1560s date '156X-12-25'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "156X-12-25"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "156X"
+          unspecified: [4]
+        month: 12
+        day: 25
+
+  - id: conf-test:unspecified-anywhere-parsing-002
+    description: "Parse two unspecified year digits '15XX-12-25'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "15XX-12-25"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "15XX"
+          unspecified: [3, 4]
+        month: 12
+        day: 25
+
+  - id: conf-test:unspecified-anywhere-parsing-003
+    description: "Parse unspecified year and day '1XXX-12-XX'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1XXX-12-XX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "1XXX"
+          unspecified: [2, 3, 4]
+        month: 12
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-anywhere-parsing-004
+    description: "Parse unspecified year and day in December 'XXXX-12-XX'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "XXXX-12-XX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "XXXX"
+          unspecified: [1, 2, 3, 4]
+        month: 12
+        day:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-anywhere-parsing-005
+    description: "Parse unspecified month with known day '1560-XX-25'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1560-XX-25"
+    expect:
+      valid: true
+      components:
+        year: 1560
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+        day: 25
+
+  - id: conf-test:unspecified-anywhere-parsing-006
+    description: "Parse partially unspecified month '1560-X2'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1560-X2"
+    expect:
+      valid: true
+      components:
+        year: 1560
+        month:
+          value: "X2"
+          unspecified: [1]
+
+  - id: conf-test:unspecified-anywhere-parsing-007
+    description: "Parse unspecified month in 1000s '1XXX-XX'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1XXX-XX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "1XXX"
+          unspecified: [2, 3, 4]
+        month:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-anywhere-parsing-008
+    description: "Parse December in 1000s '1XXX-12'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1XXX-12"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "1XXX"
+          unspecified: [2, 3, 4]
+        month: 12
+
+  - id: conf-test:unspecified-anywhere-parsing-009
+    description: "Parse unspecified year in 1000s '1XXX'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1XXX"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "1XXX"
+          unspecified: [2, 3, 4]
+
+  - id: conf-test:unspecified-anywhere-parsing-010
+    description: "Parse year ending in 3 during 1000s '1XX3'"
+    requirements:
+      - req:unspecified-anywhere-calendar-date
+    test_type: parsing
+    given:
+      expression: "1XX3"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "1XX3"
+          unspecified: [2, 3]
+
+  # --- Date and time expressions with unspecified digits (Clause 9.3) ---
+  - id: conf-test:unspecified-datetime-parsing-001
+    description: "Parse datetime with unspecified seconds implicit '2018-03-17T20:40:XX'"
+    requirements:
+      - req:unspecified-datetime-expression
+    test_type: parsing
+    given:
+      expression: "2018-03-17T20:40:XX"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 3
+        day: 17
+        hour: 20
+        minute: 40
+        second:
+          value: "XX"
+          unspecified: [1, 2]
+
+  - id: conf-test:unspecified-datetime-parsing-002
+    description: "Parse datetime with unspecified minutes and seconds '2018-03-17T20:XX:0X'"
+    requirements:
+      - req:unspecified-datetime-expression
+    test_type: parsing
+    given:
+      expression: "2018-03-17T20:XX:0X"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 3
+        day: 17
+        hour: 20
+        minute:
+          value: "XX"
+          unspecified: [1, 2]
+        second:
+          value: "0X"
+          unspecified: [2]
+
+  - id: conf-test:unspecified-datetime-parsing-003
+    description: "Parse datetime with unspecified year and time components '201X-03-17TXX:XX:X0'"
+    requirements:
+      - req:unspecified-datetime-expression
+    test_type: parsing
+    given:
+      expression: "201X-03-17TXX:XX:X0"
+    expect:
+      valid: true
+      components:
+        year:
+          value: "201X"
+          unspecified: [4]
+        month: 3
+        day: 17
+        hour:
+          value: "XX"
+          unspecified: [1, 2]
+        minute:
+          value: "XX"
+          unspecified: [1, 2]
+        second:
+          value: "X0"
+          unspecified: [1]

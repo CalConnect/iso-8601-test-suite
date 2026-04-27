@@ -1,0 +1,148 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:rfc-3339
+name: RFC 3339
+description: >-
+  Profile of ISO 8601-1 for Internet date/time formats as defined in
+  RFC 3339. This profile restricts ISO 8601 to extended format only,
+  requires a time designator and UTC offset, mandates seconds in time
+  representations, and disallows hour value 24.
+source: RFC 3339 (https://www.rfc-editor.org/rfc/rfc3339)
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+additional_requirements:
+  - id: req:rfc-3339-extended-format-only
+    statement: >-
+      Only extended format representations shall be used. Basic format
+      representations (without hyphens or colons as delimiters) are not
+      permitted.
+  - id: req:rfc-3339-mandatory-uppercase-t
+    statement: >-
+      The time designator between the date and time components shall be
+      the uppercase character "T". Lowercase "t" is not permitted.
+  - id: req:rfc-3339-utc-offset-required
+    statement: >-
+      Every date-time representation shall include either the UTC
+      designator "Z" or a numeric UTC offset (±hh:mm). Representations
+      without a UTC offset are not permitted.
+  - id: req:rfc-3339-no-hour-24
+    statement: >-
+      The hour value 24 is not allowed. Midnight shall be represented
+      as 00:00:00 of the following day.
+  - id: req:rfc-3339-full-date-required
+    statement: >-
+      Date representations shall be complete calendar dates
+      (YYYY-MM-DD) only. Reduced precision forms (YYYY or YYYY-MM) are
+      not permitted as standalone values.
+  - id: req:rfc-3339-seconds-required
+    statement: >-
+      Time representations shall include seconds (hh:mm:ss). Fractional
+      seconds (hh:mm:ss.s) are optional but the integer seconds field
+      is mandatory. Representations with only hours and minutes
+      (hh:mm) are not permitted.
+  - id: req:rfc-3339-offset-minutes-required
+    statement: >-
+      Numeric UTC offsets shall include both hours and minutes
+      (±hh:mm). Offset representations without minutes (±hh) are not
+      permitted.
+additional_tests:
+  - id: conf-test:rfc-3339-valid-001
+    description: "Valid date-time with fractional seconds and UTC Z"
+    requirements:
+      - req:rfc-3339-extended-format-only
+      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-utc-offset-required
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50.52Z"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-valid-002
+    description: "Valid date-time with positive UTC offset"
+    requirements:
+      - req:rfc-3339-extended-format-only
+      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-utc-offset-required
+      - req:rfc-3339-offset-minutes-required
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50+02:00"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-valid-003
+    description: "Valid date-time with negative UTC offset"
+    requirements:
+      - req:rfc-3339-extended-format-only
+      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-utc-offset-required
+      - req:rfc-3339-offset-minutes-required
+    test_type: validity
+    given:
+      expression: "1996-12-19T16:39:57-08:00"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-invalid-001
+    description: >-
+      Basic format date-time is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-extended-format-only
+    test_type: validity
+    given:
+      expression: "19850412T232050Z"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-002
+    description: >-
+      Lowercase time designator is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-mandatory-uppercase-t
+    test_type: validity
+    given:
+      expression: "1985-04-12t23:20:50Z"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-003
+    description: >-
+      Time without seconds is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-seconds-required
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20Z"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-004
+    description: >-
+      Hour value 24 is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-no-hour-24
+    test_type: validity
+    given:
+      expression: "1985-04-12T24:00:00Z"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-005
+    description: >-
+      Date-only representation (no time component) is invalid in
+      RFC 3339
+    requirements:
+      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-utc-offset-required
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-006
+    description: >-
+      Reduced precision date (year-month only) is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-full-date-required
+    test_type: validity
+    given:
+      expression: "1985-04"
+    expect:
+      valid: false

@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:negative-values
+name: Negative values for time scale components
+description: >
+  Extends time scale components to accept negative integer values. Negative values
+  allow expression of years prior to year zero, reverse-counted days/weeks/months,
+  and negative durations.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - req-class:explicit-representation
+source: ISO 8601-2:2026 Clause 4.4.1
+requirements:
+  - id: req:negative-year-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.2"
+    statement: >
+      The calendar year in implicit form permits negative values by prefixing
+      a minus sign: [!]["-"][year].
+    format: extended
+    pattern: '[!]["-"][year]'
+  - id: req:negative-year-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.2"
+    statement: >
+      The calendar year in explicit form permits negative values by prefixing
+      a minus sign: [!]["-"][yearE].
+    format: any
+    pattern: '[!]["-"][yearE]'
+  - id: req:negative-week-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.3"
+    statement: >
+      The calendar week of year in explicit form permits negative values:
+      [!]["-"][weekE]. A negative week number counts in reverse from the end
+      of the year.
+    format: any
+    pattern: '[!]["-"][weekE]'
+  - id: req:negative-day-of-month-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.4"
+    statement: >
+      The calendar day of month in explicit form permits negative values:
+      [!]["-"][dayE]. A negative day number counts in reverse from the end
+      of the month.
+    format: any
+    pattern: '[!]["-"][dayE]'
+  - id: req:negative-day-of-year-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.5"
+    statement: >
+      The calendar day of year in explicit form permits negative values:
+      [!]["-"][dayoE]. A negative day-of-year counts in reverse from the end
+      of the year.
+    format: any
+    pattern: '[!]["-"][dayoE]'
+  - id: req:negative-year-before-one-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.6"
+    statement: >
+      A calendar year preceding year one is represented in explicit form with
+      a B suffix: [yearE]["B"].
+    format: any
+    pattern: '[yearE]["B"]'
+  - id: req:negative-decade-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.7"
+    statement: >
+      The calendar decade in implicit form permits negative values by prefixing
+      a minus sign: [!]["-"][dec].
+    format: extended
+    pattern: '[!]["-"][dec]'
+  - id: req:negative-decade-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.7"
+    statement: >
+      The calendar decade in explicit form permits negative values by prefixing
+      a minus sign: [!]["-"][decE].
+    format: any
+    pattern: '[!]["-"][decE]'
+  - id: req:negative-century-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.8"
+    statement: >
+      The calendar century in implicit form permits negative values by prefixing
+      a minus sign: [!]["-"][cent].
+    format: extended
+    pattern: '[!]["-"][cent]'
+  - id: req:negative-century-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.8"
+    statement: >
+      The calendar century in explicit form permits negative values by prefixing
+      a minus sign: [!]["-"][centE].
+    format: any
+    pattern: '[!]["-"][centE]'
+  - id: req:negative-duration
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.9"
+    statement: >
+      A negative duration prefixes the entire positive duration with a minus sign:
+      [!]["-"][positiveDuration]. All individual time scale components within the
+      duration remain positive.
+    format: any
+    pattern: '[!]["-"][positiveDuration]'

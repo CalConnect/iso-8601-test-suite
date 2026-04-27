@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:exponential-values
+name: Exponential values for time scale components
+description: >
+  Allows representation of time scale component values using exponential (E) notation
+  when the value scale is more important than accuracy. This mechanism originated from
+  LOCEDTF.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - req-class:explicit-representation
+source: ISO 8601-2:2026 Clause 4.4.2
+requirements:
+  - id: req:exponential-notation
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    statement: >
+      An exponential value encodes a significand and exponent:
+      [significand]["E"][exponent], where the significand is a positive or negative
+      integer and the exponent is a positive integer power of 10.
+    format: any
+    pattern: '[significand]["E"][exponent]'
+  - id: req:exponential-time-scale-component
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    statement: >
+      Any time scale component that accepts unbounded integers or describes a
+      duration may substitute the integer placeholder [i] with an exponential
+      value [exp].
+    format: any
+    pattern: '[exp]'
+  - id: req:exponential-calendar-year
+    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    statement: >
+      An exponential calendar year in explicit form replaces the integer
+      placeholder with an exponential value, producing the year designator:
+      [significand]["E"][exponent]["Y"].
+    format: any
+    pattern: '[significand]["E"][exponent]["Y"]'
+  - id: req:exponential-letter-prefixed-year
+    clause: "iso:8601:-2:ed-1:en:clause:4.7.3"
+    statement: >
+      An exponential calendar year with letter prefix combines the Y designator
+      with a signed integer and exponent: ["Y"][negi]["E"][i].
+    format: any
+    pattern: '["Y"][negi]["E"][i]'

@@ -1,0 +1,417 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:calendar-date
+name: Calendar date conformance tests
+description: >
+  Tests for calendar date representations including complete basic/extended
+  formats, reduced precision, and expanded representations.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:fundamentals
+requirements_class: req-class:calendar-date
+source: ISO 8601-1:2026 Clause 5.2.2
+tests:
+  # Parsing tests: complete representations
+  - id: conf-test:cal-date-parse-001
+    description: "Parse basic format complete calendar date 19850412"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: parsing
+    given:
+      expression: "19850412"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+
+  - id: conf-test:cal-date-parse-002
+    description: "Parse extended format complete calendar date 1985-04-12"
+    requirements:
+      - req:cal-date-extended-full
+    test_type: parsing
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+
+  # Parsing tests: reduced precision
+  - id: conf-test:cal-date-parse-003
+    description: "Parse specific calendar month in extended format 1985-04"
+    requirements:
+      - req:cal-date-reduced-month-ext
+    test_type: parsing
+    given:
+      expression: "1985-04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+
+  - id: conf-test:cal-date-parse-004
+    description: "Parse specific calendar year 1985"
+    requirements:
+      - req:cal-date-reduced-year
+    test_type: parsing
+    given:
+      expression: "1985"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+
+  - id: conf-test:cal-date-parse-005
+    description: "Parse specific decade 198 (years 1980 through 1989)"
+    requirements:
+      - req:cal-date-reduced-decade
+    test_type: parsing
+    given:
+      expression: "198"
+    expect:
+      valid: true
+      components:
+        calendar:
+          decade: 198
+
+  - id: conf-test:cal-date-parse-006
+    description: "Parse specific century 19 (years 1900 through 1999)"
+    requirements:
+      - req:cal-date-reduced-century
+    test_type: parsing
+    given:
+      expression: "19"
+    expect:
+      valid: true
+      components:
+        calendar:
+          century: 19
+
+  # Parsing tests: expanded representations
+  - id: conf-test:cal-date-parse-007
+    description: "Parse expanded basic format calendar date +0019850412"
+    requirements:
+      - req:cal-date-expanded-basic-full
+    test_type: parsing
+    given:
+      expression: "+0019850412"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+
+  - id: conf-test:cal-date-parse-008
+    description: "Parse expanded extended format calendar date +001985-04-12"
+    requirements:
+      - req:cal-date-expanded-extended-full
+    test_type: parsing
+    given:
+      expression: "+001985-04-12"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+
+  - id: conf-test:cal-date-parse-009
+    description: "Parse expanded extended format calendar month +001985-04"
+    requirements:
+      - req:cal-date-expanded-extended-month
+    test_type: parsing
+    given:
+      expression: "+001985-04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+
+  - id: conf-test:cal-date-parse-010
+    description: "Parse expanded basic format calendar year +001985"
+    requirements:
+      - req:cal-date-expanded-basic-year
+    test_type: parsing
+    given:
+      expression: "+001985"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+
+  - id: conf-test:cal-date-parse-011
+    description: "Parse expanded basic format decade +00198"
+    requirements:
+      - req:cal-date-expanded-basic-decade
+    test_type: parsing
+    given:
+      expression: "+00198"
+    expect:
+      valid: true
+      components:
+        calendar:
+          decade: 198
+
+  - id: conf-test:cal-date-parse-012
+    description: "Parse expanded basic format century +0019"
+    requirements:
+      - req:cal-date-expanded-basic-century
+    test_type: parsing
+    given:
+      expression: "+0019"
+    expect:
+      valid: true
+      components:
+        calendar:
+          century: 19
+
+  # Generation tests: complete representations
+  - id: conf-test:cal-date-gen-001
+    description: "Generate basic format complete calendar date from components"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+    expect:
+      expression: "19850412"
+
+  - id: conf-test:cal-date-gen-002
+    description: "Generate extended format complete calendar date from components"
+    requirements:
+      - req:cal-date-extended-full
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+    expect:
+      expression: "1985-04-12"
+
+  # Generation tests: reduced precision
+  - id: conf-test:cal-date-gen-003
+    description: "Generate specific calendar month in extended format"
+    requirements:
+      - req:cal-date-reduced-month-ext
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+    expect:
+      expression: "1985-04"
+
+  - id: conf-test:cal-date-gen-004
+    description: "Generate specific calendar year"
+    requirements:
+      - req:cal-date-reduced-year
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+    expect:
+      expression: "1985"
+
+  - id: conf-test:cal-date-gen-005
+    description: "Generate specific decade"
+    requirements:
+      - req:cal-date-reduced-decade
+    test_type: generation
+    given:
+      components:
+        calendar:
+          decade: 198
+    expect:
+      expression: "198"
+
+  - id: conf-test:cal-date-gen-006
+    description: "Generate specific century"
+    requirements:
+      - req:cal-date-reduced-century
+    test_type: generation
+    given:
+      components:
+        calendar:
+          century: 19
+    expect:
+      expression: "19"
+
+  # Generation tests: expanded representations
+  - id: conf-test:cal-date-gen-007
+    description: "Generate expanded basic format calendar date"
+    requirements:
+      - req:cal-date-expanded-basic-full
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        expanded: true
+    expect:
+      expression: "+0019850412"
+
+  - id: conf-test:cal-date-gen-008
+    description: "Generate expanded extended format calendar date"
+    requirements:
+      - req:cal-date-expanded-extended-full
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        expanded: true
+    expect:
+      expression: "+001985-04-12"
+
+  # Validity tests: invalid calendar dates
+  - id: conf-test:cal-date-valid-001
+    description: "Verify month 13 is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19851312"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-002
+    description: "Verify month 00 is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850012"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-003
+    description: "Verify day 32 is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850132"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-004
+    description: "Verify day 00 is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850100"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-005
+    description: "Verify 30 February is invalid in a common year"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850230"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-006
+    description: "Verify 31 April is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850431"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-007
+    description: "Verify mixed format is invalid (basic date with extended separator)"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "198504-12"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-008
+    description: "Verify 31 June is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850631"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-009
+    description: "Verify 31 September is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19850931"
+    expect:
+      valid: false
+
+  - id: conf-test:cal-date-valid-010
+    description: "Verify 31 November is invalid"
+    requirements:
+      - req:cal-date-basic-full
+    test_type: validity
+    given:
+      expression: "19851131"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:cal-date-equiv-001
+    description: "Basic and extended format represent the same calendar date"
+    requirements:
+      - req:cal-date-basic-full
+      - req:cal-date-extended-full
+    test_type: equivalence
+    given:
+      expression_a: "19850412"
+      expression_b: "1985-04-12"
+    expect:
+      equivalent: true
+
+  - id: conf-test:cal-date-equiv-002
+    description: "Expanded basic and standard basic represent the same calendar date"
+    requirements:
+      - req:cal-date-basic-full
+      - req:cal-date-expanded-basic-full
+    test_type: equivalence
+    given:
+      expression_a: "+0019850412"
+      expression_b: "19850412"
+    expect:
+      equivalent: true

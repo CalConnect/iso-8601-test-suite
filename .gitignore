@@ -1,0 +1,16 @@
+# Editor / OS artifacts
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Ruby
+*.gem
+.bundle/
+vendor/bundle/
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace

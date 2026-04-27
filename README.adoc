@@ -1,0 +1,425 @@
+= ISO 8601 machine-readable test suite
+
+This is the https://www.calconnect.org[CalConnect] TC DATETIME machine-readable
+test suite for the ISO 8601 series, developed as joint work with
+https://www.iso.org/committee/45136.html[ISO/TC 154/WG 5].
+
+The test suite covers the syntaxes introduced by ISO 8601-1:2026
+(_Date and time — Representations for information interchange — Part 1: Basic rules_)
+and ISO 8601-2:2026 (_Part 2: Extensions_).
+
+This repository contains conformance tests in a format-agnostic YAML data model
+that can be converted into JSON, YAML and XML for consumption by test suite
+implementations.
+
+== Source repository
+
+[source]
+----
+git clone git@github.com:CalConnect/iso-8601-test-suite.git
+----
+
+== Copyright and licensing notice
+
+The requirement `statement` fields in `requirements/` are **independent
+paraphrases** of the normative provisions of ISO 8601-1:2026 and ISO 8601-2:2026.
+
+They are written in original language and do **not** reproduce verbatim text
+from the ISO standards.
+
+ISO 8601-1:2026 and ISO 8601-2:2026 are copyrighted by the International
+Organization for Standardization (ISO). The requirement statements in this
+repository are original works that describe the same technical constraints using
+different language, prepared under the principle that functional specifications
+are not subject to copyright protection.
+
+== Data model
+
+The test suite follows the
+https://www.ogc.org/standards/modspec[OGC Model for Standards Specification (ModSpec)]
+terminology:
+
+[cols="h,4"]
+|===
+| Requirement | An atomic testable criterion (a normative "shall" statement)
+| Requirements class | A set of consistent requirements on a single standardization target type
+| Conformance test | An individual test that verifies one or more requirements (pass/fail)
+| Conformance class | A group of conformance tests corresponding 1:1 to a requirements class
+| Conformance suite | All conformance classes for a standard
+| Dependency | A requirements class that must be passed before another can be tested
+| Profile | A set of conformance classes from one or more standards
+|===
+
+The standardization target type is _iso-8601-date-time-processor_ — a software
+implementation that parses, generates, validates, or computes ISO 8601
+date/time expressions.
+
+== Identifier scheme
+
+Identifiers use a CURIE-like notation with type prefixes:
+
+[cols="1,3"]
+|===
+| `suite:{name}` | Test suite manifest (e.g. `suite:iso-8601`)
+| `req-class:{name}` | Requirements class (e.g. `req-class:calendar-date`)
+| `req:{name}` | Requirement (e.g. `req:cal-date-basic-full`)
+| `conf-class:{name}` | Conformance class (e.g. `conf-class:calendar-date`)
+| `conf-test:{name}` | Conformance test (e.g. `conf-test:cal-date-parse-001`)
+| `profile:{name}` | Profile (e.g. `profile:rfc-3339`)
+| `result:{name}` | Conformance result set (e.g. `result:ruby-date`)
+|===
+
+Cross-part references use a part prefix: `8601-1:conf-class:calendar-date`.
+
+These local identifiers expand to RFC 5141 URNs under the ISO namespace:
+`urn:iso:std:iso:8601:-{part}:ed-1:en:tech:tc154.wg5:{type}:{name}`
+
+=== Clause references
+
+Requirement `clause` fields use RFC 5141 partial URNs to identify the source
+clause within the standard. The format follows the pattern:
+
+[source]
+----
+iso:8601:-{part}:ed-1:en:clause:{number}
+----
+
+Examples:
+
+* `iso:8601:-1:ed-1:en:clause:5.2.2.1` — Part 1, Clause 5.2.2.1
+* `iso:8601:-2:ed-1:en:clause:7.2.2` — Part 2, Clause 7.2.2
+* `iso:8601:-1:ed-1:en:clause:4,5.1` — Part 1, Clauses 4 and 5.1
+
+== Test types
+
+[cols="1,1,3"]
+|===
+| `parsing` | expression → components | Parse an expression and validate extracted components
+| `generation` | components → expression | Build an expression from components
+| `validity` | expression → boolean | Check if expression is syntactically valid
+| `equivalence` | two expressions → boolean | Two expressions resolve to the same instant
+| `arithmetic` | expression + operation → result | Date/time arithmetic
+|===
+
+== Directory structure
+
+[source]
+----
+iso-8601-test-suite/
+├── suite.yaml                        # Machine-readable suite manifest
+├── scripts/
+│   ├── run-tests                     # Test runner (ruby scripts/run-tests)
+│   └── validate                      # Validation script (ruby scripts/validate)
+├── adapters/                         # Pluggable implementation adapters
+│   ├── TEMPLATE.rb                   # Adapter interface template
+│   ├── ruby-date.rb                  # Ruby stdlib Date/DateTime/Time adapter
+│   └── python-datetime.py            # Example: Python datetime (exec protocol)
+├── schema/
+│   ├── suite.yaml                    # YAML Schema for suite manifest
+│   ├── requirements-class.yaml       # YAML Schema for requirements class files
+│   ├── conformance-class.yaml        # YAML Schema for conformance class files
+│   ├── conformance-result.yaml       # YAML Schema for conformance result files
+│   └── profile.yaml                  # YAML Schema for profile files
+├── requirements/
+│   ├── 8601-1/                       # ISO 8601-1 requirements (9 files)
+│   └── 8601-2/                       # ISO 8601-2 requirements (13 files)
+├── tests/
+│   ├── 8601-1/                       # ISO 8601-1 conformance tests (9 files)
+│   └── 8601-2/                       # ISO 8601-2 conformance tests (13 files)
+├── profiles/                         # Profile definitions (7 files)
+├── results/                          # Conformance test results per implementation
+│   ├── TEMPLATE.yaml                 # Template for new result files
+│   └── ruby-date.yaml                # Ruby Date/DateTime/Time results
+----
+
+=== Requirements classes
+
+==== ISO 8601-1:2026 (Part 1)
+
+[cols="1,3,1",options="header"]
+|===
+| Requirements class | Source | Dependencies
+
+| `req-class:fundamentals` | Clauses 4, 5.1 | (core)
+| `req-class:calendar-date` | Clause 5.2.2 | fundamentals
+| `req-class:ordinal-date` | Clause 5.2.3 | fundamentals
+| `req-class:week-date` | Clause 5.2.4 | fundamentals
+| `req-class:time-of-day` | Clause 5.3 | fundamentals
+| `req-class:date-and-time` | Clause 5.4 | calendar-date, time-of-day
+| `req-class:duration` | Clause 5.5.2 | fundamentals
+| `req-class:time-interval` | Clause 5.5 | date-and-time, duration
+| `req-class:recurring-time-interval` | Clause 5.6 | time-interval
+|===
+
+==== ISO 8601-2:2026 (Part 2)
+
+[cols="1,3,1",options="header"]
+|===
+| Requirements class | Source | Dependencies
+
+| `req-class:explicit-representation` | Clause 7 | 8601-1:fundamentals
+| `req-class:negative-values` | Clause 4.4.1 | explicit-representation
+| `req-class:exponential-values` | Clause 4.4.2 | explicit-representation
+| `req-class:significant-digits` | Clause 4.4.3 | explicit-representation
+| `req-class:qualification` | Clause 8 | 8601-1:date-and-time
+| `req-class:unspecified-digits` | Clause 9 | 8601-1:calendar-date
+| `req-class:seasons` | Clause 4.8 | 8601-1:fundamentals
+| `req-class:grouped-time-scale-units` | Clause 5 | 8601-1:fundamentals
+| `req-class:set-representation` | Clause 6 | 8601-1:date-and-time
+| `req-class:extended-time-intervals` | Clause 10 | 8601-1:time-interval
+| `req-class:date-time-selection` | Clause 12 | 8601-1:date-and-time
+| `req-class:recurring-time-intervals-with-rules` | Clause 13 | 8601-1:recurring-time-interval
+| `req-class:arithmetic` | Clause 14 | 8601-1:date-and-time, 8601-1:duration
+|===
+
+=== Profiles
+
+[cols="1,3,1",options="header"]
+|===
+| Profile | Conformance classes | Add'l tests
+
+| `profile:iso-8601-1-complete` | 9 (all Part 1) | —
+| `profile:iso-8601-2-complete` | 22 (all Part 1 + Part 2) | —
+| `profile:edtf-level-0` | 4 | 10
+| `profile:edtf-level-1` | 7 | 19
+| `profile:edtf-level-2` | 10 | 24
+| `profile:rfc-3339` | 3 | 9
+| `profile:w3c-datetime` | 3 | 13
+|===
+
+== Statistics
+
+* **99 requirements** in ISO 8601-1:2026 across 9 requirements classes
+* **158 requirements** in ISO 8601-2:2026 across 13 requirements classes
+* **275 conformance tests** for ISO 8601-1
+* **363 conformance tests** for ISO 8601-2
+* **75 additional tests** across 7 profiles
+* **713 total tests**
+
+== How to use
+
+=== Running conformance tests with the Ruby test runner
+
+The `scripts/run-tests` script executes test definitions from the YAML files
+against a pluggable adapter. The default adapter uses Ruby's standard library
+`Date`, `DateTime`, and `Time` classes. No gem dependencies are required.
+
+[source,bash]
+----
+ruby scripts/run-tests                            # run all 713 tests (default: ruby-date)
+ruby scripts/run-tests --adapter ruby-date        # explicit adapter selection
+ruby scripts/run-tests --profile rfc-3339         # run RFC 3339 profile (130 tests)
+ruby scripts/run-tests --profile w3c-datetime     # run W3C Datetime profile (134 tests)
+ruby scripts/run-tests --profile edtf-level-0     # run EDTF Level 0 profile (185 tests)
+ruby scripts/run-tests --class calendar-date      # run a single conformance class (32 tests)
+ruby scripts/run-tests --class time-of-day        # run time-of-day tests (52 tests)
+ruby scripts/run-tests --list                     # list available adapters, profiles, and classes
+ruby scripts/run-tests --verbose                  # show test descriptions
+ruby scripts/run-tests --quiet                    # only show summary
+ruby scripts/run-tests --output results/new.yaml  # write results to YAML file
+----
+
+A profile runs all tests from its conformance classes plus the profile-specific
+additional tests. For example, `--profile rfc-3339` runs the `calendar-date`,
+`time-of-day`, and `date-and-time` conformance classes (121 base tests) plus
+9 RFC 3339-specific additional tests, for 130 total.
+
+==== Writing a new adapter
+
+Adapters live in `adapters/{name}.rb` and wrap a specific date/time
+implementation so the test harness can execute conformance tests against it.
+Each adapter implements a well-defined interface:
+
+[cols="1,4"]
+|===
+| `try_parse(expression)` | Parse an expression; return `{valid:, parsed:, api:}` or `{valid: false, error:, api:}`
+| `extract_components(parsed)` | Extract components (year, month, day, etc.) from a parsed object
+| `generate(components)` | Build an expression from components; return `{expression:}` or `nil`
+| `equivalent?(obj_a, obj_b)` | Check if two parsed objects represent the same instant
+| `run_arithmetic(test)` | Optional: execute an arithmetic test (default: not-supported)
+|===
+
+To create a new adapter:
+
+. Copy `adapters/TEMPLATE.rb` to `adapters/{name}.rb`
+. Rename the class to `{CamelCaseName}Adapter` (e.g. `ruby-date.rb` → `RubyDateAdapter`)
+. Implement the required methods
+. Run: `ruby scripts/run-tests --adapter {name}`
+
+The class naming convention converts the filename by capitalizing each
+hyphen-separated segment and appending `Adapter` (e.g. `my-lib` → `MyLibAdapter`).
+
+==== Testing non-Ruby implementations (exec adapter)
+
+The `exec:` adapter type lets you test any implementation in any language —
+JavaScript, Python, Rust, an XML parser, a web API — without writing Ruby code.
+It communicates with a child process via a newline-delimited JSON protocol.
+
+[source,bash]
+----
+ruby scripts/run-tests --adapter "exec:python3 adapters/python-datetime.py"
+ruby scripts/run-tests --adapter "exec:node adapters/js-temporal.mjs"
+ruby scripts/run-tests --adapter exec:./adapters/rust-chrono
+----
+
+===== JSON protocol
+
+The harness starts the adapter process once and keeps it running for all tests.
+For each operation, it writes one JSON command to stdin and reads one JSON
+response from stdout — each on a single line.
+
+Request:
+[source,json]
+----
+{"method":"<name>","params":{...}}
+----
+
+Response:
+[source,json]
+----
+{"result":<value>}
+----
+
+Error response:
+[source,json]
+----
+{"error":"<message>"}
+----
+
+Protocol methods:
+
+[cols="1,4",options="header"]
+|===
+| Method | Description
+
+| `info`
+| Return `{"name":"...","language":"...","version":"..."}`.
+  Called once at startup.
+
+| `try_parse`
+| Params: `{"expression":"..."}`. +
+Return `{"valid":true,"parsed":"<handle>","api":"Class.method"}` +
+or `{"valid":false,"error":"...","api":"Class.method"}`.
+
+| `extract_components`
+| Params: `{"parsed":"<handle>"}`. +
+Return component hash, e.g. `{"calendar":{"year":1985,"month":4,"day":12}}`.
+
+| `generate`
+| Params: `{"components":{...}}`. +
+Return `{"expression":"1985-04-12"}` or `null`.
+
+| `equivalent`
+| Params: `{"parsed_a":"<h>","parsed_b":"<h>"}`. +
+Return `true`, `false`, or `null` (cannot determine).
+
+| `run_arithmetic`
+| Params: `{"test":{...}}`. +
+Return `{"result":"not-supported","notes":"..."}` if unsupported.
+|===
+
+The `parsed` value is an opaque handle (any JSON value) managed by the adapter
+process. When `try_parse` succeeds, the adapter caches the internal parsed
+object and returns a handle. The harness passes this handle to
+`extract_components` and `equivalent`. The adapter looks up the cached object
+by handle.
+
+See `adapters/python-datetime.py` for a working example (Python standard library).
+See `adapters/TEMPLATE.rb` for the full adapter interface specification.
+
+=== Running conformance tests manually
+
+The test suite is format-agnostic — the YAML test definitions can be consumed
+by any implementation in any language. The general procedure is:
+
+. An implementation declares which requirements classes it supports.
+. For each supported requirements class, the implementation runs all conformance
+  tests in the corresponding conformance class.
+. An implementation passes a conformance class if all tests pass.
+. An implementation passes a profile if all referenced conformance classes pass
+  (including additional profile-specific tests).
+
+=== Recording conformance results
+
+Results are recorded in YAML files under `results/`, one file per implementation,
+following the schema in `schema/conformance-result.yaml`.
+
+Each result file contains:
+
+* **Implementation metadata** — name, language, version, modules/classes used
+* **Verification mode** — `automated` (test script), `manual` (human), or
+  `inferred` (known behavior without execution)
+* **Per-class results** — aggregate status (`passed`, `failed`, `partial`,
+  `not-supported`) with optional default method (e.g. `Date.parse(expr)`)
+* **Per-test results** — individual `pass`/`fail`/`error`/`not-supported` status
+  with documented API calls, actual output, and exception details
+* **Profile results** — results for profile-specific additional tests (e.g. RFC 3339,
+  EDTF Level 0/1/2, W3C Datetime)
+
+Example result entry:
+
+[source,yaml]
+----
+- test: conf-test:cal-date-parse-001
+  result: pass
+  method:
+    code: 'Date.parse("19850412")'
+    language: ruby
+    api: Date.parse
+  actual:
+    valid: true
+    returned: "1985-04-12"
+----
+
+To add a new implementation result:
+
+. Copy `results/TEMPLATE.yaml` to `results/{implementation}.yaml`
+. Set `id: result:{name}` and fill in implementation metadata
+. For each conformance class, record aggregate status and individual test results
+. Use `verification: automated` if a script ran the tests, `manual` if a human
+  tested and recorded results, or `inferred` if results are based on known behavior
+
+=== Validating the test suite
+
+The `scripts/validate` script performs 9 phases of validation:
+
+. **YAML syntax** — all files parse correctly
+. **Schema references** — every data file has a `$schema` header
+. **Schema validation** — each file is validated against its declared YAML Schema
+  (type checking, required fields, pattern matching, enum values, `oneOf` discriminated unions)
+. **Requirements indexing** — unique IDs, correct structure
+. **Conformance test indexing** — unique IDs, valid requirement references
+. **Requirements coverage** — every requirement is referenced by at least one test
+. **Profile references** — all conformance class references resolve
+. **Result cross-references** — all test IDs in result files match test definitions
+. **Dependency graph** — no cycles in requirements class dependencies
+
+[source,bash]
+----
+ruby scripts/validate              # run all checks (colored output)
+ruby scripts/validate -q           # quiet — only show errors
+ruby scripts/validate -v           # verbose — show every file processed
+----
+
+This is also run automatically via GitHub Actions on every push that modifies
+YAML files.
+
+Each YAML file includes a `$schema` reference for validation in editors that
+support YAML Schema (e.g. VS Code with the YAML extension).
+
+== Conformance
+
+A conformant implementation for a particular feature shall pass all conformance
+tests within the corresponding conformance class.
+
+This is ongoing work by CalConnect TC DATETIME in collaboration with ISO/TC
+154/WG 5.
+
+== Copyright
+
+Copyright (c) 2025–2026 Ribose Inc.
+
+Content (examples and syntax from ISO 8601) copyrighted to its respective owners.
+
+Developed as cooperative work with CalConnect TC DATETIME and
+ISO/TC 154/WG 5.

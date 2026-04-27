@@ -1,0 +1,217 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:qualification
+name: Qualification of uncertainty and approximation
+description: >
+  Extends date and time expressions with qualification of uncertainty (?),
+  approximation (~), or both (%). Qualification may apply to individual components,
+  groups of components, or an entire expression.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:req-class:date-and-time
+source: ISO 8601-2:2026 Clause 8
+requirements:
+  - id: req:qualification-implicit-form
+    clause: "iso:8601:-2:ed-1:en:clause:4.5"
+    statement: >
+      In implicit form, a qualification marker precedes the component it modifies:
+      [!][Q][c], where [Q] is one of the qualifying symbols ("?", "~", or "%").
+    format: extended
+    pattern: "[!][Q][c]"
+  - id: req:qualification-explicit-form
+    clause: "iso:8601:-2:ed-1:en:clause:4.5"
+    statement: >
+      In explicit form, the qualifier appears between the value and its designator
+      symbol: [i][!][Q][symbol(c)].
+    format: any
+    pattern: "[i][!][Q][symbol(c)]"
+  - id: req:qualification-complete
+    clause: "iso:8601:-2:ed-1:en:clause:8.2.1"
+    statement: >
+      Complete qualification applies to the entire date-time expression by placing
+      the qualification symbol at the rightmost end.
+    format: any
+  - id: req:qualification-group
+    clause: "iso:8601:-2:ed-1:en:clause:8.2.2"
+    statement: >
+      Group qualification applies the qualifier to a component and all components
+      to its left. The qualifier appears immediately to the right of the targeted
+      component.
+    format: any
+  - id: req:qualification-individual
+    clause: "iso:8601:-2:ed-1:en:clause:8.2.3"
+    statement: >
+      Individual qualification targets a single component. In implicit form the
+      qualifier precedes the component; in explicit form it appears between the
+      value and the designator.
+    format: any
+  - id: req:qualification-year-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.2"
+    statement: >
+      Calendar year qualification in implicit form places the qualifier before
+      the year field: [!][Q][YYYY].
+    format: extended
+    pattern: "[!][Q][YYYY]"
+  - id: req:qualification-year-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.2"
+    statement: >
+      Calendar year qualification in explicit form places the qualifier before
+      the year designator: [i][!][Q]["Y"].
+    format: any
+    pattern: '[i][!][Q]["Y"]'
+  - id: req:qualification-month-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.3"
+    statement: >
+      Calendar month qualification in implicit form: [!][Q][MM].
+    format: extended
+    pattern: "[!][Q][MM]"
+  - id: req:qualification-month-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.3"
+    statement: >
+      Calendar month qualification in explicit form: [i][!][Q]["M"].
+    format: any
+    pattern: '[i][!][Q]["M"]'
+  - id: req:qualification-week-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.4"
+    statement: >
+      Calendar week qualification in implicit form: [!][Q]["W"][WW].
+    format: extended
+    pattern: '[!][Q]["W"][WW]'
+  - id: req:qualification-week-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.4"
+    statement: >
+      Calendar week qualification in explicit form: [i][!][Q]["W"].
+    format: any
+    pattern: '[i][!][Q]["W"]'
+  - id: req:qualification-day-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.5"
+    statement: >
+      Calendar day of month qualification in implicit form: [!][Q][DD].
+    format: extended
+    pattern: "[!][Q][DD]"
+  - id: req:qualification-day-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.5"
+    statement: >
+      Calendar day of month qualification in explicit form: [i][!][Q]["D"].
+    format: any
+    pattern: '[i][!][Q]["D"]'
+  - id: req:qualification-day-of-week-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.6"
+    statement: >
+      Calendar day of week qualification in implicit form: [!][Q][K].
+    format: extended
+    pattern: "[!][Q][K]"
+  - id: req:qualification-day-of-week-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.6"
+    statement: >
+      Calendar day of week qualification in explicit form: [i][!][Q]["K"].
+    format: any
+    pattern: '[i][!][Q]["K"]'
+  - id: req:qualification-day-of-year-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.7"
+    statement: >
+      Calendar day of year qualification in implicit form: [!][Q][OOO].
+    format: extended
+    pattern: "[!][Q][OOO]"
+  - id: req:qualification-day-of-year-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.7"
+    statement: >
+      Calendar day of year qualification in explicit form: [i][!][Q]["O"].
+    format: any
+    pattern: '[i][!][Q]["O"]'
+  - id: req:qualification-hour-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.8"
+    statement: >
+      Clock hour qualification in implicit form: [!][Q][hh].
+    format: extended
+    pattern: "[!][Q][hh]"
+  - id: req:qualification-hour-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.8"
+    statement: >
+      Clock hour qualification in explicit form: [i][!][Q]["H"].
+    format: any
+    pattern: '[i][!][Q]["H"]'
+  - id: req:qualification-minute-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.9"
+    statement: >
+      Clock minute qualification in implicit form: [!][Q][mm].
+    format: extended
+    pattern: "[!][Q][mm]"
+  - id: req:qualification-minute-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.9"
+    statement: >
+      Clock minute qualification in explicit form: [i][!][Q]["M"].
+    format: any
+    pattern: '[i][!][Q]["M"]'
+  - id: req:qualification-second-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.10"
+    statement: >
+      Clock second qualification in implicit form: [!][Q][ss].
+    format: extended
+    pattern: "[!][Q][ss]"
+  - id: req:qualification-second-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.10"
+    statement: >
+      Clock second qualification in explicit form: [i][!][Q]["S"].
+    format: any
+    pattern: '[i][!][Q]["S"]'
+  - id: req:qualification-decade-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.11"
+    statement: >
+      Decade qualification in implicit form: [!][Q][YYY].
+    format: extended
+    pattern: "[!][Q][YYY]"
+  - id: req:qualification-decade-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.11"
+    statement: >
+      Decade qualification in explicit form: [i][!][Q]["J"].
+    format: any
+    pattern: '[i][!][Q]["J"]'
+  - id: req:qualification-century-implicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.12"
+    statement: >
+      Century qualification in implicit form: [!][Q][YY].
+    format: extended
+    pattern: "[!][Q][YY]"
+  - id: req:qualification-century-explicit
+    clause: "iso:8601:-2:ed-1:en:clause:8.3.12"
+    statement: >
+      Century qualification in explicit form: [i][!][Q]["C"].
+    format: any
+    pattern: '[i][!][Q]["C"]'
+  - id: req:qualification-calendar-date-complete
+    clause: "iso:8601:-2:ed-1:en:clause:8.4.1"
+    statement: >
+      A fully qualified calendar date places the qualifier at the end of the
+      expression, applying to the entire date in both implicit and explicit formats.
+    format: any
+  - id: req:qualification-calendar-date-group-all
+    clause: "iso:8601:-2:ed-1:en:clause:8.4.4"
+    statement: >
+      Group qualification covering day, month, and year simultaneously places
+      the qualifier [Q] after the day component.
+    format: any
+  - id: req:qualification-calendar-date-group-month-year
+    clause: "iso:8601:-2:ed-1:en:clause:8.4.4"
+    statement: >
+      Group qualification covering month and year places the qualifier [Q] after
+      the month component.
+    format: any
+  - id: req:qualification-calendar-date-group-year
+    clause: "iso:8601:-2:ed-1:en:clause:8.4.4"
+    statement: >
+      Group qualification covering only the year places the qualifier [Q] after
+      the year component.
+    format: any
+  - id: req:qualification-calendar-date-individual
+    clause: "iso:8601:-2:ed-1:en:clause:8.4.5"
+    statement: >
+      Individual qualification of calendar date components applies a separate
+      qualifier symbol to each targeted component.
+    format: any
+  - id: req:qualification-datetime
+    clause: "iso:8601:-2:ed-1:en:clause:8.5"
+    statement: >
+      The qualification mechanism extends to combined date and time expressions,
+      qualifying the relevant time scale components within the expression.
+    format: any

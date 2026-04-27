@@ -1,0 +1,483 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:arithmetic
+name: Date and time arithmetic
+description: >
+  Tests for arithmetic operations on date and time expressions including
+  addition, subtraction, multiplication, overflow/underflow resolution,
+  conversion boundaries, and canonical form derivation.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:duration
+requirements_class: req-class:arithmetic
+source: ISO 8601-2:2026 Clause 14
+tests:
+  # --- Composite duration addition (Clause 14.3) ---
+  - id: conf-test:arithmetic-composite-addition-001
+    description: "Add composite durations: PT40M60S + PT40M80S = PT80M140S"
+    requirements:
+      - req:arithmetic-composite-addition
+    test_type: arithmetic
+    given:
+      expression: "PT40M60S + PT40M80S"
+    expect:
+      valid: true
+      components:
+        duration:
+          minute: 80
+          second: 140
+
+  - id: conf-test:arithmetic-composite-addition-002
+    description: "Add composite durations: P1Y10M3D + P2Y5M = P3Y15M3D"
+    requirements:
+      - req:arithmetic-composite-addition
+    test_type: arithmetic
+    given:
+      expression: "P1Y10M3D + P2Y5M"
+    expect:
+      valid: true
+      components:
+        duration:
+          year: 3
+          month: 15
+          day: 3
+
+  # --- Composite duration subtraction (Clause 14.3) ---
+  - id: conf-test:arithmetic-composite-subtraction-001
+    description: "Subtract composite durations: PT40M60S - PT40M20S = PT40S"
+    requirements:
+      - req:arithmetic-subtraction-duration
+    test_type: arithmetic
+    given:
+      expression: "PT40M60S - PT40M20S"
+    expect:
+      valid: true
+      components:
+        duration:
+          second: 40
+
+  - id: conf-test:arithmetic-composite-subtraction-002
+    description: "Subtract composite durations: P1Y10M3D - P2Y5MT10M = P-1Y5M3DT-10M"
+    requirements:
+      - req:arithmetic-subtraction-duration
+    test_type: arithmetic
+    given:
+      expression: "P1Y10M3D - P2Y5MT10M"
+    expect:
+      valid: true
+      components:
+        duration:
+          year: -1
+          month: 5
+          day: 3
+          minute: -10
+
+  - id: conf-test:arithmetic-composite-subtraction-003
+    description: "Subtract durations: P3M2D - P1D = P3M1D"
+    requirements:
+      - req:arithmetic-subtraction-duration
+    test_type: arithmetic
+    given:
+      expression: "P3M2D - P1D"
+    expect:
+      valid: true
+      components:
+        duration:
+          month: 3
+          day: 1
+
+  - id: conf-test:arithmetic-composite-subtraction-004
+    description: "Subtract with negative result: -P3M4D - P5D = -P3M9D"
+    requirements:
+      - req:arithmetic-subtraction-duration
+    test_type: arithmetic
+    given:
+      expression: "-P3M4D - P5D"
+    expect:
+      valid: true
+      components:
+        duration:
+          month: -3
+          day: -9
+
+  # --- Precedence duration addition (Clause 14.3) ---
+  - id: conf-test:arithmetic-precedence-addition-001
+    description: "Add precedence durations: PT40MPT60S + PT40MPT80S = PT40MPT60SPT40MPT80S"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "PT40MPT60S + PT40MPT80S"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - minute: 40
+            - second: 60
+            - minute: 40
+            - second: 80
+
+  - id: conf-test:arithmetic-precedence-addition-002
+    description: "Add precedence durations: P1YP10MP3D + P2YP5M = P1YP10MP3DP2YP5M"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "P1YP10MP3D + P2YP5M"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - year: 1
+            - month: 10
+            - day: 3
+            - year: 2
+            - month: 5
+
+  # --- Precedence duration with minus sign internalization ---
+  - id: conf-test:arithmetic-precedence-negative-001
+    description: "Internalize minus in precedence: -P3MP4D - P5D = P-3MP4DP-5D"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "-P3MP4D - P5D"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - month: -3
+            - day: 4
+            - day: -5
+
+  - id: conf-test:arithmetic-precedence-negative-002
+    description: "Internalize minus in precedence: P3MP2D - P1D = P3MP2DP-1D"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "P3MP2D - P1D"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - month: 3
+            - day: 2
+            - day: -1
+
+  - id: conf-test:arithmetic-precedence-negative-003
+    description: "Internalize minus in precedence: P3D - P3M = P3DP-3M"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "P3D - P3M"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - day: 3
+            - month: -3
+
+  - id: conf-test:arithmetic-precedence-negative-004
+    description: "Internalize minus in precedence: -P3M + P2Y = P-3MP2Y"
+    requirements:
+      - req:arithmetic-precedence-addition
+    test_type: arithmetic
+    given:
+      expression: "-P3M + P2Y"
+    expect:
+      valid: true
+      components:
+        duration:
+          type: precedence
+          units:
+            - month: -3
+            - year: 2
+
+  # --- Multiplication (Clause 14.4) ---
+  - id: conf-test:arithmetic-multiplication-001
+    description: "Multiply composite duration: 3 x P3M2D = P9M6D"
+    requirements:
+      - req:arithmetic-multiplication
+    test_type: arithmetic
+    given:
+      expression: "3 x P3M2D"
+    expect:
+      valid: true
+      components:
+        duration:
+          month: 9
+          day: 6
+
+  - id: conf-test:arithmetic-multiplication-002
+    description: "Multiply with fraction: 0.5 x P3M2D = P1.5M1D"
+    requirements:
+      - req:arithmetic-multiplication
+    test_type: arithmetic
+    given:
+      expression: "0.5 x P3M2D"
+    expect:
+      valid: true
+      components:
+        duration:
+          month: 1.5
+          day: 1
+
+  # --- Date modified by duration (Clause 14.5) ---
+  - id: conf-test:arithmetic-date-duration-001
+    description: "Add duration to date: 2018Y9M10D + P1D = 2018Y9M11D"
+    requirements:
+      - req:arithmetic-date-duration
+    test_type: arithmetic
+    given:
+      expression: "2018Y9M10D + P1D"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 9
+        day: 11
+
+  - id: conf-test:arithmetic-date-duration-002
+    description: "Add duration to datetime: 2018Y9M10DT9H10M + P2MT50S = 2018Y11M10DT9H10M50S"
+    requirements:
+      - req:arithmetic-date-duration
+    test_type: arithmetic
+    given:
+      expression: "2018Y9M10DT9H10M + P2MT50S"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 11
+        day: 10
+        hour: 9
+        minute: 10
+        second: 50
+
+  # --- Precedence duration with date ---
+  - id: conf-test:arithmetic-date-precedence-001
+    description: "Date with precedence duration: 2018Y9M10DT9H10M + P2MPT50S"
+    requirements:
+      - req:arithmetic-date-precedence
+    test_type: arithmetic
+    given:
+      expression: "2018Y9M10DT9H10M + P2MPT50S"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 11
+        day: 10
+        hour: 9
+        minute: 10
+        second: 50
+
+  - id: conf-test:arithmetic-date-precedence-002
+    description: "Date with precedence duration order matters: 2020Y2M29D + P2DP2Y"
+    requirements:
+      - req:arithmetic-date-precedence
+    test_type: arithmetic
+    given:
+      expression: "2020Y2M29D + P2DP2Y"
+    expect:
+      valid: true
+      components:
+        year: 2022
+        month: 3
+        day: 2
+
+  # --- Overflow detection (Clause 14.6) ---
+  - id: conf-test:arithmetic-overflow-001
+    description: "Detect overflow: 1H90M contains overflow (90 min > 60 min)"
+    requirements:
+      - req:arithmetic-overflow-underflow
+    test_type: validity
+    given:
+      expression: "1H90M"
+    expect:
+      valid: true
+      components:
+        hour: 1
+        minute: 90
+        overflow: true
+
+  # --- Underflow detection (Clause 14.6) ---
+  - id: conf-test:arithmetic-underflow-001
+    description: "Detect underflow: 1H-10M contains underflow"
+    requirements:
+      - req:arithmetic-overflow-underflow
+    test_type: validity
+    given:
+      expression: "1H-10M"
+    expect:
+      valid: true
+      components:
+        hour: 1
+        minute: -10
+        underflow: true
+
+  # --- Conversion boundaries (Clause 14.7) ---
+  - id: conf-test:arithmetic-conversion-equivocal-001
+    description: "Convert century to decade: 28C = 280D"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "28C"
+    expect:
+      valid: true
+      components:
+        century: 28
+        equivalent_decade: 280
+
+  - id: conf-test:arithmetic-conversion-equivocal-002
+    description: "Convert decade to year: 33D = 330Y"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "33D"
+    expect:
+      valid: true
+      components:
+        decade: 33
+        equivalent_year: 330
+
+  - id: conf-test:arithmetic-conversion-equivocal-003
+    description: "Convert months to year+month: 20M = 1Y8M"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "20M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          year: 1
+          month: 8
+
+  - id: conf-test:arithmetic-conversion-equivocal-004
+    description: "Convert days to weeks+days: 108D = 15W3D"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "108D"
+    expect:
+      valid: true
+      components:
+        canonical:
+          week: 15
+          day: 3
+
+  - id: conf-test:arithmetic-conversion-equivocal-005
+    description: "Convert hours to day+hour: T26H = 1DT2H"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "T26H"
+    expect:
+      valid: true
+      components:
+        canonical:
+          day: 1
+          hour: 2
+
+  - id: conf-test:arithmetic-conversion-equivocal-006
+    description: "Convert minutes to hours: T1H120M = T3H"
+    requirements:
+      - req:arithmetic-conversion-boundaries
+    test_type: arithmetic
+    given:
+      expression: "T1H120M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          hour: 3
+
+  # --- Canonical form (Clause 14.8) ---
+  - id: conf-test:arithmetic-canonical-001
+    description: "Canonical form of 7Y24M = 9Y"
+    requirements:
+      - req:arithmetic-canonical-form
+    test_type: arithmetic
+    given:
+      expression: "7Y24M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          year: 9
+
+  - id: conf-test:arithmetic-canonical-002
+    description: "Canonical form of 1H90M = 2H30M"
+    requirements:
+      - req:arithmetic-canonical-form
+    test_type: arithmetic
+    given:
+      expression: "1H90M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          hour: 2
+          minute: 30
+
+  - id: conf-test:arithmetic-canonical-003
+    description: "Canonical form of 1H-10M = 50M"
+    requirements:
+      - req:arithmetic-canonical-form
+    test_type: arithmetic
+    given:
+      expression: "1H-10M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          minute: 50
+
+  - id: conf-test:arithmetic-canonical-004
+    description: "Canonical form with transitive conversion: 3DT-10M = 2DT23H50M"
+    requirements:
+      - req:arithmetic-canonical-form
+    test_type: arithmetic
+    given:
+      expression: "3DT-10M"
+    expect:
+      valid: true
+      components:
+        canonical:
+          day: 2
+          hour: 23
+          minute: 50
+
+  # --- Addition of durations (Clause 14.2) ---
+  - id: conf-test:arithmetic-addition-001
+    description: "Addition of two durations: P1Y2M + P0Y3M = P1Y5M"
+    requirements:
+      - req:arithmetic-addition-duration
+    test_type: arithmetic
+    given:
+      expression: "P1Y2M+P0Y3M"
+    expect:
+      valid: true
+      components:
+        duration:
+          years: 1
+          months: 5

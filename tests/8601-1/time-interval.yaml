@@ -1,0 +1,486 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:time-interval
+name: Time interval conformance tests
+description: >
+  Tests for time interval representations including start/end, start/duration,
+  duration/end, abbreviated end, and time shift inheritance.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:date-and-time
+  - conf-class:duration
+requirements_class: req-class:time-interval
+source: ISO 8601-1:2026 Clause 5.6
+tests:
+  # Parsing tests: start/end intervals
+  - id: conf-test:interval-parse-001
+    description: "Parse basic format start/end date-time interval 19850412T232050/19850625T103000"
+    requirements:
+      - req:interval-start-end-basic
+    test_type: parsing
+    given:
+      expression: "19850412T232050/19850625T103000"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+          end:
+            calendar:
+              year: 1985
+              month: 6
+              day: 25
+            time:
+              hour: 10
+              minute: 30
+              second: 0
+
+  - id: conf-test:interval-parse-002
+    description: "Parse extended format start/end date-time interval 1985-04-12T23:20:50/1985-06-25T10:30:00"
+    requirements:
+      - req:interval-start-end-extended
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:50/1985-06-25T10:30:00"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+          end:
+            calendar:
+              year: 1985
+              month: 6
+              day: 25
+            time:
+              hour: 10
+              minute: 30
+              second: 0
+
+  # Parsing tests: start/duration intervals
+  - id: conf-test:interval-parse-003
+    description: "Parse basic format start/duration interval 19850412T232050/P1Y2M15DT12H30M0S"
+    requirements:
+      - req:interval-start-dur-basic
+    test_type: parsing
+    given:
+      expression: "19850412T232050/P1Y2M15DT12H30M0S"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+          duration:
+            years: 1
+            months: 2
+            days: 15
+            hours: 12
+            minutes: 30
+            seconds: 0
+
+  - id: conf-test:interval-parse-004
+    description: "Parse extended format start/duration interval 1985-04-12T23:20:50/P1Y2M15DT12H30M0S"
+    requirements:
+      - req:interval-start-dur-extended
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:50/P1Y2M15DT12H30M0S"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+          duration:
+            years: 1
+            months: 2
+            days: 15
+            hours: 12
+            minutes: 30
+            seconds: 0
+
+  # Parsing tests: duration/end intervals
+  - id: conf-test:interval-parse-005
+    description: "Parse basic format duration/end interval P1Y2M15DT12H30M0S/19850412T232050"
+    requirements:
+      - req:interval-dur-end-basic
+    test_type: parsing
+    given:
+      expression: "P1Y2M15DT12H30M0S/19850412T232050"
+    expect:
+      valid: true
+      components:
+        interval:
+          duration:
+            years: 1
+            months: 2
+            days: 15
+            hours: 12
+            minutes: 30
+            seconds: 0
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+
+  - id: conf-test:interval-parse-006
+    description: "Parse extended format duration/end interval P1Y2M15DT12H30M0S/1985-04-12T23:20:50"
+    requirements:
+      - req:interval-dur-end-extended
+    test_type: parsing
+    given:
+      expression: "P1Y2M15DT12H30M0S/1985-04-12T23:20:50"
+    expect:
+      valid: true
+      components:
+        interval:
+          duration:
+            years: 1
+            months: 2
+            days: 15
+            hours: 12
+            minutes: 30
+            seconds: 0
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+            time:
+              hour: 23
+              minute: 20
+              second: 50
+
+  # Parsing tests: abbreviated end
+  - id: conf-test:interval-parse-007
+    description: "Parse interval with abbreviated end 2018-01-15/02-20"
+    requirements:
+      - req:interval-abbreviated-end
+    test_type: parsing
+    given:
+      expression: "2018-01-15/02-20"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 2018
+              month: 1
+              day: 15
+          end:
+            calendar:
+              year: 2018
+              month: 2
+              day: 20
+
+  # Parsing tests: date-only intervals (no time component)
+  - id: conf-test:interval-parse-008
+    description: "Parse basic format date-only start/end interval 19850412/19850425"
+    requirements:
+      - req:interval-start-end-basic
+    test_type: parsing
+    given:
+      expression: "19850412/19850425"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+
+  - id: conf-test:interval-parse-009
+    description: "Parse extended format date-only start/end interval 1985-04-12/1985-04-25"
+    requirements:
+      - req:interval-start-end-extended
+    test_type: parsing
+    given:
+      expression: "1985-04-12/1985-04-25"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+
+  - id: conf-test:interval-parse-010
+    description: "Parse basic format start/duration date-only interval 19850412/P1Y2M10D"
+    requirements:
+      - req:interval-start-dur-basic
+    test_type: parsing
+    given:
+      expression: "19850412/P1Y2M10D"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          duration:
+            years: 1
+            months: 2
+            days: 10
+
+  - id: conf-test:interval-parse-011
+    description: "Parse basic format duration/end date-only interval P1Y2M10D/19850425"
+    requirements:
+      - req:interval-dur-end-basic
+    test_type: parsing
+    given:
+      expression: "P1Y2M10D/19850425"
+    expect:
+      valid: true
+      components:
+        interval:
+          duration:
+            years: 1
+            months: 2
+            days: 10
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+
+  # Parsing tests: time shift inheritance
+  - id: conf-test:interval-parse-012
+    description: "Parse interval with time shift inherited 2018-01-15T12:00:00+05:00/2018-02-20T12:00:00"
+    requirements:
+      - req:interval-time-shift-inheritance
+    test_type: parsing
+    given:
+      expression: "2018-01-15T12:00:00+05:00/2018-02-20T12:00:00"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 2018
+              month: 1
+              day: 15
+            time:
+              hour: 12
+              minute: 0
+              second: 0
+              utc_offset:
+                sign: "+"
+                hours: 5
+                minutes: 0
+          end:
+            calendar:
+              year: 2018
+              month: 2
+              day: 20
+            time:
+              hour: 12
+              minute: 0
+              second: 0
+              utc_offset:
+                sign: "+"
+                hours: 5
+                minutes: 0
+
+  # Parsing tests: ending of day in intervals
+  - id: conf-test:interval-parse-013
+    description: "Parse interval using ending of day 2022-04-19T00:00:00/2022-04-19T24:00:00"
+    requirements:
+      - req:interval-start-end-extended
+    test_type: parsing
+    given:
+      expression: "2022-04-19T00:00:00/2022-04-19T24:00:00"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 2022
+              month: 4
+              day: 19
+            time:
+              hour: 0
+              minute: 0
+              second: 0
+          end:
+            calendar:
+              year: 2022
+              month: 4
+              day: 19
+            time:
+              hour: 24
+              minute: 0
+              second: 0
+
+  # Generation tests
+  - id: conf-test:interval-gen-001
+    description: "Generate basic format start/end date-only interval"
+    requirements:
+      - req:interval-start-end-basic
+    test_type: generation
+    given:
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+    expect:
+      expression: "19850412/19850425"
+
+  - id: conf-test:interval-gen-002
+    description: "Generate extended format start/end date-only interval"
+    requirements:
+      - req:interval-start-end-extended
+    test_type: generation
+    given:
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+    expect:
+      expression: "1985-04-12/1985-04-25"
+
+  - id: conf-test:interval-gen-003
+    description: "Generate basic format start/duration interval"
+    requirements:
+      - req:interval-start-dur-basic
+    test_type: generation
+    given:
+      components:
+        interval:
+          start:
+            calendar:
+              year: 1985
+              month: 4
+              day: 12
+          duration:
+            years: 1
+            months: 2
+            days: 10
+    expect:
+      expression: "19850412/P1Y2M10D"
+
+  - id: conf-test:interval-gen-004
+    description: "Generate basic format duration/end interval"
+    requirements:
+      - req:interval-dur-end-basic
+    test_type: generation
+    given:
+      components:
+        interval:
+          duration:
+            years: 1
+            months: 2
+            days: 10
+          end:
+            calendar:
+              year: 1985
+              month: 4
+              day: 25
+    expect:
+      expression: "P1Y2M10D/19850425"
+
+  # Validity tests
+  - id: conf-test:interval-valid-001
+    description: "Verify interval without separator is invalid"
+    requirements:
+      - req:interval-start-end-basic
+    test_type: validity
+    given:
+      expression: "1985041219850425"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:interval-equiv-001
+    description: "Basic and extended start/end intervals are equivalent"
+    requirements:
+      - req:interval-start-end-basic
+      - req:interval-start-end-extended
+    test_type: equivalence
+    given:
+      expression_a: "19850412T232050/19850625T103000"
+      expression_b: "1985-04-12T23:20:50/1985-06-25T10:30:00"
+    expect:
+      equivalent: true
+
+  - id: conf-test:interval-equiv-002
+    description: "Ending of day interval is equivalent to next day beginning of day"
+    requirements:
+      - req:interval-start-end-extended
+    test_type: equivalence
+    given:
+      expression_a: "2022-04-19T00:00:00/2022-04-19T24:00:00"
+      expression_b: "2022-04-19T00:00:00/2022-04-20T00:00:00"
+    expect:
+      equivalent: true

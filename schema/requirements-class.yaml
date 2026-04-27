@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/schema-org.yaml
+# YAML Schema for ISO 8601 Test Suite — Requirements Class
+---
+type: object
+required:
+  - id
+  - name
+  - standardization_target_type
+  - source
+  - requirements
+properties:
+  id:
+    type: string
+    pattern: "^req-class:[a-z0-9-]+$"
+    description: "Local identifier for this requirements class (e.g. req-class:calendar-date)"
+  name:
+    type: string
+    description: "Human-readable name"
+  description:
+    type: string
+    description: "Description of the requirements class"
+  standardization_target_type:
+    type: string
+    description: "The type of implementation being tested"
+  dependencies:
+    type: array
+    items:
+      type: string
+      pattern: "^(8601-[12]:)?req-class:[a-z0-9-]+$"
+    description: "Other requirements classes this class depends on"
+  source:
+    type: string
+    description: "Source reference in the ISO 8601 standard"
+  requirements:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+        - clause
+        - statement
+      properties:
+        id:
+          type: string
+          pattern: "^req:[a-z0-9-]+$"
+          description: "Local identifier for this requirement (e.g. req:cal-date-basic-full)"
+        clause:
+          type: string
+          pattern: "^iso:8601:-[12]:ed-1:en:clause:[0-9A-Za-z.,\\-]+$"
+          description: "RFC 5141 partial URN clause reference (e.g. iso:8601:-1:ed-1:en:clause:5.2.2.1)"
+        statement:
+          type: string
+          description: "The normative requirement statement"
+        format:
+          type: string
+          enum: [basic, extended, any]
+          description: "Format type this requirement applies to"
+        pattern:
+          type: string
+          description: "Symbolic pattern for the representation format"

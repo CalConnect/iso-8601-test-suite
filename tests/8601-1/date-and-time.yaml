@@ -1,0 +1,769 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:date-and-time
+name: Date and time of day conformance tests
+description: >
+  Tests for date and time of day combinations including calendar date + time,
+  ordinal date + time, and week date + time, in basic and extended formats,
+  with UTC and offset variants.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:calendar-date
+  - conf-class:time-of-day
+requirements_class: req-class:date-and-time
+source: ISO 8601-1:2026 Clause 5.4
+tests:
+  # Parsing tests: calendar date + time, basic format
+  - id: conf-test:date-time-parse-001
+    description: "Parse basic format calendar date and time 19850412T232030"
+    requirements:
+      - req:date-time-cal-basic-local
+    test_type: parsing
+    given:
+      expression: "19850412T232030"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-002
+    description: "Parse basic format calendar date and UTC time 19850412T232030Z"
+    requirements:
+      - req:date-time-cal-basic-utc
+    test_type: parsing
+    given:
+      expression: "19850412T232030Z"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-003
+    description: "Parse basic format calendar date and time with offset 19850412T232030+0400"
+    requirements:
+      - req:date-time-cal-basic-offset
+    test_type: parsing
+    given:
+      expression: "19850412T232030+0400"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-004
+    description: "Parse basic format calendar date and time with hours-only offset 19850412T232030+04"
+    requirements:
+      - req:date-time-cal-basic-offset
+    test_type: parsing
+    given:
+      expression: "19850412T232030+04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  # Parsing tests: calendar date + time, extended format
+  - id: conf-test:date-time-parse-005
+    description: "Parse extended format calendar date and time 1985-04-12T23:20:30"
+    requirements:
+      - req:date-time-cal-extended-local
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:30"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-006
+    description: "Parse extended format calendar date and UTC time 1985-04-12T23:20:30Z"
+    requirements:
+      - req:date-time-cal-extended-utc
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:30Z"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-007
+    description: "Parse extended format calendar date and time with offset 1985-04-12T23:20:30+04:00"
+    requirements:
+      - req:date-time-cal-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:30+04:00"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-008
+    description: "Parse extended format calendar date and time with hours-only offset 1985-04-12T23:20:30+04"
+    requirements:
+      - req:date-time-cal-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  # Parsing tests: ordinal date + time
+  - id: conf-test:date-time-parse-009
+    description: "Parse basic format ordinal date and time 1985102T232030"
+    requirements:
+      - req:date-time-ord-basic-local
+    test_type: parsing
+    given:
+      expression: "1985102T232030"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-010
+    description: "Parse basic format ordinal date and UTC time 1985102T232030Z"
+    requirements:
+      - req:date-time-ord-basic-utc
+    test_type: parsing
+    given:
+      expression: "1985102T232030Z"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-011
+    description: "Parse basic format ordinal date and time with offset 1985102T232030+0400"
+    requirements:
+      - req:date-time-ord-basic-offset
+    test_type: parsing
+    given:
+      expression: "1985102T232030+0400"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-012
+    description: "Parse basic format ordinal date and time with hours-only offset 1985102T232030+04"
+    requirements:
+      - req:date-time-ord-basic-offset
+    test_type: parsing
+    given:
+      expression: "1985102T232030+04"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  - id: conf-test:date-time-parse-013
+    description: "Parse extended format ordinal date and time 1985-102T23:20:30"
+    requirements:
+      - req:date-time-ord-extended-local
+    test_type: parsing
+    given:
+      expression: "1985-102T23:20:30"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-014
+    description: "Parse extended format ordinal date and UTC time 1985-102T23:20:30Z"
+    requirements:
+      - req:date-time-ord-extended-utc
+    test_type: parsing
+    given:
+      expression: "1985-102T23:20:30Z"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-015
+    description: "Parse extended format ordinal date and time with offset 1985-102T23:20:30+04:00"
+    requirements:
+      - req:date-time-ord-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-102T23:20:30+04:00"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-016
+    description: "Parse extended format ordinal date and time with hours-only offset 1985-102T23:20:30+04"
+    requirements:
+      - req:date-time-ord-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-102T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  # Parsing tests: week date + time
+  - id: conf-test:date-time-parse-017
+    description: "Parse basic format week date and time 1985W155T232030"
+    requirements:
+      - req:date-time-week-basic-local
+    test_type: parsing
+    given:
+      expression: "1985W155T232030"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-018
+    description: "Parse basic format week date and UTC time 1985W155T232030Z"
+    requirements:
+      - req:date-time-week-basic-utc
+    test_type: parsing
+    given:
+      expression: "1985W155T232030Z"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-019
+    description: "Parse basic format week date and time with offset 1985W155T232030+0400"
+    requirements:
+      - req:date-time-week-basic-offset
+    test_type: parsing
+    given:
+      expression: "1985W155T232030+0400"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-020
+    description: "Parse basic format week date and time with hours-only offset 1985W155T232030+04"
+    requirements:
+      - req:date-time-week-basic-offset
+    test_type: parsing
+    given:
+      expression: "1985W155T232030+04"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  - id: conf-test:date-time-parse-021
+    description: "Parse extended format week date and time 1985-W15-5T23:20:30"
+    requirements:
+      - req:date-time-week-extended-local
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T23:20:30"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+
+  - id: conf-test:date-time-parse-022
+    description: "Parse extended format week date and UTC time 1985-W15-5T23:20:30Z"
+    requirements:
+      - req:date-time-week-extended-utc
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T23:20:30Z"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-023
+    description: "Parse extended format week date and time with offset 1985-W15-5T23:20:30+04:00"
+    requirements:
+      - req:date-time-week-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T23:20:30+04:00"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-024
+    description: "Parse extended format week date and time with hours-only offset 1985-W15-5T23:20:30+04"
+    requirements:
+      - req:date-time-week-extended-offset
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  # Parsing tests: reduced precision date-time
+  - id: conf-test:date-time-parse-025
+    description: "Parse calendar date and reduced precision time (HM) basic 19850412T1015"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "19850412T1015"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 10
+          minute: 15
+
+  - id: conf-test:date-time-parse-026
+    description: "Parse calendar date and reduced precision time (HM) extended 1985-04-12T10:15"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "1985-04-12T10:15"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 10
+          minute: 15
+
+  - id: conf-test:date-time-parse-027
+    description: "Parse ordinal date and UTC reduced precision time basic 1985102T1015Z"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "1985102T1015Z"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 10
+          minute: 15
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-028
+    description: "Parse ordinal date and UTC reduced precision time extended 1985-102T10:15Z"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "1985-102T10:15Z"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 10
+          minute: 15
+          utc_offset:
+            sign: "+"
+            hours: 0
+            minutes: 0
+
+  - id: conf-test:date-time-parse-029
+    description: "Parse week date and time with offset reduced precision basic 1985W155T1015+0400"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "1985W155T1015+0400"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 10
+          minute: 15
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-030
+    description: "Parse week date and time with offset reduced precision extended 1985-W15-5T10:15+04"
+    requirements:
+      - req:date-time-reduced-precision
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T10:15+04"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 10
+          minute: 15
+          utc_offset:
+            sign: "+"
+            hours: 4
+
+  # Generation tests
+  - id: conf-test:date-time-gen-001
+    description: "Generate basic format calendar date and time"
+    requirements:
+      - req:date-time-cal-basic-local
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+    expect:
+      expression: "19850412T232030"
+
+  - id: conf-test:date-time-gen-002
+    description: "Generate extended format calendar date and time"
+    requirements:
+      - req:date-time-cal-extended-local
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+    expect:
+      expression: "1985-04-12T23:20:30"
+
+  - id: conf-test:date-time-gen-003
+    description: "Generate basic format calendar date and time with offset"
+    requirements:
+      - req:date-time-cal-basic-offset
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+    expect:
+      expression: "19850412T232030+0400"
+
+  - id: conf-test:date-time-gen-004
+    description: "Generate extended format calendar date and time with offset"
+    requirements:
+      - req:date-time-cal-extended-offset
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+    expect:
+      expression: "1985-04-12T23:20:30+04:00"
+
+  # Validity tests
+  - id: conf-test:date-time-valid-001
+    description: "Verify mixed format is invalid (basic date, extended time)"
+    requirements:
+      - req:date-time-cal-basic-local
+    test_type: validity
+    given:
+      expression: "19850412T23:20:30"
+    expect:
+      valid: false
+
+  - id: conf-test:date-time-valid-002
+    description: "Verify mixed format is invalid (extended date, basic time)"
+    requirements:
+      - req:date-time-cal-extended-local
+    test_type: validity
+    given:
+      expression: "1985-04-12T232030"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:date-time-equiv-001
+    description: "Basic and extended format represent the same date and time"
+    requirements:
+      - req:date-time-cal-basic-local
+      - req:date-time-cal-extended-local
+    test_type: equivalence
+    given:
+      expression_a: "19850412T232030"
+      expression_b: "1985-04-12T23:20:30"
+    expect:
+      equivalent: true

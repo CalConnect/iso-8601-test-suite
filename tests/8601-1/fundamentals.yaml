@@ -1,0 +1,648 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:fundamentals
+name: Fundamentals conformance tests
+description: >
+  Tests for fundamental principles of ISO 8601, including character set validity,
+  Gregorian calendar rules, leap year determination, year/century/decade
+  representation, and leading zero requirements.
+standardization_target_type: iso-8601-date-time-processor
+requirements_class: req-class:fundamentals
+source: ISO 8601-1:2026 Clauses 4, 5.1
+tests:
+  # Validity tests: valid character usage
+  - id: conf-test:fundamentals-valid-001
+    description: "Verify that valid ISO 8601 characters are accepted"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-002
+    description: "Verify that digits 0-9 are valid characters"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "20230101"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-003
+    description: "Verify that separators and designators are valid characters"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "P1Y2M10DT2H30M"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-004
+    description: "Verify Z designator is valid"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "T232030Z"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-005
+    description: "Verify R designator is valid"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "R5/19850412/19850425"
+    expect:
+      valid: true
+
+  # Validity tests: invalid character usage
+  - id: conf-test:fundamentals-valid-006
+    description: "Verify that invalid characters are rejected (space)"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "1985 04 12"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-007
+    description: "Verify that invalid characters are rejected (letters in date)"
+    requirements:
+      - req:character-set
+    test_type: validity
+    given:
+      expression: "AB85-04-12"
+    expect:
+      valid: false
+
+  # Leap year validity tests
+  - id: conf-test:fundamentals-valid-008
+    description: "Verify that year divisible by 4 is a leap year (2000)"
+    requirements:
+      - req:leap-year-rules
+    test_type: validity
+    given:
+      expression: "20000229"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-009
+    description: "Verify that year divisible by 400 is a leap year (2000)"
+    requirements:
+      - req:leap-year-rules
+    test_type: validity
+    given:
+      expression: "2000-02-29"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-010
+    description: "Verify that year divisible by 100 but not 400 is not a leap year (1900)"
+    requirements:
+      - req:leap-year-rules
+    test_type: validity
+    given:
+      expression: "19000229"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-011
+    description: "Verify that year not divisible by 4 is not a leap year (2023)"
+    requirements:
+      - req:leap-year-rules
+    test_type: validity
+    given:
+      expression: "20230229"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-012
+    description: "Verify that year divisible by 4 but not 100 is a leap year (2024)"
+    requirements:
+      - req:leap-year-rules
+    test_type: validity
+    given:
+      expression: "20240229"
+    expect:
+      valid: true
+
+  # Days per month validity tests
+  - id: conf-test:fundamentals-valid-013
+    description: "Verify January has 31 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230131"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-014
+    description: "Verify January does not have 32 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230132"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-015
+    description: "Verify April has 30 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230430"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-016
+    description: "Verify April does not have 31 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230431"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-017
+    description: "Verify February in a common year has 28 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230228"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-018
+    description: "Verify February in a common year does not have 29 days"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230229"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-019
+    description: "Verify month 13 is invalid"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20231301"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-020
+    description: "Verify month 00 is invalid"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230001"
+    expect:
+      valid: false
+
+  - id: conf-test:fundamentals-valid-021
+    description: "Verify day 00 is invalid"
+    requirements:
+      - req:days-per-month
+    test_type: validity
+    given:
+      expression: "20230100"
+    expect:
+      valid: false
+
+  # Year representation parsing tests
+  - id: conf-test:fundamentals-parse-001
+    description: "Parse a 4-digit calendar year"
+    requirements:
+      - req:year-representation
+    test_type: parsing
+    given:
+      expression: "1985"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+
+  - id: conf-test:fundamentals-parse-002
+    description: "Parse year zero"
+    requirements:
+      - req:year-representation
+    test_type: parsing
+    given:
+      expression: "0000"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 0
+
+  - id: conf-test:fundamentals-parse-003
+    description: "Parse year 9999"
+    requirements:
+      - req:year-representation
+    test_type: parsing
+    given:
+      expression: "9999"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 9999
+
+  # Century representation parsing tests
+  - id: conf-test:fundamentals-parse-004
+    description: "Parse a century representation (19 = 1900s)"
+    requirements:
+      - req:century-representation
+    test_type: parsing
+    given:
+      expression: "19"
+    expect:
+      valid: true
+      components:
+        calendar:
+          century: 19
+
+  - id: conf-test:fundamentals-parse-005
+    description: "Parse century zero (00)"
+    requirements:
+      - req:century-representation
+    test_type: parsing
+    given:
+      expression: "00"
+    expect:
+      valid: true
+      components:
+        calendar:
+          century: 0
+
+  # Decade representation parsing tests
+  - id: conf-test:fundamentals-parse-006
+    description: "Parse a decade representation (196 = 1960s)"
+    requirements:
+      - req:decade-representation
+    test_type: parsing
+    given:
+      expression: "196"
+    expect:
+      valid: true
+      components:
+        calendar:
+          decade: 196
+
+  # Generation tests
+  - id: conf-test:fundamentals-gen-001
+    description: "Generate a 4-digit calendar year"
+    requirements:
+      - req:year-representation
+    test_type: generation
+    given:
+      components:
+        calendar:
+          year: 1985
+    expect:
+      expression: "1985"
+
+  - id: conf-test:fundamentals-gen-002
+    description: "Generate a century representation"
+    requirements:
+      - req:century-representation
+    test_type: generation
+    given:
+      components:
+        calendar:
+          century: 19
+    expect:
+      expression: "19"
+
+  - id: conf-test:fundamentals-gen-003
+    description: "Generate a decade representation"
+    requirements:
+      - req:decade-representation
+    test_type: generation
+    given:
+      components:
+        calendar:
+          decade: 196
+    expect:
+      expression: "196"
+
+  # Time shift validity tests
+  - id: conf-test:fundamentals-valid-022
+    description: "Verify UTC designator Z is valid"
+    requirements:
+      - req:time-shift
+    test_type: validity
+    given:
+      expression: "Z"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-023
+    description: "Verify positive time shift is valid (+01:00)"
+    requirements:
+      - req:time-shift
+    test_type: validity
+    given:
+      expression: "+01:00"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-024
+    description: "Verify negative time shift is valid (-05:00)"
+    requirements:
+      - req:time-shift
+    test_type: validity
+    given:
+      expression: "-05:00"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-025
+    description: "Verify basic format time shift is valid (+0500)"
+    requirements:
+      - req:time-shift
+    test_type: validity
+    given:
+      expression: "+0500"
+    expect:
+      valid: true
+
+  # 24-hour clock validity tests
+  - id: conf-test:fundamentals-valid-026
+    description: "Verify hour 00 is valid"
+    requirements:
+      - req:24-hour-clock
+    test_type: validity
+    given:
+      expression: "T00"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-027
+    description: "Verify hour 23 is valid"
+    requirements:
+      - req:24-hour-clock
+    test_type: validity
+    given:
+      expression: "T23"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-028
+    description: "Verify hour 24 is invalid for general time (only valid for end-of-day)"
+    requirements:
+      - req:24-hour-clock
+    test_type: validity
+    given:
+      expression: "T243061"
+    expect:
+      valid: false
+
+  # Leading zeros tests
+  - id: conf-test:fundamentals-valid-029
+    description: "Verify that missing leading zeros are rejected for month"
+    requirements:
+      - req:leading-zeros
+    test_type: validity
+    given:
+      expression: "1985-4-12"
+    expect:
+      valid: false
+
+  # Decreasing order tests
+  - id: conf-test:fundamentals-valid-030
+    description: "Verify decreasing order: year before month before day is valid"
+    requirements:
+      - req:decreasing-order
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-031
+    description: "Verify decreasing order: hour before minute before second is valid"
+    requirements:
+      - req:decreasing-order
+    test_type: validity
+    given:
+      expression: "T23:20:50"
+    expect:
+      valid: true
+
+  # Gregorian calendar tests
+  - id: conf-test:fundamentals-valid-032
+    description: "Verify Gregorian calendar: 12 months are valid"
+    requirements:
+      - req:gregorian-calendar
+    test_type: validity
+    given:
+      expression: "20231215"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-033
+    description: "Verify Gregorian calendar: year with 365 days in common year"
+    requirements:
+      - req:gregorian-calendar
+    test_type: validity
+    given:
+      expression: "20231231"
+    expect:
+      valid: true
+
+  # Week calendar tests
+  - id: conf-test:fundamentals-valid-034
+    description: "Verify week calendar: day of week 1 (Monday) is valid"
+    requirements:
+      - req:week-calendar
+    test_type: validity
+    given:
+      expression: "2023W011"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-035
+    description: "Verify week calendar: day of week 7 (Sunday) is valid"
+    requirements:
+      - req:week-calendar
+    test_type: validity
+    given:
+      expression: "2023W017"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-036
+    description: "Verify week calendar: day of week 8 is invalid"
+    requirements:
+      - req:week-calendar
+    test_type: validity
+    given:
+      expression: "2023W018"
+    expect:
+      valid: false
+
+  # Month representation tests
+  - id: conf-test:fundamentals-parse-007
+    description: "Parse month 01 (January)"
+    requirements:
+      - req:month-representation
+    test_type: parsing
+    given:
+      expression: "1985-01"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 1
+
+  - id: conf-test:fundamentals-parse-008
+    description: "Parse month 12 (December)"
+    requirements:
+      - req:month-representation
+    test_type: parsing
+    given:
+      expression: "1985-12"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 12
+
+  # Week number representation tests
+  - id: conf-test:fundamentals-valid-037
+    description: "Verify week number W01 is valid"
+    requirements:
+      - req:week-number-representation
+    test_type: validity
+    given:
+      expression: "2023W01"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-038
+    description: "Verify week number W53 is valid"
+    requirements:
+      - req:week-number-representation
+    test_type: validity
+    given:
+      expression: "2020W53"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-039
+    description: "Verify week number W54 is invalid"
+    requirements:
+      - req:week-number-representation
+    test_type: validity
+    given:
+      expression: "2023W54"
+    expect:
+      valid: false
+
+  # Day of week representation tests
+  - id: conf-test:fundamentals-valid-040
+    description: "Verify day of week 1 (Monday) is valid"
+    requirements:
+      - req:day-of-week-representation
+    test_type: validity
+    given:
+      expression: "2023W011"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-041
+    description: "Verify day of week 7 (Sunday) is valid"
+    requirements:
+      - req:day-of-week-representation
+    test_type: validity
+    given:
+      expression: "2023W017"
+    expect:
+      valid: true
+
+  # Day of year representation tests
+  - id: conf-test:fundamentals-valid-042
+    description: "Verify day of year 001 is valid"
+    requirements:
+      - req:day-of-year-representation
+    test_type: validity
+    given:
+      expression: "2023001"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-043
+    description: "Verify day of year 365 is valid for common year"
+    requirements:
+      - req:day-of-year-representation
+    test_type: validity
+    given:
+      expression: "2023365"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-044
+    description: "Verify day of year 366 is valid for leap year"
+    requirements:
+      - req:day-of-year-representation
+    test_type: validity
+    given:
+      expression: "2024366"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-045
+    description: "Verify day of year 366 is invalid for common year"
+    requirements:
+      - req:day-of-year-representation
+    test_type: validity
+    given:
+      expression: "2023366"
+    expect:
+      valid: false
+
+  # Expansion tests
+  - id: conf-test:fundamentals-parse-009
+    description: "Parse expanded year with positive sign +001985"
+    requirements:
+      - req:expansion
+    test_type: parsing
+    given:
+      expression: "+001985"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+
+  - id: conf-test:fundamentals-parse-010
+    description: "Parse expanded year with negative sign -000001"
+    requirements:
+      - req:expansion
+    test_type: parsing
+    given:
+      expression: "-000001"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: -1

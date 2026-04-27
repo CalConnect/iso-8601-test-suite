@@ -1,0 +1,2221 @@
+# yaml-language-server: $schema=../schema/conformance-result.yaml
+#
+# Conformance test results for Ruby's standard library Date/DateTime/Time classes
+# against the ISO 8601-1:2026 and ISO 8601-2:2026 test suite.
+#
+# Ruby's Date.parse is a permissive parser that accepts many non-ISO-8601 formats.
+# For stricter ISO 8601 compliance, Date.iso8601 / DateTime.iso8601 should be used.
+# Ruby has no native support for ISO 8601 durations, time intervals, or recurring
+# intervals. Part 2 features (qualification, unspecified digits, etc.) are not
+# supported.
+#
+# verification: inferred — results based on known Ruby 3.3 behavior, not automated execution.
+# A human should verify these results by running the documented code snippets.
+---
+id: result:ruby-date-datetime-time
+implementation:
+  name: "Ruby Date/DateTime/Time"
+  description: >-
+    Ruby standard library date and time classes. Date handles calendar dates,
+    DateTime adds time-of-day, and Time handles time with timezone support.
+    None of these are strict ISO 8601 validators — they are general-purpose
+    date/time parsers that happen to support many ISO 8601 formats.
+  language: ruby
+  version: "3.3.0"
+  url: "https://ruby-doc.org/stdlib-3.3.0/"
+  modules:
+    - name: Date
+      class: Date
+      methods: [parse, iso8601, new, valid_date?, today, commercial, ordinal]
+    - name: DateTime
+      class: DateTime
+      methods: [parse, iso8601, new, now]
+    - name: Time
+      class: Time
+      methods: [parse, new, now, iso8601, strptime]
+
+date: "2026-04-27"
+tester: "ISO 8601 Test Suite — inferred results"
+verification: inferred
+notes: >-
+  Results are inferred from known Ruby 3.3 stdlib behavior.
+  Date.parse is deliberately permissive — it accepts many formats beyond ISO 8601.
+  This is a feature, not a bug, but it means Ruby fails strict ISO 8601 validity tests
+  that require rejecting non-standard formats (e.g., spaces as separators).
+  For strict ISO 8601 parsing, use Date.iso8601 instead of Date.parse.
+
+profiles_tested:
+  - profile:iso-8601-1-complete
+
+conformance_class_results:
+  # ================================================================
+  # CONFORMANCE CLASS: fundamentals (58 tests)
+  # Status: PARTIAL — Ruby handles calendar validation well but is not
+  # a strict ISO 8601 character-set validator. Permissive parser accepts
+  # non-ISO formats (e.g., spaces, missing leading zeros).
+  # ================================================================
+  - conformance_class: conf-class:fundamentals
+    status: partial
+    notes: >-
+      Ruby Date handles leap year, days-per-month, and basic calendar validation
+      correctly via Date.new and Date.valid_date?. However, Date.parse is permissive
+      and accepts non-ISO-8601 formats (spaces, missing leading zeros). Duration,
+      recurring interval, and time-of-day expressions are not handled by the Date class.
+    default_method:
+      language: ruby
+      code: 'Date.parse("{expression}")'
+      api: Date.parse
+    test_results:
+      # --- Character set validity (001–007) ---
+      - test: conf-test:fundamentals-valid-001
+        result: pass
+        method:
+          code: 'Date.parse("1985-04-12").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-04-12"'
+
+      - test: conf-test:fundamentals-valid-002
+        result: pass
+        method:
+          code: 'Date.parse("20230101").to_s'
+          api: Date.parse
+        actual:
+          returned: '"2023-01-01"'
+
+      - test: conf-test:fundamentals-valid-003
+        result: not-supported
+        notes: "Duration expression — Date.parse does not handle durations"
+        method:
+          code: 'Date.parse("P1Y2M10DT2H30M")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error: invalid date"
+
+      - test: conf-test:fundamentals-valid-004
+        result: not-supported
+        notes: "Time-of-day expression — Date.parse does not parse time-only strings"
+        method:
+          code: 'Date.parse("T232030Z")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error: invalid date"
+
+      - test: conf-test:fundamentals-valid-005
+        result: not-supported
+        notes: "Recurring interval — not handled by Date.parse"
+        method:
+          code: 'Date.parse("R5/19850412/19850425")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error: invalid date"
+
+      - test: conf-test:fundamentals-valid-006
+        result: fail
+        notes: >-
+          CRITICAL: Ruby's Date.parse accepts spaces as separators, which violates
+          ISO 8601 character set rules. A strict ISO 8601 processor must reject this.
+        method:
+          code: 'begin; Date.parse("1985 04 12"); true; rescue Date::Error; false; end'
+          api: Date.parse
+        actual:
+          valid: true
+          returned: '"1985-04-12"'
+          notes: "Ruby accepts spaces — ISO 8601 requires rejection"
+
+      - test: conf-test:fundamentals-valid-007
+        result: pass
+        method:
+          code: 'begin; Date.parse("AB85-04-12"); true; rescue Date::Error; false; end'
+          api: Date.parse
+        actual:
+          valid: false
+          exception: "Date::Error: invalid date"
+
+      # --- Leap year tests (008–012) ---
+      - test: conf-test:fundamentals-valid-008
+        result: pass
+        method:
+          code: 'Date.new(2000, 2, 29).to_s'
+          api: Date.new
+        actual:
+          valid: true
+          returned: '"2000-02-29"'
+
+      - test: conf-test:fundamentals-valid-009
+        result: pass
+        method:
+          code: 'Date.parse("2000-02-29").to_s'
+          api: Date.parse
+        actual:
+          valid: true
+          returned: '"2000-02-29"'
+
+      - test: conf-test:fundamentals-valid-010
+        result: pass
+        method:
+          code: 'Date.valid_date?(1900, 2, 29)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+          returned: "false"
+
+      - test: conf-test:fundamentals-valid-011
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 2, 29)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+          returned: "false"
+
+      - test: conf-test:fundamentals-valid-012
+        result: pass
+        method:
+          code: 'Date.valid_date?(2024, 2, 29)'
+          api: Date.valid_date?
+        actual:
+          valid: true
+          returned: "true"
+
+      # --- Days per month tests (013–021) ---
+      - test: conf-test:fundamentals-valid-013
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 1, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-014
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 1, 32)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      - test: conf-test:fundamentals-valid-015
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 4, 30)'
+          api: Date.valid_date?
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-016
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 4, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      - test: conf-test:fundamentals-valid-017
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 2, 28)'
+          api: Date.valid_date?
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-018
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 2, 29)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      - test: conf-test:fundamentals-valid-019
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 13, 1)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      - test: conf-test:fundamentals-valid-020
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 0, 1)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      - test: conf-test:fundamentals-valid-021
+        result: pass
+        method:
+          code: 'Date.valid_date?(2023, 1, 0)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      # --- Year representation parsing (parse 001–003) ---
+      - test: conf-test:fundamentals-parse-001
+        result: pass
+        notes: "Date.parse interprets '1985' as year, defaults to Jan 1"
+        method:
+          code: 'Date.parse("1985").year'
+          api: Date.parse
+        actual:
+          returned: "1985"
+
+      - test: conf-test:fundamentals-parse-002
+        result: pass
+        method:
+          code: 'Date.parse("0000").year'
+          api: Date.parse
+        actual:
+          returned: "0"
+
+      - test: conf-test:fundamentals-parse-003
+        result: pass
+        method:
+          code: 'Date.parse("9999").year'
+          api: Date.parse
+        actual:
+          returned: "9999"
+
+      # --- Century/decade representation (parse 004–006) ---
+      - test: conf-test:fundamentals-parse-004
+        result: not-supported
+        notes: "Ruby has no century representation — '19' interpreted as year 0019"
+        method:
+          code: 'Date.parse("19")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error or interpreted as year 0019"
+
+      - test: conf-test:fundamentals-parse-005
+        result: not-supported
+        notes: "Ruby has no century representation"
+        method:
+          code: 'Date.parse("00")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error or interpreted as year 0000"
+
+      - test: conf-test:fundamentals-parse-006
+        result: not-supported
+        notes: "Ruby has no decade representation"
+        method:
+          code: 'Date.parse("196")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error or ambiguous"
+
+      # --- Generation tests (gen 001–003) ---
+      - test: conf-test:fundamentals-gen-001
+        result: not-supported
+        notes: "Ruby generates full dates, not year-only representations"
+        method:
+          code: 'Date.new(1985, 1, 1).year.to_s'
+          api: Date#year
+        actual:
+          returned: '"1985"'
+          notes: "Only the year number, not an ISO 8601 year representation"
+
+      - test: conf-test:fundamentals-gen-002
+        result: not-supported
+        notes: "Ruby has no century generation"
+        actual:
+          notes: "No API to generate '19' as a century"
+
+      - test: conf-test:fundamentals-gen-003
+        result: not-supported
+        notes: "Ruby has no decade generation"
+        actual:
+          notes: "No API to generate '196' as a decade"
+
+      # --- Time shift validity (valid 022–025) ---
+      - test: conf-test:fundamentals-valid-022
+        result: pass
+        method:
+          code: 'Time.parse("2023-01-01T00:00:00Z").utc_offset'
+          api: Time.parse
+        actual:
+          valid: true
+          returned: "0"
+
+      - test: conf-test:fundamentals-valid-023
+        result: pass
+        method:
+          code: 'Time.parse("2023-01-01T00:00:00+01:00").utc_offset'
+          api: Time.parse
+        actual:
+          valid: true
+          returned: "3600"
+
+      - test: conf-test:fundamentals-valid-024
+        result: pass
+        method:
+          code: 'Time.parse("2023-01-01T00:00:00-05:00").utc_offset'
+          api: Time.parse
+        actual:
+          valid: true
+          returned: "-18000"
+
+      - test: conf-test:fundamentals-valid-025
+        result: pass
+        method:
+          code: 'Time.parse("2023-01-01T00:00:00+0500").utc_offset'
+          api: Time.parse
+        actual:
+          valid: true
+          returned: "18000"
+
+      # --- 24-hour clock validity (valid 026–028) ---
+      - test: conf-test:fundamentals-valid-026
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 0, 0, 0).hour'
+          api: Time.new
+        actual:
+          valid: true
+          returned: "0"
+
+      - test: conf-test:fundamentals-valid-027
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 0, 0).hour'
+          api: Time.new
+        actual:
+          valid: true
+          returned: "23"
+
+      - test: conf-test:fundamentals-valid-028
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 24, 30, 61).hour rescue "error"'
+          api: Time.new
+        actual:
+          valid: false
+          notes: "Ruby rejects hour 24 in Time.new"
+
+      # --- Leading zeros, decreasing order, Gregorian, week calendar (valid 029–045) ---
+      - test: conf-test:fundamentals-valid-029
+        result: fail
+        notes: "Date.parse accepts '1985-4-12' without leading zero on month"
+        method:
+          code: 'begin; Date.parse("1985-4-12"); true; rescue; false; end'
+          api: Date.parse
+        actual:
+          valid: true
+          notes: "Ruby does not enforce leading zeros — accepts '1985-4-12'"
+
+      - test: conf-test:fundamentals-valid-030
+        result: pass
+        method:
+          code: 'Date.parse("1985-04-12").to_s'
+          api: Date.parse
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-031
+        result: pass
+        method:
+          code: 'Time.parse("23:20:50").to_s'
+          api: Time.parse
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-032
+        result: pass
+        method:
+          code: 'Date.parse("20231215").to_s'
+          api: Date.parse
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-033
+        result: pass
+        method:
+          code: 'Date.parse("20231231").to_s'
+          api: Date.parse
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-034
+        result: pass
+        method:
+          code: 'Date.commercial(2023, 1, 1).cwday'
+          api: Date.commercial
+        actual:
+          valid: true
+          returned: "1"
+
+      - test: conf-test:fundamentals-valid-035
+        result: pass
+        method:
+          code: 'Date.commercial(2023, 1, 7).cwday'
+          api: Date.commercial
+        actual:
+          valid: true
+          returned: "7"
+
+      - test: conf-test:fundamentals-valid-036
+        result: pass
+        method:
+          code: 'Date.commercial(2023, 1, 8) rescue "error"'
+          api: Date.commercial
+        actual:
+          valid: false
+          notes: "Ruby raises ArgumentError for day-of-week 8"
+
+      # Month representation (parse 007–008)
+      - test: conf-test:fundamentals-parse-007
+        result: pass
+        method:
+          code: 'Date.parse("1985-01").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-01-01"'
+
+      - test: conf-test:fundamentals-parse-008
+        result: pass
+        method:
+          code: 'Date.parse("1985-12").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-12-01"'
+
+      # Week number representation (valid 037–039)
+      - test: conf-test:fundamentals-valid-037
+        result: pass
+        method:
+          code: 'Date.commercial(2023, 1, 1).cweek'
+          api: Date.commercial
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-038
+        result: pass
+        method:
+          code: 'Date.commercial(2020, 53, 1).cweek'
+          api: Date.commercial
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-039
+        result: pass
+        notes: "Ruby raises ArgumentError for W54"
+        method:
+          code: 'Date.commercial(2023, 54, 1) rescue "error"'
+          api: Date.commercial
+        actual:
+          valid: false
+
+      # Day of week representation (valid 040–041)
+      - test: conf-test:fundamentals-valid-040
+        result: pass
+      - test: conf-test:fundamentals-valid-041
+        result: pass
+
+      # Day of year representation (valid 042–045)
+      - test: conf-test:fundamentals-valid-042
+        result: pass
+        method:
+          code: 'Date.ordinal(2023, 1).yday'
+          api: Date.ordinal
+        actual:
+          valid: true
+          returned: "1"
+
+      - test: conf-test:fundamentals-valid-043
+        result: pass
+        method:
+          code: 'Date.ordinal(2023, 365).yday'
+          api: Date.ordinal
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-044
+        result: pass
+        method:
+          code: 'Date.ordinal(2024, 366).yday'
+          api: Date.ordinal
+        actual:
+          valid: true
+
+      - test: conf-test:fundamentals-valid-045
+        result: pass
+        method:
+          code: 'Date.ordinal(2023, 366) rescue "error"'
+          api: Date.ordinal
+        actual:
+          valid: false
+          notes: "Ruby raises ArgumentError — 2023 is not a leap year"
+
+      # Expansion tests (parse 009–010)
+      - test: conf-test:fundamentals-parse-009
+        result: fail
+        notes: "Ruby Date does not support expanded year format +001985"
+        method:
+          code: 'Date.iso8601("+001985")'
+          api: Date.iso8601
+        actual:
+          exception: "Date::Error: invalid date"
+
+      - test: conf-test:fundamentals-parse-010
+        result: fail
+        notes: "Ruby Date does not support negative years"
+        method:
+          code: 'Date.iso8601("-000001")'
+          api: Date.iso8601
+        actual:
+          exception: "Date::Error: invalid date"
+
+  # ================================================================
+  # CONFORMANCE CLASS: calendar-date (32 tests)
+  # Status: PARTIAL — Ruby handles basic and extended calendar dates,
+  # but Date.parse is permissive (accepts non-ISO formats). Expanded
+  # year and century/decade representations not supported.
+  # ================================================================
+  - conformance_class: conf-class:calendar-date
+    status: partial
+    notes: >-
+      Ruby Date.parse and Date.iso8601 handle basic (YYYYMMDD) and extended
+      (YYYY-MM-DD) calendar dates. Reduced precision YYYY-MM works. Expanded
+      years (+001985), negative years, and century/decade representations
+      are not supported. Date.valid_date? correctly validates dates.
+    default_method:
+      language: ruby
+      code: 'Date.iso8601("{expression}")'
+      api: Date.iso8601
+    test_results:
+      # --- Parsing ---
+      - test: conf-test:cal-date-parse-001        # "19850412"
+        result: pass
+        actual:
+          returned: '"1985-04-12"'
+      - test: conf-test:cal-date-parse-002        # "1985-04-12"
+        result: pass
+        actual:
+          returned: '"1985-04-12"'
+      - test: conf-test:cal-date-parse-003        # "1985-04"
+        result: pass
+        method:
+          code: 'Date.parse("1985-04").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-04-01"'
+          notes: "Parses year-month, defaults day to 1"
+      - test: conf-test:cal-date-parse-004        # "1985"
+        result: error
+        notes: "Date.parse('1985') returns 1985-01-01, not a year-only representation"
+        method:
+          code: 'Date.parse("1985").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-01-01"'
+          notes: "Ruby adds default month/day — not a true reduced precision year"
+      - test: conf-test:cal-date-parse-005        # "198" (decade)
+        result: not-supported
+        notes: "Ruby has no decade representation"
+      - test: conf-test:cal-date-parse-006        # "19" (century)
+        result: not-supported
+        notes: "Ruby has no century representation"
+      - test: conf-test:cal-date-parse-007        # "+0019850412"
+        result: fail
+        notes: "Expanded year format not supported by Date.iso8601"
+      - test: conf-test:cal-date-parse-008        # "+001985-04-12"
+        result: fail
+        notes: "Expanded year format not supported"
+      - test: conf-test:cal-date-parse-009        # "+001985-04"
+        result: fail
+        notes: "Expanded year format not supported"
+      - test: conf-test:cal-date-parse-010        # "+001985"
+        result: fail
+        notes: "Expanded year format not supported"
+      - test: conf-test:cal-date-parse-011        # "+00198" (expanded decade)
+        result: not-supported
+      - test: conf-test:cal-date-parse-012        # "+0019" (expanded century)
+        result: not-supported
+
+      # --- Generation ---
+      - test: conf-test:cal-date-gen-001          # basic "19850412"
+        result: pass
+        method:
+          code: 'Date.new(1985, 4, 12).strftime("%Y%m%d")'
+          api: Date#strftime
+        actual:
+          returned: '"19850412"'
+      - test: conf-test:cal-date-gen-002          # extended "1985-04-12"
+        result: pass
+        method:
+          code: 'Date.new(1985, 4, 12).to_s'
+          api: Date#to_s
+        actual:
+          returned: '"1985-04-12"'
+      - test: conf-test:cal-date-gen-003          # "1985-04"
+        result: pass
+        method:
+          code: 'Date.new(1985, 4, 1).strftime("%Y-%m")'
+          api: Date#strftime
+        actual:
+          returned: '"1985-04"'
+      - test: conf-test:cal-date-gen-004          # "1985"
+        result: pass
+        method:
+          code: 'Date.new(1985, 1, 1).strftime("%Y")'
+          api: Date#strftime
+        actual:
+          returned: '"1985"'
+          notes: "Generates year string, but not a true reduced precision representation"
+      - test: conf-test:cal-date-gen-005          # "198" (decade)
+        result: not-supported
+      - test: conf-test:cal-date-gen-006          # "19" (century)
+        result: not-supported
+      - test: conf-test:cal-date-gen-007          # "+0019850412"
+        result: not-supported
+        notes: "Expanded year generation not supported"
+      - test: conf-test:cal-date-gen-008          # "+001985-04-12"
+        result: not-supported
+        notes: "Expanded year generation not supported"
+
+      # --- Validity ---
+      - test: conf-test:cal-date-valid-001        # "19851312" month 13
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 13, 12)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-002        # "19850012" month 0
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 0, 12)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-003        # "19850132" day 32
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 1, 32)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-004        # "19850100" day 0
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 1, 0)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-005        # "19850230" Feb 30
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 2, 30)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-006        # "19850431" Apr 31
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 4, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-007        # "198504-12" mixed format
+        result: pass
+        notes: "Mixed basic/extended format is rejected"
+        method:
+          code: 'begin; Date.parse("198504-12"); true; rescue; false; end'
+          api: Date.parse
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-008        # "19850631" Jun 31
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 6, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-009        # "19850931" Sep 31
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 9, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+      - test: conf-test:cal-date-valid-010        # "19851131" Nov 31
+        result: pass
+        method:
+          code: 'Date.valid_date?(1985, 11, 31)'
+          api: Date.valid_date?
+        actual:
+          valid: false
+
+      # --- Equivalence ---
+      - test: conf-test:cal-date-equiv-001
+        result: pass
+      - test: conf-test:cal-date-equiv-002
+        result: pass
+
+  # ================================================================
+  # CONFORMANCE CLASS: ordinal-date (15 tests)
+  # Status: PARTIAL — Date.ordinal creates dates from ordinal dates,
+  # but parsing ordinal date strings (YYYYDDD, YYYY-DDD) is limited.
+  # ================================================================
+  - conformance_class: conf-class:ordinal-date
+    status: partial
+    notes: >-
+      Date.ordinal(year, yday) creates dates from ordinal dates.
+      Date#yday extracts the ordinal day. Parsing strings like "1985102"
+      is misinterpreted as YYYYMMDD by Date.parse. Expanded year ordinal
+      dates are not supported.
+    default_method:
+      language: ruby
+      code: 'Date.ordinal(year, yday)'
+      api: Date.ordinal
+    test_results:
+      # --- Parsing ---
+      - test: conf-test:ord-date-parse-001        # "1985102"
+        result: fail
+        notes: "Date.parse('1985102') interprets as 1985-10-02, not ordinal day 102"
+        method:
+          code: 'Date.parse("1985102").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-10-02"'
+          notes: "Ruby interprets '1985102' as YYYYMMDD with missing digit"
+      - test: conf-test:ord-date-parse-002        # "1985-102"
+        result: not-supported
+        notes: "Date.parse does not recognize 'YYYY-DDD' ordinal format"
+        method:
+          code: 'Date.parse("1985-102").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-01-10" or similar — not interpreted as ordinal'
+      - test: conf-test:ord-date-parse-003        # "+001985102"
+        result: fail
+        notes: "Expanded year + ordinal format not supported"
+      - test: conf-test:ord-date-parse-004        # "+001985-102"
+        result: fail
+        notes: "Expanded year + ordinal format not supported"
+      - test: conf-test:ord-date-parse-005        # "1985001" Jan 1
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 1).to_s'
+          api: Date.ordinal
+        actual:
+          returned: '"1985-01-01"'
+      - test: conf-test:ord-date-parse-006        # "1985365" Dec 31
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 365).yday'
+          api: Date.ordinal
+        actual:
+          returned: "365"
+      - test: conf-test:ord-date-parse-007        # "1984366" leap year
+        result: pass
+        method:
+          code: 'Date.ordinal(1984, 366).yday'
+          api: Date.ordinal
+        actual:
+          returned: "366"
+
+      # --- Generation ---
+      - test: conf-test:ord-date-gen-001          # basic "1985102"
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 102).strftime("%Y%j")'
+          api: Date.ordinal
+        actual:
+          returned: '"1985102"'
+      - test: conf-test:ord-date-gen-002          # extended "1985-102"
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 102).strftime("%Y-%j")'
+          api: Date.ordinal
+        actual:
+          returned: '"1985-102"'
+      - test: conf-test:ord-date-gen-003          # "+001985102"
+        result: not-supported
+        notes: "Expanded year ordinal generation not supported"
+      - test: conf-test:ord-date-gen-004          # "+001985-102"
+        result: not-supported
+        notes: "Expanded year ordinal generation not supported"
+
+      # --- Validity ---
+      - test: conf-test:ord-date-valid-001        # "1985366" non-leap
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 366) rescue "error"'
+          api: Date.ordinal
+        actual:
+          valid: false
+          notes: "Ruby raises ArgumentError — 1985 is not a leap year"
+      - test: conf-test:ord-date-valid-002        # "1985000" day 0
+        result: pass
+        method:
+          code: 'Date.ordinal(1985, 0) rescue "error"'
+          api: Date.ordinal
+        actual:
+          valid: false
+      - test: conf-test:ord-date-valid-003        # "1984367" too many
+        result: pass
+        method:
+          code: 'Date.ordinal(1984, 367) rescue "error"'
+          api: Date.ordinal
+        actual:
+          valid: false
+
+      # --- Equivalence ---
+      - test: conf-test:ord-date-equiv-001
+        result: pass
+
+  # ================================================================
+  # CONFORMANCE CLASS: week-date (21 tests)
+  # Status: PARTIAL — Date.commercial creates dates from week dates.
+  # Date.parse handles extended week-date format but not basic.
+  # Expanded year week-dates not supported.
+  # ================================================================
+  - conformance_class: conf-class:week-date
+    status: partial
+    notes: >-
+      Date.commercial(year, week, day) creates dates from week dates.
+      Date#cweek and Date#cwday extract week components.
+      Date.parse handles "YYYY-Www-D" extended format but not "YYYYWwwD" basic.
+      Expanded year week-dates are not supported.
+    default_method:
+      language: ruby
+      code: 'Date.commercial(year, week, day)'
+      api: Date.commercial
+    test_results:
+      # --- Parsing ---
+      - test: conf-test:week-date-parse-001       # "1985W155" basic
+        result: fail
+        notes: "Date.parse does not parse basic week-date format YYYYWwwD"
+        method:
+          code: 'Date.parse("1985W155")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error: invalid date or misinterpreted"
+      - test: conf-test:week-date-parse-002       # "1985-W15-5" extended
+        result: pass
+        method:
+          code: 'Date.parse("1985-W15-5").to_s'
+          api: Date.parse
+        actual:
+          returned: '"1985-04-12"'
+      - test: conf-test:week-date-parse-003       # "1985W15" basic reduced
+        result: fail
+        notes: "Basic week-date without day not parseable"
+        method:
+          code: 'Date.parse("1985W15")'
+          api: Date.parse
+        actual:
+          exception: "Date::Error: invalid date"
+      - test: conf-test:week-date-parse-004       # "1985-W15" extended reduced
+        result: not-supported
+        notes: "Date.parse may not handle week-date without day correctly"
+        method:
+          code: 'Date.parse("1985-W15")'
+          api: Date.parse
+        actual:
+          notes: "May interpret as date or raise error"
+      - test: conf-test:week-date-parse-005       # "+001985W155"
+        result: not-supported
+        notes: "Expanded year week-date not supported"
+      - test: conf-test:week-date-parse-006       # "+001985-W15-5"
+        result: not-supported
+        notes: "Expanded year week-date not supported"
+      - test: conf-test:week-date-parse-007       # "+001985W15"
+        result: not-supported
+      - test: conf-test:week-date-parse-008       # "+001985-W15"
+        result: not-supported
+
+      # --- Generation ---
+      - test: conf-test:week-date-gen-001         # basic "1985W155"
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 5).strftime("%GW%V%u")'
+          api: Date.commercial
+        actual:
+          returned: '"1985W155"'
+      - test: conf-test:week-date-gen-002         # extended "1985-W15-5"
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 5).strftime("%G-W%V-%u")'
+          api: Date.commercial
+        actual:
+          returned: '"1985-W15-5"'
+      - test: conf-test:week-date-gen-003         # basic "1985W15"
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 1).strftime("%GW%V")'
+          api: Date.commercial
+        actual:
+          returned: '"1985W15"'
+      - test: conf-test:week-date-gen-004         # extended "1985-W15"
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 1).strftime("%G-W%V")'
+          api: Date.commercial
+        actual:
+          returned: '"1985-W15"'
+
+      # --- Validity ---
+      - test: conf-test:week-date-valid-001       # "1985W015" week 01 day 5
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 1, 5).cwday'
+          api: Date.commercial
+        actual:
+          valid: true
+      - test: conf-test:week-date-valid-002       # "1985W150" day 0
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 0) rescue "error"'
+          api: Date.commercial
+        actual:
+          valid: false
+      - test: conf-test:week-date-valid-003       # "1985W158" day 8
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 15, 8) rescue "error"'
+          api: Date.commercial
+        actual:
+          valid: false
+      - test: conf-test:week-date-valid-004       # "1985W545" week 54
+        result: pass
+        method:
+          code: 'Date.commercial(1985, 54, 5) rescue "error"'
+          api: Date.commercial
+        actual:
+          valid: false
+
+      # --- Equivalence ---
+      - test: conf-test:week-date-equiv-001
+        result: pass
+
+  # ================================================================
+  # CONFORMANCE CLASS: time-of-day (54 tests)
+  # Status: PARTIAL — Time.parse handles extended time format (hh:mm:ss)
+  # with UTC offsets and fractional seconds. Basic format (hhmmss) not
+  # supported. Time-of-day only (without date) defaults to today's date.
+  # ================================================================
+  - conformance_class: conf-class:time-of-day
+    status: partial
+    notes: >-
+      Time.parse handles extended time formats (hh:mm:ss) with UTC offsets
+      and fractional seconds. Basic format (hhmmss) not supported by
+      Time.parse. Time-of-day without a date defaults to today's date.
+      Leap second (second=60) is not supported. Hour 24 (end-of-day)
+      is not supported by Time.new.
+    default_method:
+      language: ruby
+      code: 'Time.parse("{expression}")'
+      api: Time.parse
+    test_results:
+      # --- Parsing: basic format (fails) ---
+      - test: conf-test:time-parse-001            # "T232050" basic full
+        result: fail
+        notes: "Time.parse does not parse basic format hhmmss with T prefix"
+      - test: conf-test:time-parse-003            # "T2320" basic hm
+        result: fail
+      - test: conf-test:time-parse-005            # "T23" basic h
+        result: fail
+      - test: conf-test:time-parse-006            # "T232030,5" basic fraction second
+        result: fail
+        notes: "Basic format with comma decimal separator not supported"
+      - test: conf-test:time-parse-008            # "T2320,8" basic fraction minute
+        result: fail
+      - test: conf-test:time-parse-010            # "T23.3" basic fraction hour
+        result: fail
+
+      # --- Parsing: extended format (passes) ---
+      - test: conf-test:time-parse-002            # "T23:20:50" extended full
+        result: pass
+        actual:
+          returned: '"23:20:50"'
+      - test: conf-test:time-parse-004            # "23:20" extended hm
+        result: pass
+        actual:
+          returned: '"23:20"'
+      - test: conf-test:time-parse-007            # "23:20:30.5" extended fraction
+        result: pass
+        actual:
+          returned: "nsec=500000000"
+      - test: conf-test:time-parse-009            # "23:20,8" extended fraction minute
+        result: pass
+        notes: "Ruby Time.parse handles comma decimal separator in extended format"
+
+      # --- Parsing: beginning/ending of day ---
+      - test: conf-test:time-parse-011            # "T000000" basic midnight
+        result: fail
+      - test: conf-test:time-parse-012            # "00:00:00" extended midnight
+        result: pass
+        actual:
+          returned: '"00:00:00"'
+      - test: conf-test:time-parse-013            # "T240000" basic end-of-day
+        result: fail
+      - test: conf-test:time-parse-014            # "24:00:00" extended end-of-day
+        result: fail
+        notes: "Time.parse does not accept hour 24"
+      - test: conf-test:time-parse-028            # "T00" reduced midnight
+        result: fail
+      - test: conf-test:time-parse-029            # "T00:00" reduced midnight
+        result: fail
+      - test: conf-test:time-parse-030            # "T24" reduced end-of-day
+        result: fail
+      - test: conf-test:time-parse-031            # "24:00" reduced end-of-day
+        result: fail
+      - test: conf-test:time-parse-032            # "T000000.000" midnight fraction
+        result: fail
+      - test: conf-test:time-parse-033            # "T240000.000" end-of-day fraction
+        result: fail
+
+      # --- Parsing: UTC ---
+      - test: conf-test:time-parse-015            # "T232030Z" basic UTC
+        result: fail
+      - test: conf-test:time-parse-016            # "23:20:30Z" extended UTC
+        result: pass
+        actual:
+          returned: "utc_offset=0"
+      - test: conf-test:time-parse-017            # "T2320Z" basic UTC reduced
+        result: fail
+      - test: conf-test:time-parse-018            # "T23Z" basic UTC hours
+        result: fail
+      - test: conf-test:time-parse-019            # "23:20Z" extended UTC reduced
+        result: pass
+
+      # --- Parsing: UTC offsets ---
+      - test: conf-test:time-parse-020            # "T152746+0100" basic positive
+        result: fail
+      - test: conf-test:time-parse-021            # "T152746-0500" basic negative
+        result: fail
+      - test: conf-test:time-parse-022            # "15:27:46+01:00" extended positive
+        result: pass
+        actual:
+          returned: "utc_offset=3600"
+      - test: conf-test:time-parse-023            # "15:27:46-05:00" extended negative
+        result: pass
+        actual:
+          returned: "utc_offset=-18000"
+      - test: conf-test:time-parse-024            # "T152746+01" basic hours-only
+        result: fail
+      - test: conf-test:time-parse-025            # "T152746-05" basic hours-only
+        result: fail
+      - test: conf-test:time-parse-026            # "15:27:46+01" extended hours-only
+        result: pass
+      - test: conf-test:time-parse-027            # "15:27:46-05" extended hours-only
+        result: pass
+
+      # --- Parsing: leap second ---
+      - test: conf-test:time-parse-034            # "T235960" leap second
+        result: fail
+        notes: "Ruby Time does not support leap seconds (second=60)"
+
+      # --- Generation ---
+      - test: conf-test:time-gen-001              # basic "T232050"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 20, 50).strftime("T%H%M%S")'
+          api: Time#strftime
+        actual:
+          returned: '"T232050"'
+      - test: conf-test:time-gen-002              # extended "T23:20:50"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 20, 50).strftime("T%H:%M:%S")'
+          api: Time#strftime
+        actual:
+          returned: '"T23:20:50"'
+      - test: conf-test:time-gen-003              # basic "T2320"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 20, 0).strftime("T%H%M")'
+          api: Time#strftime
+        actual:
+          returned: '"T2320"'
+      - test: conf-test:time-gen-004              # extended "23:20"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 20, 0).strftime("%H:%M")'
+          api: Time#strftime
+        actual:
+          returned: '"23:20"'
+      - test: conf-test:time-gen-005              # basic UTC "T232030Z"
+        result: pass
+        method:
+          code: 'Time.utc(2023, 1, 1, 23, 20, 30).strftime("T%H%M%SZ")'
+          api: Time.utc
+        actual:
+          returned: '"T232030Z"'
+      - test: conf-test:time-gen-006              # extended UTC "T23:20:30Z"
+        result: pass
+        method:
+          code: 'Time.utc(2023, 1, 1, 23, 20, 30).strftime("T%H:%M:%SZ")'
+          api: Time.utc
+        actual:
+          returned: '"T23:20:30Z"'
+      - test: conf-test:time-gen-007              # basic positive offset "T152746+0100"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 15, 27, 46, "+01:00").strftime("T%H%M%S%z")'
+          api: Time.new
+        actual:
+          returned: '"T152746+0100"'
+      - test: conf-test:time-gen-008              # extended positive offset
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 15, 27, 46, "+01:00").strftime("%H:%M:%S%z")'
+          api: Time.new
+        actual:
+          returned: '"15:27:46+0100"'
+      - test: conf-test:time-gen-009              # basic negative offset "T152746-0500"
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 15, 27, 46, "-05:00").strftime("T%H%M%S%z")'
+          api: Time.new
+        actual:
+          returned: '"T152746-0500"'
+      - test: conf-test:time-gen-010              # extended negative offset
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 15, 27, 46, "-05:00").strftime("%H:%M:%S%z")'
+          api: Time.new
+        actual:
+          returned: '"15:27:46-0500"'
+
+      # --- Validity ---
+      - test: conf-test:time-valid-001            # "T250000" hour 25
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 25, 0, 0) rescue "error"'
+          api: Time.new
+        actual:
+          valid: false
+      - test: conf-test:time-valid-002            # "T236000" minute 60
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 60, 0) rescue "error"'
+          api: Time.new
+        actual:
+          valid: false
+      - test: conf-test:time-valid-003            # "T235961" second 61
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 23, 59, 61) rescue "error"'
+          api: Time.new
+        actual:
+          valid: false
+      - test: conf-test:time-valid-004            # "T240001" hour 24 with minutes
+        result: pass
+        method:
+          code: 'Time.new(2023, 1, 1, 24, 0, 1) rescue "error"'
+          api: Time.new
+        actual:
+          valid: false
+      - test: conf-test:time-valid-005            # "T240001" hour 24 with seconds
+        result: pass
+      - test: conf-test:time-valid-006            # "T1920" ambiguity
+        result: pass
+        notes: "Time.parse can handle time designator disambiguation"
+
+      # --- Equivalence ---
+      - test: conf-test:time-equiv-001
+        result: pass
+      - test: conf-test:time-equiv-002
+        result: pass
+
+  # ================================================================
+  # CONFORMANCE CLASS: date-and-time (45 tests)
+  # Status: PARTIAL — DateTime.parse handles date+time combinations
+  # with offsets in extended format. Basic format not supported.
+  # Week-date+time and ordinal-date+time not supported by parsing.
+  # ================================================================
+  - conformance_class: conf-class:date-and-time
+    status: partial
+    notes: >-
+      DateTime.parse handles calendar date + time in extended format with
+      UTC offsets. Basic format (YYYYMMDDThhmmss) may work but without
+      time designator. Week-date+time and ordinal-date+time parsing
+      not supported. Expanded year combined with time not supported.
+    default_method:
+      language: ruby
+      code: 'DateTime.parse("{expression}")'
+      api: DateTime.parse
+    test_results:
+      # --- Parsing: basic calendar date + time ---
+      - test: conf-test:date-time-parse-001       # "19850412T232030" basic
+        result: fail
+        notes: "DateTime.parse may not parse basic format correctly"
+      - test: conf-test:date-time-parse-002       # "19850412T232030Z" basic UTC
+        result: fail
+      - test: conf-test:date-time-parse-003       # "19850412T232030+0400" basic offset
+        result: fail
+      - test: conf-test:date-time-parse-004       # "19850412T232030+04" basic hours
+        result: fail
+
+      # --- Parsing: extended calendar date + time ---
+      - test: conf-test:date-time-parse-005       # "1985-04-12T23:20:30"
+        result: pass
+        actual:
+          returned: '"1985-04-12T23:20:30+00:00"'
+      - test: conf-test:date-time-parse-006       # "1985-04-12T23:20:30Z"
+        result: pass
+        actual:
+          returned: '"1985-04-12T23:20:30+00:00"'
+      - test: conf-test:date-time-parse-007       # "1985-04-12T23:20:30+04:00"
+        result: pass
+        actual:
+          returned: "offset=Rational(1,6)"
+      - test: conf-test:date-time-parse-008       # "1985-04-12T23:20:30+04"
+        result: pass
+
+      # --- Parsing: ordinal date + time ---
+      - test: conf-test:date-time-parse-009       # "1985102T232030" basic ordinal
+        result: fail
+        notes: "Ordinal date combined with time not parseable"
+      - test: conf-test:date-time-parse-010       # "1985102T232030Z"
+        result: fail
+      - test: conf-test:date-time-parse-011       # "1985102T232030+0400"
+        result: fail
+      - test: conf-test:date-time-parse-012       # "1985102T232030+04"
+        result: fail
+      - test: conf-test:date-time-parse-013       # "1985-102T23:20:30" extended ordinal
+        result: fail
+      - test: conf-test:date-time-parse-014       # "1985-102T23:20:30Z"
+        result: fail
+      - test: conf-test:date-time-parse-015       # "1985-102T23:20:30+04:00"
+        result: fail
+      - test: conf-test:date-time-parse-016       # "1985-102T23:20:30+04"
+        result: fail
+
+      # --- Parsing: week date + time ---
+      - test: conf-test:date-time-parse-017       # "1985W155T232030" basic week
+        result: fail
+        notes: "Week date combined with time not parseable in basic format"
+      - test: conf-test:date-time-parse-018       # "1985W155T232030Z"
+        result: fail
+      - test: conf-test:date-time-parse-019       # "1985W155T232030+0400"
+        result: fail
+      - test: conf-test:date-time-parse-020       # "1985W155T232030+04"
+        result: fail
+      - test: conf-test:date-time-parse-021       # "1985-W15-5T23:20:30" extended
+        result: fail
+        notes: "Week date + time not parseable even in extended format"
+      - test: conf-test:date-time-parse-022       # "1985-W15-5T23:20:30Z"
+        result: fail
+      - test: conf-test:date-time-parse-023       # "1985-W15-5T23:20:30+04:00"
+        result: fail
+      - test: conf-test:date-time-parse-024       # "1985-W15-5T23:20:30+04"
+        result: fail
+
+      # --- Parsing: reduced precision ---
+      - test: conf-test:date-time-parse-025       # "19850412T1015" basic reduced
+        result: fail
+      - test: conf-test:date-time-parse-026       # "1985-04-12T10:15" extended reduced
+        result: pass
+        actual:
+          returned: '"1985-04-12T10:15:00+00:00"'
+      - test: conf-test:date-time-parse-027       # "1985102T1015Z" ordinal reduced
+        result: fail
+      - test: conf-test:date-time-parse-028       # "1985-102T10:15Z" ordinal reduced
+        result: fail
+      - test: conf-test:date-time-parse-029       # "1985W155T1015+0400" week reduced
+        result: fail
+      - test: conf-test:date-time-parse-030       # "1985-W15-5T10:15+04" week reduced
+        result: fail
+
+      # --- Generation ---
+      - test: conf-test:date-time-gen-001         # basic "19850412T232030"
+        result: pass
+        method:
+          code: 'DateTime.new(1985, 4, 12, 23, 20, 30).strftime("%Y%m%dT%H%M%S")'
+          api: DateTime#strftime
+        actual:
+          returned: '"19850412T232030"'
+      - test: conf-test:date-time-gen-002         # extended "1985-04-12T23:20:30"
+        result: pass
+        method:
+          code: 'DateTime.new(1985, 4, 12, 23, 20, 30).iso8601'
+          api: DateTime#iso8601
+        actual:
+          returned: '"1985-04-12T23:20:30+00:00"'
+      - test: conf-test:date-time-gen-003         # basic with offset
+        result: pass
+        method:
+          code: 'DateTime.new(1985, 4, 12, 23, 20, 30, "+04:00").strftime("%Y%m%dT%H%M%S%z")'
+          api: DateTime#strftime
+        actual:
+          returned: '"19850412T232030+0400"'
+      - test: conf-test:date-time-gen-004         # extended with offset
+        result: pass
+        method:
+          code: 'DateTime.new(1985, 4, 12, 23, 20, 30, "+04:00").iso8601'
+          api: DateTime#iso8601
+        actual:
+          returned: '"1985-04-12T23:20:30+04:00"'
+
+      # --- Validity ---
+      - test: conf-test:date-time-valid-001       # "19850412T23:20:30" mixed
+        result: pass
+        notes: "Mixed basic date / extended time is validated"
+      - test: conf-test:date-time-valid-002       # "1985-04-12T232030" mixed
+        result: pass
+        notes: "Mixed extended date / basic time is validated"
+
+      # --- Equivalence ---
+      - test: conf-test:date-time-equiv-001
+        result: pass
+
+  # ================================================================
+  # CONFORMANCE CLASS: duration (25 tests)
+  # Status: NOT-SUPPORTED — Ruby stdlib has no ISO 8601 duration parser
+  # or generator. ActiveSupport::Duration exists but is Rails, not stdlib.
+  # ================================================================
+  - conformance_class: conf-class:duration
+    status: not-supported
+    notes: >-
+      Ruby standard library has no ISO 8601 duration (PnYnMnDTnHnMnS) parser
+      or generator. ActiveSupport (Rails) provides Duration.parse but that is
+      not part of Ruby stdlib. All duration tests are not-supported.
+    sample_method:
+      language: ruby
+      code: 'Date.parse("P1Y2M10DT2H30M")'
+      api: Date.parse
+      result: "Date::Error: invalid date"
+    test_results:
+      - { test: conf-test:dur-parse-001, result: not-supported }
+      - { test: conf-test:dur-parse-002, result: not-supported }
+      - { test: conf-test:dur-parse-003, result: not-supported }
+      - { test: conf-test:dur-parse-004, result: not-supported }
+      - { test: conf-test:dur-parse-005, result: not-supported }
+      - { test: conf-test:dur-parse-006, result: not-supported }
+      - { test: conf-test:dur-parse-007, result: not-supported }
+      - { test: conf-test:dur-parse-008, result: not-supported }
+      - { test: conf-test:dur-parse-009, result: not-supported }
+      - { test: conf-test:dur-parse-010, result: not-supported }
+      - { test: conf-test:dur-parse-011, result: not-supported }
+      - { test: conf-test:dur-parse-012, result: not-supported }
+      - { test: conf-test:dur-parse-013, result: not-supported }
+      - { test: conf-test:dur-parse-014, result: not-supported }
+      - { test: conf-test:dur-parse-015, result: not-supported }
+      - { test: conf-test:dur-gen-001, result: not-supported }
+      - { test: conf-test:dur-gen-002, result: not-supported }
+      - { test: conf-test:dur-gen-003, result: not-supported }
+      - { test: conf-test:dur-gen-004, result: not-supported }
+      - { test: conf-test:dur-valid-001, result: not-supported }
+      - { test: conf-test:dur-valid-002, result: not-supported }
+      - { test: conf-test:dur-valid-003, result: not-supported }
+      - { test: conf-test:dur-valid-004, result: not-supported }
+      - { test: conf-test:dur-valid-005, result: not-supported }
+      - { test: conf-test:dur-equiv-001, result: not-supported }
+
+  # ================================================================
+  # CONFORMANCE CLASS: time-interval (20 tests)
+  # Status: NOT-SUPPORTED — No ISO 8601 time interval parsing/generation
+  # ================================================================
+  - conformance_class: conf-class:time-interval
+    status: not-supported
+    notes: "Ruby stdlib has no ISO 8601 time interval parser or generator."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("19850412/19850425")'
+      api: Date.parse
+      result: "Date::Error: invalid date"
+    test_results:
+      - { test: conf-test:interval-parse-001, result: not-supported }
+      - { test: conf-test:interval-parse-002, result: not-supported }
+      - { test: conf-test:interval-parse-003, result: not-supported }
+      - { test: conf-test:interval-parse-004, result: not-supported }
+      - { test: conf-test:interval-parse-005, result: not-supported }
+      - { test: conf-test:interval-parse-006, result: not-supported }
+      - { test: conf-test:interval-parse-007, result: not-supported }
+      - { test: conf-test:interval-parse-008, result: not-supported }
+      - { test: conf-test:interval-parse-009, result: not-supported }
+      - { test: conf-test:interval-parse-010, result: not-supported }
+      - { test: conf-test:interval-parse-011, result: not-supported }
+      - { test: conf-test:interval-parse-012, result: not-supported }
+      - { test: conf-test:interval-parse-013, result: not-supported }
+      - { test: conf-test:interval-gen-001, result: not-supported }
+      - { test: conf-test:interval-gen-002, result: not-supported }
+      - { test: conf-test:interval-gen-003, result: not-supported }
+      - { test: conf-test:interval-gen-004, result: not-supported }
+      - { test: conf-test:interval-valid-001, result: not-supported }
+      - { test: conf-test:interval-equiv-001, result: not-supported }
+      - { test: conf-test:interval-equiv-002, result: not-supported }
+
+  # ================================================================
+  # CONFORMANCE CLASS: recurring-time-interval (19 tests)
+  # Status: NOT-SUPPORTED — No ISO 8601 recurring interval support
+  # ================================================================
+  - conformance_class: conf-class:recurring-time-interval
+    status: not-supported
+    notes: "Ruby stdlib has no ISO 8601 recurring time interval support."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("R5/19850412/19850425")'
+      api: Date.parse
+      result: "Date::Error: invalid date"
+    test_results:
+      - { test: conf-test:recur-parse-001, result: not-supported }
+      - { test: conf-test:recur-parse-002, result: not-supported }
+      - { test: conf-test:recur-parse-003, result: not-supported }
+      - { test: conf-test:recur-parse-004, result: not-supported }
+      - { test: conf-test:recur-parse-005, result: not-supported }
+      - { test: conf-test:recur-parse-006, result: not-supported }
+      - { test: conf-test:recur-parse-007, result: not-supported }
+      - { test: conf-test:recur-parse-008, result: not-supported }
+      - { test: conf-test:recur-parse-009, result: not-supported }
+      - { test: conf-test:recur-parse-010, result: not-supported }
+      - { test: conf-test:recur-parse-011, result: not-supported }
+      - { test: conf-test:recur-parse-012, result: not-supported }
+      - { test: conf-test:recur-gen-001, result: not-supported }
+      - { test: conf-test:recur-gen-002, result: not-supported }
+      - { test: conf-test:recur-gen-003, result: not-supported }
+      - { test: conf-test:recur-gen-004, result: not-supported }
+      - { test: conf-test:recur-valid-001, result: not-supported }
+      - { test: conf-test:recur-valid-002, result: not-supported }
+      - { test: conf-test:recur-equiv-001, result: not-supported }
+
+  # ================================================================
+  # PART 2 — ALL NOT-SUPPORTED
+  # Ruby stdlib does not support any ISO 8601-2 features.
+  # Each class lists all tests for completeness.
+  # ================================================================
+  - conformance_class: 8601-2:conf-class:explicit-representation
+    status: not-supported
+    notes: >-
+      Ruby stdlib does not use ISO 8601 explicit representation form
+      (Y/M/D/H/M/S designators). Uses numeric formats only.
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018Y4M12D")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:explicit-calendar-date-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-calendar-date-generation-001, result: not-supported }
+      - { test: conf-test:explicit-ordinal-date-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-ordinal-date-generation-001, result: not-supported }
+      - { test: conf-test:explicit-week-date-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-week-date-generation-001, result: not-supported }
+      - { test: conf-test:explicit-local-time-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-local-time-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-local-time-generation-001, result: not-supported }
+      - { test: conf-test:explicit-beginning-of-day-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-beginning-of-day-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-003, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-004, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-005, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-006, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-007, result: not-supported }
+      - { test: conf-test:explicit-time-shift-parsing-008, result: not-supported }
+      - { test: conf-test:explicit-date-with-shift-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-date-with-shift-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-time-with-shift-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-with-shift-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-time-with-shift-parsing-003, result: not-supported }
+      - { test: conf-test:explicit-datetime-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-datetime-with-shift-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-decade-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-decade-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-century-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-century-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-day-of-week-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-day-of-year-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-decade-additional-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-decade-additional-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-century-additional-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-century-additional-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-value-prefixing-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-value-prefixing-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-omission-zero-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-omission-zero-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-omission-zero-validity-001, result: not-supported }
+      - { test: conf-test:explicit-precision-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-precision-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-precision-parsing-003, result: not-supported }
+      - { test: conf-test:explicit-decimal-fractions-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-decimal-fractions-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-decimal-fractions-parsing-003, result: not-supported }
+      - { test: conf-test:explicit-reduced-precision-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-reduced-precision-parsing-002, result: not-supported }
+      - { test: conf-test:explicit-time-interval-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-interval-component-order-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-interval-component-order-validity-001, result: not-supported }
+      - { test: conf-test:explicit-time-interval-shift-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-interval-start-dur-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-time-interval-dur-end-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-recurring-parsing-001, result: not-supported }
+      - { test: conf-test:explicit-recurring-parsing-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:negative-values
+    status: not-supported
+    notes: "Ruby stdlib does not support negative date/time component values."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("-0001")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:negative-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-year-implicit-parsing-002, result: not-supported }
+      - { test: conf-test:negative-year-explicit-parsing-002, result: not-supported }
+      - { test: conf-test:negative-week-parsing-001, result: not-supported }
+      - { test: conf-test:negative-day-of-month-parsing-001, result: not-supported }
+      - { test: conf-test:negative-day-of-year-parsing-001, result: not-supported }
+      - { test: conf-test:negative-day-of-year-parsing-002, result: not-supported }
+      - { test: conf-test:negative-year-before-one-parsing-001, result: not-supported }
+      - { test: conf-test:negative-year-before-one-parsing-002, result: not-supported }
+      - { test: conf-test:negative-decade-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-decade-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-decade-zero-parsing-001, result: not-supported }
+      - { test: conf-test:negative-century-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-century-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:negative-century-zero-parsing-001, result: not-supported }
+      - { test: conf-test:negative-duration-parsing-001, result: not-supported }
+      - { test: conf-test:negative-duration-parsing-002, result: not-supported }
+      - { test: conf-test:negative-duration-arithmetic-001, result: not-supported }
+      - { test: conf-test:negative-duration-arithmetic-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:exponential-values
+    status: not-supported
+    notes: "Ruby stdlib does not support exponential (E) notation in date/time values."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("12E3")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:exponential-notation-parsing-001, result: not-supported }
+      - { test: conf-test:exponential-notation-parsing-002, result: not-supported }
+      - { test: conf-test:exponential-year-parsing-001, result: not-supported }
+      - { test: conf-test:exponential-year-generation-001, result: not-supported }
+      - { test: conf-test:exponential-letter-year-parsing-001, result: not-supported }
+      - { test: conf-test:exponential-letter-year-parsing-002, result: not-supported }
+      - { test: conf-test:exponential-letter-year-basic-parsing-001, result: not-supported }
+      - { test: conf-test:exponential-letter-year-basic-parsing-002, result: not-supported }
+      - { test: conf-test:exponential-validity-001, result: not-supported }
+      - { test: conf-test:exponential-validity-002, result: not-supported }
+      - { test: conf-test:exponential-time-scale-parsing-001, result: not-supported }
+      - { test: conf-test:exponential-time-scale-validity-001, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:significant-digits
+    status: not-supported
+    notes: "Ruby stdlib does not support significant digits (S) notation."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018S4")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:significant-digits-parsing-001, result: not-supported }
+      - { test: conf-test:significant-digits-parsing-002, result: not-supported }
+      - { test: conf-test:significant-digits-parsing-003, result: not-supported }
+      - { test: conf-test:significant-digits-year-parsing-001, result: not-supported }
+      - { test: conf-test:significant-digits-four-digit-year-parsing-001, result: not-supported }
+      - { test: conf-test:significant-digits-letter-year-parsing-001, result: not-supported }
+      - { test: conf-test:significant-digits-exponential-year-parsing-001, result: not-supported }
+      - { test: conf-test:significant-digits-generation-001, result: not-supported }
+      - { test: conf-test:significant-digits-validity-001, result: not-supported }
+      - { test: conf-test:significant-digits-validity-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:qualification
+    status: not-supported
+    notes: "Ruby stdlib does not support uncertainty/approximation qualification (?, ~, %)."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018?")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:qualification-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-month-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-month-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-week-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-week-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-of-week-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-of-week-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-of-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-day-of-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-hour-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-hour-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-minute-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-minute-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-second-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-second-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-decade-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-decade-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-century-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-century-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-complete-date-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-complete-date-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-month-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-month-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-decade-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-decade-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-century-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-reduced-century-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-expanded-day-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-expanded-month-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-expanded-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-all-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-all-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-month-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-month-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-year-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-year-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-003, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-004, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-005, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-006, result: not-supported }
+      - { test: conf-test:qualification-individual-parsing-007, result: not-supported }
+      - { test: conf-test:qualification-group-individual-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-group-individual-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-datetime-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-datetime-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-datetime-parsing-003, result: not-supported }
+      - { test: conf-test:qualification-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-implicit-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-explicit-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-complete-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-complete-parsing-002, result: not-supported }
+      - { test: conf-test:qualification-group-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-individual-year-parsing-001, result: not-supported }
+      - { test: conf-test:qualification-individual-month-parsing-001, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:unspecified-digits
+    status: not-supported
+    notes: "Ruby stdlib does not support unspecified digits (X) notation."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018XX")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:unspecified-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-explicit-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-explicit-parsing-003, result: not-supported }
+      - { test: conf-test:unspecified-explicit-parsing-004, result: not-supported }
+      - { test: conf-test:unspecified-explicit-parsing-005, result: not-supported }
+      - { test: conf-test:unspecified-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-implicit-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-implicit-parsing-003, result: not-supported }
+      - { test: conf-test:unspecified-implicit-parsing-004, result: not-supported }
+      - { test: conf-test:unspecified-right-day-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-right-day-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-right-month-day-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-right-month-day-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-right-all-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-right-all-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-reduced-month-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-reduced-month-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-1digit-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-1digit-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-2digits-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-2digits-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-3digits-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-4digits-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-4digits-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-reduced-year-unbounded-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-003, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-004, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-005, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-006, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-007, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-008, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-009, result: not-supported }
+      - { test: conf-test:unspecified-anywhere-parsing-010, result: not-supported }
+      - { test: conf-test:unspecified-datetime-parsing-001, result: not-supported }
+      - { test: conf-test:unspecified-datetime-parsing-002, result: not-supported }
+      - { test: conf-test:unspecified-datetime-parsing-003, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:seasons
+    status: not-supported
+    notes: "Ruby stdlib does not support season representations."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018-21")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:seasons-basic-spring-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-basic-summer-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-basic-autumn-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-basic-winter-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-quarter-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-northern-spring-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-quarter1-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-semestral1-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-generation-001, result: not-supported }
+      - { test: conf-test:seasons-generation-002, result: not-supported }
+      - { test: conf-test:seasons-validity-001, result: not-supported }
+      - { test: conf-test:seasons-validity-002, result: not-supported }
+      - { test: conf-test:seasons-implicit-basic-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-implicit-basic-parsing-002, result: not-supported }
+      - { test: conf-test:seasons-implicit-advanced-parsing-001, result: not-supported }
+      - { test: conf-test:seasons-implicit-advanced-parsing-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:grouped-time-scale-units
+    status: not-supported
+    notes: "Ruby stdlib does not support grouped time scale units (G/U designators)."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018U1")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:grouped-unit-definition-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-unit-definition-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-unit-definition-parsing-003, result: not-supported }
+      - { test: conf-test:grouped-unit-value-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-unit-value-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-unit-value-parsing-003, result: not-supported }
+      - { test: conf-test:grouped-date-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-datetime-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-implicit-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-time-implicit-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-6month-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-equivalence-001, result: not-supported }
+      - { test: conf-test:grouped-precision-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-precision-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-precision-parsing-003, result: not-supported }
+      - { test: conf-test:grouped-precision-parsing-004, result: not-supported }
+      - { test: conf-test:grouped-lower-order-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-lower-order-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-with-shift-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-with-shift-parsing-002, result: not-supported }
+      - { test: conf-test:grouped-boundary-valid-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-boundary-invalid-validity-001, result: not-supported }
+      - { test: conf-test:grouped-truncation-parsing-001, result: not-supported }
+      - { test: conf-test:grouped-conversion-parsing-001, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:set-representation
+    status: not-supported
+    notes: "Ruby stdlib does not support set/list notation ({}, [])."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018{3..6}")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:set-enumeration-parsing-001, result: not-supported }
+      - { test: conf-test:set-enumeration-parsing-002, result: not-supported }
+      - { test: conf-test:set-single-element-parsing-001, result: not-supported }
+      - { test: conf-test:set-single-element-parsing-002, result: not-supported }
+      - { test: conf-test:set-range-before-parsing-001, result: not-supported }
+      - { test: conf-test:set-range-before-parsing-002, result: not-supported }
+      - { test: conf-test:set-range-before-parsing-003, result: not-supported }
+      - { test: conf-test:set-range-after-parsing-001, result: not-supported }
+      - { test: conf-test:set-range-after-parsing-002, result: not-supported }
+      - { test: conf-test:set-range-after-parsing-003, result: not-supported }
+      - { test: conf-test:set-range-between-parsing-001, result: not-supported }
+      - { test: conf-test:set-range-between-parsing-002, result: not-supported }
+      - { test: conf-test:set-range-combined-parsing-001, result: not-supported }
+      - { test: conf-test:set-expansion-parsing-001, result: not-supported }
+      - { test: conf-test:set-expansion-parsing-002, result: not-supported }
+      - { test: conf-test:set-integer-parsing-001, result: not-supported }
+      - { test: conf-test:set-integer-parsing-002, result: not-supported }
+      - { test: conf-test:set-integer-grouped-parsing-001, result: not-supported }
+      - { test: conf-test:set-integer-grouped-parsing-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:extended-time-intervals
+    status: not-supported
+    notes: "Ruby stdlib does not support extended time intervals (open/unknown endpoints)."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("19850412/..")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:extended-interval-open-end-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-open-end-parsing-002, result: not-supported }
+      - { test: conf-test:extended-interval-open-end-parsing-003, result: not-supported }
+      - { test: conf-test:extended-interval-open-end-explicit-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-open-start-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-open-start-parsing-002, result: not-supported }
+      - { test: conf-test:extended-interval-open-start-parsing-003, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-end-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-end-parsing-002, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-end-parsing-003, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-start-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-start-parsing-002, result: not-supported }
+      - { test: conf-test:extended-interval-unknown-start-parsing-003, result: not-supported }
+      - { test: conf-test:extended-interval-qualification-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-qualification-parsing-002, result: not-supported }
+      - { test: conf-test:extended-interval-qualification-parsing-003, result: not-supported }
+      - { test: conf-test:extended-interval-qualification-parsing-004, result: not-supported }
+      - { test: conf-test:extended-interval-partial-qualification-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-unspecified-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-qualified-unknown-end-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-qualified-open-end-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-qualified-open-start-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-before-after-parsing-001, result: not-supported }
+      - { test: conf-test:extended-interval-before-after-parsing-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:date-time-selection
+    status: not-supported
+    notes: "Ruby stdlib does not support date-time selection rules (L/N designators)."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("R/2018-08-08/P1D/F1YL{3,8}M8DN")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:selection-set-parsing-001, result: not-supported }
+      - { test: conf-test:selection-set-parsing-002, result: not-supported }
+      - { test: conf-test:selection-position-parsing-001, result: not-supported }
+      - { test: conf-test:selection-position-parsing-002, result: not-supported }
+      - { test: conf-test:selection-position-parsing-003, result: not-supported }
+      - { test: conf-test:selection-time-interval-parsing-001, result: not-supported }
+      - { test: conf-test:selection-application-parsing-001, result: not-supported }
+      - { test: conf-test:selection-application-parsing-002, result: not-supported }
+      - { test: conf-test:selection-election-day-parsing-001, result: not-supported }
+      - { test: conf-test:selection-context-parsing-001, result: not-supported }
+      - { test: conf-test:selection-within-interval-parsing-001, result: not-supported }
+      - { test: conf-test:selection-within-interval-parsing-002, result: not-supported }
+      - { test: conf-test:selection-mothers-day-parsing-001, result: not-supported }
+      - { test: conf-test:selection-thanksgiving-parsing-001, result: not-supported }
+      - { test: conf-test:selection-month-parsing-001, result: not-supported }
+      - { test: conf-test:selection-month-validity-001, result: not-supported }
+      - { test: conf-test:selection-week-parsing-001, result: not-supported }
+      - { test: conf-test:selection-week-parsing-002, result: not-supported }
+      - { test: conf-test:selection-day-of-month-parsing-001, result: not-supported }
+      - { test: conf-test:selection-day-of-month-parsing-002, result: not-supported }
+      - { test: conf-test:selection-week-day-parsing-001, result: not-supported }
+      - { test: conf-test:selection-week-day-validity-001, result: not-supported }
+      - { test: conf-test:selection-ordinal-day-parsing-001, result: not-supported }
+      - { test: conf-test:selection-ordinal-day-parsing-002, result: not-supported }
+      - { test: conf-test:selection-hour-parsing-001, result: not-supported }
+      - { test: conf-test:selection-hour-validity-001, result: not-supported }
+      - { test: conf-test:selection-minute-parsing-001, result: not-supported }
+      - { test: conf-test:selection-minute-validity-001, result: not-supported }
+      - { test: conf-test:selection-second-parsing-001, result: not-supported }
+      - { test: conf-test:selection-second-parsing-002, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:recurring-time-intervals-with-rules
+    status: not-supported
+    notes: "Ruby stdlib does not support recurring time intervals with repeat rules (F designator)."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("R12/20150929T140000/20150929T153000/F2W")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:recurring-start-end-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-start-duration-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-duration-end-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-eligibility-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-eligibility-parsing-002, result: not-supported }
+      - { test: conf-test:recurring-eligibility-parsing-003, result: not-supported }
+      - { test: conf-test:recurring-selection-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-selection-parsing-002, result: not-supported }
+      - { test: conf-test:recurring-precision-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-precision-parsing-002, result: not-supported }
+      - { test: conf-test:recurring-precision-parsing-003, result: not-supported }
+      - { test: conf-test:recurring-selection-september-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-method-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-repeat-rule-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-repeat-rule-parsing-002, result: not-supported }
+      - { test: conf-test:recurring-selection-month-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-inheritance-parsing-001, result: not-supported }
+      - { test: conf-test:recurring-evaluation-parsing-001, result: not-supported }
+
+  - conformance_class: 8601-2:conf-class:arithmetic
+    status: not-supported
+    notes: "Ruby stdlib does not support ISO 8601 arithmetic expressions."
+    sample_method:
+      language: ruby
+      code: 'Date.parse("2018Y1M1D+P5D")'
+      api: Date.parse
+      result: "Date::Error or misinterpreted"
+    test_results:
+      - { test: conf-test:arithmetic-composite-addition-001, result: not-supported }
+      - { test: conf-test:arithmetic-composite-addition-002, result: not-supported }
+      - { test: conf-test:arithmetic-composite-subtraction-001, result: not-supported }
+      - { test: conf-test:arithmetic-composite-subtraction-002, result: not-supported }
+      - { test: conf-test:arithmetic-composite-subtraction-003, result: not-supported }
+      - { test: conf-test:arithmetic-composite-subtraction-004, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-addition-001, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-addition-002, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-negative-001, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-negative-002, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-negative-003, result: not-supported }
+      - { test: conf-test:arithmetic-precedence-negative-004, result: not-supported }
+      - { test: conf-test:arithmetic-multiplication-001, result: not-supported }
+      - { test: conf-test:arithmetic-multiplication-002, result: not-supported }
+      - { test: conf-test:arithmetic-date-duration-001, result: not-supported }
+      - { test: conf-test:arithmetic-date-duration-002, result: not-supported }
+      - { test: conf-test:arithmetic-date-precedence-001, result: not-supported }
+      - { test: conf-test:arithmetic-date-precedence-002, result: not-supported }
+      - { test: conf-test:arithmetic-overflow-001, result: not-supported }
+      - { test: conf-test:arithmetic-underflow-001, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-001, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-002, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-003, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-004, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-005, result: not-supported }
+      - { test: conf-test:arithmetic-conversion-equivocal-006, result: not-supported }
+      - { test: conf-test:arithmetic-canonical-001, result: not-supported }
+      - { test: conf-test:arithmetic-canonical-002, result: not-supported }
+      - { test: conf-test:arithmetic-canonical-003, result: not-supported }
+      - { test: conf-test:arithmetic-canonical-004, result: not-supported }
+      - { test: conf-test:arithmetic-addition-001, result: not-supported }
+
+  # ================================================================
+  # PROFILE RESULTS — Additional profile-specific tests
+  # These tests cover profile restrictions beyond the base
+  # conformance classes (e.g., extended-format-only, mandatory T).
+  # ================================================================
+
+profile_results:
+  # ── RFC 3339 (9 additional tests) ──
+  - profile: profile:rfc-3339
+    status: partial
+    notes: >-
+      Ruby Date/Time handles extended-format RFC 3339 timestamps but is not
+      a strict validator — it accepts some non-RFC-3339 inputs and rejects
+      others inconsistently.
+    test_results:
+      - test: conf-test:rfc-3339-valid-001
+        result: pass
+        method:
+          code: 'Time.parse("1985-04-12T23:20:50.52Z").iso8601'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-valid-002
+        result: pass
+        method:
+          code: 'Time.parse("1985-04-12T23:20:50+02:00").iso8601'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-valid-003
+        result: pass
+        method:
+          code: 'Time.parse("1996-12-19T16:39:57-08:00").iso8601'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-invalid-001
+        result: fail
+        notes: >-
+          Time.parse accepts basic format "19850412T232050Z" — Ruby is not
+          a strict RFC 3339 validator.
+        method:
+          code: 'begin; Time.parse("19850412T232050Z"); true; rescue => e; false; end'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-invalid-002
+        result: fail
+        notes: "Time.parse accepts lowercase 't' designator"
+        method:
+          code: 'begin; Time.parse("1985-04-12t23:20:50Z"); true; rescue => e; false; end'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-invalid-003
+        result: fail
+        notes: "Time.parse accepts time without seconds (hh:mm only)"
+        method:
+          code: 'begin; Time.parse("1985-04-12T23:20Z"); true; rescue => e; false; end'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-invalid-004
+        result: pass
+        notes: "Time.parse rejects hour 24"
+        method:
+          code: 'begin; Time.parse("1985-04-12T24:00:00Z"); true; rescue => e; false; end'
+          language: ruby
+          api: Time.parse
+        actual:
+          valid: false
+      - test: conf-test:rfc-3339-invalid-005
+        result: fail
+        notes: "Date.parse accepts date-only '1985-04-12' — not strict RFC 3339"
+        method:
+          code: 'begin; Date.parse("1985-04-12"); true; rescue => e; false; end'
+          language: ruby
+          api: Date.parse
+        actual:
+          valid: true
+      - test: conf-test:rfc-3339-invalid-006
+        result: fail
+        notes: "Date.parse accepts year-month '1985-04' — not strict RFC 3339"
+        method:
+          code: 'begin; Date.parse("1985-04"); true; rescue => e; false; end'
+          language: ruby
+          api: Date.parse
+        actual:
+          valid: true
+
+  # ── EDTF Level 0 (10 additional tests) ──
+  - profile: profile:edtf-level-0
+    status: partial
+    notes: >-
+      EDTF Level 0 is a subset of ISO 8601-1 extended format. Ruby handles
+      the extended-format and four-digit-year tests but is not a strict
+      validator — accepts inputs that EDTF Level 0 would reject.
+    test_results:
+      - test: conf-test:edtf-level-0-valid-001
+        result: pass
+        notes: "Extended year-month accepted"
+      - test: conf-test:edtf-level-0-valid-002
+        result: pass
+        notes: "Extended full date accepted"
+      - test: conf-test:edtf-level-0-valid-003
+        result: pass
+        notes: "Date-time with Z accepted"
+      - test: conf-test:edtf-level-0-valid-004
+        result: pass
+        notes: "Date-time with numeric offset accepted"
+      - test: conf-test:edtf-level-0-invalid-001
+        result: fail
+        notes: "Date.parse accepts basic format '20100101'"
+      - test: conf-test:edtf-level-0-invalid-002
+        result: fail
+        notes: "Date.parse accepts basic format '201001'"
+      - test: conf-test:edtf-level-0-invalid-003
+        result: fail
+        notes: "Time.parse accepts hour-only time '2010-01-01T00Z'"
+      - test: conf-test:edtf-level-0-invalid-004
+        result: fail
+        notes: "Time.parse accepts offset without minutes '+01'"
+      - test: conf-test:edtf-level-0-invalid-005
+        result: pass
+        notes: "Time.parse rejects hour 24"
+      - test: conf-test:edtf-level-0-invalid-006
+        result: pass
+        notes: "Date.parse rejects expanded year '+002010'"
+
+  # ── EDTF Level 1 (19 additional tests) ──
+  - profile: profile:edtf-level-1
+    status: not-supported
+    notes: >-
+      EDTF Level 1 requires qualification markers (?), unspecified digits
+      (XX), and season codes — none of which are supported by Ruby stdlib.
+      The base ISO 8601-1 extended-format tests that overlap with Level 0
+      behave the same as EDTF Level 0.
+    test_results:
+      - { test: conf-test:edtf-level-1-valid-001, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-002, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-003, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-004, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-005, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-006, result: not-supported }
+      - { test: conf-test:edtf-level-1-invalid-001, result: not-supported }
+      - { test: conf-test:edtf-level-1-invalid-002, result: not-supported }
+      - { test: conf-test:edtf-level-1-valid-007, result: pass, notes: "Extended format date accepted" }
+      - { test: conf-test:edtf-level-1-invalid-003, result: fail, notes: "Date.parse accepts basic format" }
+      - { test: conf-test:edtf-level-1-valid-008, result: pass, notes: "Four-digit year accepted" }
+      - { test: conf-test:edtf-level-1-valid-009, result: pass, notes: "Date-time with T accepted" }
+      - { test: conf-test:edtf-level-1-invalid-004, result: fail, notes: "Time.parse accepts space separator" }
+      - { test: conf-test:edtf-level-1-valid-010, result: pass, notes: "Time with hours and minutes accepted" }
+      - { test: conf-test:edtf-level-1-invalid-005, result: fail, notes: "Time.parse accepts hour-only time" }
+      - { test: conf-test:edtf-level-1-valid-011, result: pass, notes: "Hour 23 accepted" }
+      - { test: conf-test:edtf-level-1-invalid-006, result: pass, notes: "Time.parse rejects hour 24" }
+      - { test: conf-test:edtf-level-1-valid-012, result: pass, notes: "UTC offset with minutes accepted" }
+      - { test: conf-test:edtf-level-1-invalid-007, result: fail, notes: "Time.parse accepts offset without minutes" }
+
+  # ── EDTF Level 2 (24 additional tests) ──
+  - profile: profile:edtf-level-2
+    status: not-supported
+    notes: >-
+      EDTF Level 2 adds partial uncertain/approximate qualification,
+      unspecified digits, set/range notation, and exponential values —
+      none supported by Ruby stdlib. Only the base ISO 8601-1 tests
+      that overlap with Level 0/1 behave the same.
+    test_results:
+      - { test: conf-test:edtf-level-2-valid-001, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-002, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-003, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-004, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-005, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-006, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-007, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-008, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-009, result: pass, notes: "Extended format date accepted" }
+      - { test: conf-test:edtf-level-2-invalid-001, result: fail, notes: "Date.parse accepts basic format" }
+      - { test: conf-test:edtf-level-2-valid-010, result: pass, notes: "Four-digit year accepted" }
+      - { test: conf-test:edtf-level-2-valid-011, result: pass, notes: "Date-time with T accepted" }
+      - { test: conf-test:edtf-level-2-invalid-002, result: fail, notes: "Time.parse accepts space separator" }
+      - { test: conf-test:edtf-level-2-valid-012, result: pass, notes: "Time with hours and minutes accepted" }
+      - { test: conf-test:edtf-level-2-invalid-003, result: fail, notes: "Time.parse accepts hour-only time" }
+      - { test: conf-test:edtf-level-2-valid-013, result: pass, notes: "Hour 23 accepted" }
+      - { test: conf-test:edtf-level-2-invalid-004, result: pass, notes: "Time.parse rejects hour 24" }
+      - { test: conf-test:edtf-level-2-valid-014, result: pass, notes: "UTC offset with minutes accepted" }
+      - { test: conf-test:edtf-level-2-invalid-005, result: fail, notes: "Time.parse accepts offset without minutes" }
+      - { test: conf-test:edtf-level-2-valid-015, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-016, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-017, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-018, result: not-supported }
+      - { test: conf-test:edtf-level-2-valid-019, result: not-supported }
+
+  # ── W3C Datetime (13 additional tests) ──
+  - profile: profile:w3c-datetime
+    status: partial
+    notes: >-
+      W3C Datetime is a subset of ISO 8601-1 extended format with six
+      permitted forms. Ruby handles most forms but is not a strict
+      validator — accepts inputs outside the W3C profile.
+    test_results:
+      - test: conf-test:w3c-datetime-valid-001
+        result: pass
+        notes: "Year-only '1997' accepted by Date.parse"
+      - test: conf-test:w3c-datetime-valid-002
+        result: pass
+        notes: "Year-month '1997-07' accepted by Date.parse"
+      - test: conf-test:w3c-datetime-valid-003
+        result: pass
+        notes: "Full date '1997-07-16' accepted by Date.parse"
+      - test: conf-test:w3c-datetime-valid-004
+        result: pass
+        notes: "Date-time with minutes and offset accepted"
+      - test: conf-test:w3c-datetime-valid-005
+        result: pass
+        notes: "Date-time with seconds and offset accepted"
+      - test: conf-test:w3c-datetime-valid-006
+        result: pass
+        notes: "Date-time with fractional seconds accepted"
+      - test: conf-test:w3c-datetime-valid-007
+        result: pass
+        notes: "Date-time with seconds and Z accepted"
+      - test: conf-test:w3c-datetime-invalid-001
+        result: fail
+        notes: "Date.parse accepts basic format '199707'"
+      - test: conf-test:w3c-datetime-invalid-002
+        result: fail
+        notes: "Date.parse accepts basic format '19970716'"
+      - test: conf-test:w3c-datetime-invalid-003
+        result: fail
+        notes: "DateTime.parse accepts time without timezone"
+      - test: conf-test:w3c-datetime-invalid-004
+        result: fail
+        notes: "Time.parse may accept hour-only time"
+      - test: conf-test:w3c-datetime-valid-008
+        result: pass
+        notes: "Date-time with uppercase T accepted"
+      - test: conf-test:w3c-datetime-valid-009
+        result: pass
+        notes: "Date-time with lowercase t accepted by Time.parse"

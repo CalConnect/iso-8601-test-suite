@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:iso-8601-2-complete
+name: ISO 8601-2 Complete
+description: >-
+  Profile covering all conformance classes defined in both ISO 8601-1 (Basic
+  rules) and ISO 8601-2 (Extensions).
+source: ISO 8601-1:2019 / ISO 8601-2:2019
+standardization_target_type: iso-8601-date-time-processor
+conformance_classes:
+  - 8601-1:conf-class:fundamentals
+  - 8601-1:conf-class:calendar-date
+  - 8601-1:conf-class:ordinal-date
+  - 8601-1:conf-class:week-date
+  - 8601-1:conf-class:time-of-day
+  - 8601-1:conf-class:date-and-time
+  - 8601-1:conf-class:duration
+  - 8601-1:conf-class:time-interval
+  - 8601-1:conf-class:recurring-time-interval
+  - 8601-2:conf-class:explicit-representation
+  - 8601-2:conf-class:negative-values
+  - 8601-2:conf-class:exponential-values
+  - 8601-2:conf-class:significant-digits
+  - 8601-2:conf-class:qualification
+  - 8601-2:conf-class:unspecified-digits
+  - 8601-2:conf-class:seasons
+  - 8601-2:conf-class:grouped-time-scale-units
+  - 8601-2:conf-class:set-representation
+  - 8601-2:conf-class:extended-time-intervals
+  - 8601-2:conf-class:date-time-selection
+  - 8601-2:conf-class:recurring-time-intervals-with-rules
+  - 8601-2:conf-class:arithmetic
+additional_requirements: []
+additional_tests: []

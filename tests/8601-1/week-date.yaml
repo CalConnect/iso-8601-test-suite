@@ -1,0 +1,240 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:week-date
+name: Week date conformance tests
+description: >
+  Tests for week date representations including complete basic/extended formats,
+  reduced precision (week only), and expanded representations.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - conf-class:fundamentals
+requirements_class: req-class:week-date
+source: ISO 8601-1:2026 Clause 5.2.4
+tests:
+  # Parsing tests: complete representations
+  - id: conf-test:week-date-parse-001
+    description: "Parse basic format week date 1985W155 (week 15, day 5 = Friday)"
+    requirements:
+      - req:week-date-basic-full
+    test_type: parsing
+    given:
+      expression: "1985W155"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+
+  - id: conf-test:week-date-parse-002
+    description: "Parse extended format week date 1985-W15-5"
+    requirements:
+      - req:week-date-extended-full
+    test_type: parsing
+    given:
+      expression: "1985-W15-5"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+
+  # Parsing tests: reduced precision (week only)
+  - id: conf-test:week-date-parse-003
+    description: "Parse basic format week-only 1985W15"
+    requirements:
+      - req:week-date-basic-week-only
+    test_type: parsing
+    given:
+      expression: "1985W15"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+
+  - id: conf-test:week-date-parse-004
+    description: "Parse extended format week-only 1985-W15"
+    requirements:
+      - req:week-date-extended-week-only
+    test_type: parsing
+    given:
+      expression: "1985-W15"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+
+  # Parsing tests: expanded representations
+  - id: conf-test:week-date-parse-005
+    description: "Parse expanded basic format week date +001985W155"
+    requirements:
+      - req:week-date-expanded-basic-full
+    test_type: parsing
+    given:
+      expression: "+001985W155"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+
+  - id: conf-test:week-date-parse-006
+    description: "Parse expanded extended format week date +001985-W15-5"
+    requirements:
+      - req:week-date-expanded-extended-full
+    test_type: parsing
+    given:
+      expression: "+001985-W15-5"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+
+  - id: conf-test:week-date-parse-007
+    description: "Parse expanded basic format week-only +001985W15"
+    requirements:
+      - req:week-date-expanded-basic-week-only
+    test_type: parsing
+    given:
+      expression: "+001985W15"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+
+  - id: conf-test:week-date-parse-008
+    description: "Parse expanded extended format week-only +001985-W15"
+    requirements:
+      - req:week-date-expanded-extended-week-only
+    test_type: parsing
+    given:
+      expression: "+001985-W15"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+
+  # Generation tests
+  - id: conf-test:week-date-gen-001
+    description: "Generate basic format week date"
+    requirements:
+      - req:week-date-basic-full
+    test_type: generation
+    given:
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+    expect:
+      expression: "1985W155"
+
+  - id: conf-test:week-date-gen-002
+    description: "Generate extended format week date"
+    requirements:
+      - req:week-date-extended-full
+    test_type: generation
+    given:
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+    expect:
+      expression: "1985-W15-5"
+
+  - id: conf-test:week-date-gen-003
+    description: "Generate basic format week-only"
+    requirements:
+      - req:week-date-basic-week-only
+    test_type: generation
+    given:
+      components:
+        week:
+          week_year: 1985
+          week: 15
+    expect:
+      expression: "1985W15"
+
+  - id: conf-test:week-date-gen-004
+    description: "Generate extended format week-only"
+    requirements:
+      - req:week-date-extended-week-only
+    test_type: generation
+    given:
+      components:
+        week:
+          week_year: 1985
+          week: 15
+    expect:
+      expression: "1985-W15"
+
+  # Validity tests
+  - id: conf-test:week-date-valid-001
+    description: "Verify week 00 is invalid"
+    requirements:
+      - req:week-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985W015"
+    expect:
+      valid: false
+
+  - id: conf-test:week-date-valid-002
+    description: "Verify day of week 0 is invalid"
+    requirements:
+      - req:week-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985W150"
+    expect:
+      valid: false
+
+  - id: conf-test:week-date-valid-003
+    description: "Verify day of week 8 is invalid"
+    requirements:
+      - req:week-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985W158"
+    expect:
+      valid: false
+
+  - id: conf-test:week-date-valid-004
+    description: "Verify week 54 is invalid (maximum is 53)"
+    requirements:
+      - req:week-date-basic-full
+    test_type: validity
+    given:
+      expression: "1985W545"
+    expect:
+      valid: false
+
+  # Equivalence tests
+  - id: conf-test:week-date-equiv-001
+    description: "Basic and extended format represent the same week date"
+    requirements:
+      - req:week-date-basic-full
+      - req:week-date-extended-full
+    test_type: equivalence
+    given:
+      expression_a: "1985W155"
+      expression_b: "1985-W15-5"
+    expect:
+      equivalent: true

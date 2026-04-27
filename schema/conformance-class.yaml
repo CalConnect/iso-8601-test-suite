@@ -1,0 +1,118 @@
+# YAML Schema for ISO 8601 Test Suite — Conformance Class
+---
+type: object
+required:
+  - id
+  - name
+  - standardization_target_type
+  - requirements_class
+  - source
+  - tests
+properties:
+  id:
+    type: string
+    pattern: "^conf-class:[a-z0-9-]+$"
+    description: "Local identifier for this conformance class (e.g. conf-class:calendar-date)"
+  name:
+    type: string
+    description: "Human-readable name"
+  description:
+    type: string
+    description: "Description of the conformance class"
+  standardization_target_type:
+    type: string
+    description: "The type of implementation being tested"
+  dependencies:
+    type: array
+    items:
+      type: string
+      pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
+    description: "Other conformance classes this class depends on"
+  requirements_class:
+    type: string
+    pattern: "^(8601-[12]:)?req-class:[a-z0-9-]+$"
+    description: "Reference to the corresponding requirements class"
+  source:
+    type: string
+    description: "Source reference in the ISO 8601 standard"
+  tests:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+        - description
+        - requirements
+        - test_type
+        - given
+        - expect
+      properties:
+        id:
+          type: string
+          pattern: "^conf-test:[a-z0-9-]+$"
+          description: "Local identifier for this conformance test"
+        description:
+          type: string
+          description: "What this test verifies"
+        requirements:
+          type: array
+          items:
+            type: string
+            pattern: "^(8601-[12]:)?req:[a-z0-9-]+$"
+          description: "Requirements verified by this test"
+        test_type:
+          type: string
+          enum: [parsing, generation, validity, equivalence, arithmetic]
+          description: "Type of conformance test"
+        given:
+          oneOf:
+            - type: object
+              required: [expression]
+              properties:
+                expression:
+                  type: string
+                  description: "The input expression string"
+            - type: object
+              required: [components]
+              properties:
+                components:
+                  type: object
+                  description: "The input components"
+            - type: object
+              required: [expression_a, expression_b]
+              properties:
+                expression_a:
+                  type: string
+                expression_b:
+                  type: string
+            - type: object
+              required: [expression, operation]
+              properties:
+                expression:
+                  type: string
+                operation:
+                  type: string
+                  enum: [add, subtract]
+                operand:
+                  type: object
+        expect:
+          oneOf:
+            - type: object
+              required: [valid]
+              properties:
+                valid:
+                  type: boolean
+                components:
+                  type: object
+                  description: "Expected parsed components"
+            - type: object
+              required: [expression]
+              properties:
+                expression:
+                  type: string
+                  description: "Expected generated expression"
+            - type: object
+              required: [equivalent]
+              properties:
+                equivalent:
+                  type: boolean
