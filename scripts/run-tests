@@ -1,414 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# =============================================================================
-# ISO 8601 Test Suite — Test Harness
-# =============================================================================
-# Loads YAML test definitions and runs them against a pluggable adapter.
-#
-# Usage:
-#   ruby scripts/run-tests                              # run all tests (default adapter: ruby-date)
-#   ruby scripts/run-tests --adapter ruby-date          # explicit adapter
-#   ruby scripts/run-tests --profile rfc-3339           # run a specific profile
-#   ruby scripts/run-tests --class calendar-date        # run a specific conformance class
-#   ruby scripts/run-tests --list                       # list available profiles and classes
-#   ruby scripts/run-tests --output results/new.yaml    # write results to file
-#
-# Adapters live in adapters/{name}.rb and implement:
-#   try_parse(expression)       → { valid:, parsed:, api: } or { valid: false, error:, api: }
-#   extract_components(parsed)  → { calendar: {...}, time: {...}, ... }
-#   generate(components)        → { expression: "..." } or nil
-#   equivalent?(obj_a, obj_b)   → true / false / nil
-#   run_arithmetic(test)        → { result:, notes: }  (optional, defaults to not-supported)
-#
-# See adapters/TEMPLATE.rb for the full interface.
-# =============================================================================
+require_relative '../lib/test_suite'
 
 require 'yaml'
-require 'json'
-require 'open3'
 require 'optparse'
+require 'fileutils'
 
 REPO_ROOT = File.expand_path(File.join(__dir__, ".."))
 Dir.chdir(REPO_ROOT)
 
-# =============================================================================
-# Terminal helpers
-# =============================================================================
-module T
-  COLORS = $stdout.tty? && ENV["NO_COLOR"].nil?
-
-  def self.bold(s)    = COLORS ? "\e[1m#{s}\e[0m" : s.to_s
-  def self.green(s)   = COLORS ? "\e[32m#{s}\e[0m" : s.to_s
-  def self.red(s)     = COLORS ? "\e[31m#{s}\e[0m" : s.to_s
-  def self.yellow(s)  = COLORS ? "\e[33m#{s}\e[0m" : s.to_s
-  def self.cyan(s)    = COLORS ? "\e[36m#{s}\e[0m" : s.to_s
-  def self.dim(s)     = COLORS ? "\e[2m#{s}\e[0m" : s.to_s
-  def self.bgreen(s)  = COLORS ? "\e[92m#{s}\e[0m" : s.to_s
-  def self.bred(s)    = COLORS ? "\e[91m#{s}\e[0m" : s.to_s
-  def self.byellow(s) = COLORS ? "\e[93m#{s}\e[0m" : s.to_s
-end
-
-# =============================================================================
-# Test Suite Loader
-# =============================================================================
-class TestSuiteLoader
-  def initialize
-    @conf_tests = {}
-    @conf_classes = {}
-    @profiles = {}
-  end
-
-  attr_reader :conf_tests, :conf_classes, :profiles
-
-  def load_all
-    load_conformance_classes
-    load_profiles
-    self
-  end
-
-  def tests_for_class(class_id)
-    cc = @conf_classes[class_id]
-    cc ? cc[:tests] : []
-  end
-
-  def tests_for_profile(profile_id)
-    profile = @profiles[profile_id]
-    return [] unless profile
-
-    tests = []
-    (profile["conformance_classes"] || []).each do |cc_ref|
-      tests.concat(tests_for_class(cc_ref))
-    end
-    (profile["additional_tests"] || []).each { |t| tests << t }
-    tests
-  end
-
-  def profile_ids
-    @profiles.keys.sort
-  end
-
-  def class_ids
-    @conf_classes.keys.select { |k| k !~ /^[0-9]/ }.sort
-  end
-
-  private
-
-  def load_conformance_classes
-    Dir.glob("tests/**/*.yaml").sort.each do |f|
-      data = safe_load(f)
-      next unless data
-
-      id = data["id"]
-      part = f.include?("8601-1") ? "8601-1" : "8601-2"
-      tests = data["tests"] || []
-      tests.each { |t| @conf_tests[t["id"]] = t }
-
-      entry = { id: id, tests: tests, file: f }
-      @conf_classes[id] = entry
-      @conf_classes["#{part}:#{id}"] = entry
-    end
-  end
-
-  def load_profiles
-    Dir.glob("profiles/**/*.yaml").sort.each do |f|
-      data = safe_load(f)
-      next unless data
-      @profiles[data["id"]] = data
-    end
-  end
-
-  def safe_load(path)
-    YAML.load_file(path, permitted_classes: [Symbol])
-  rescue => e
-    $stderr.puts T.red("ERROR: Cannot load #{path}: #{e.message}")
-    nil
-  end
-end
-
-# =============================================================================
-# Test Executor — uses an adapter to run a single test
-# =============================================================================
-class TestExecutor
-  def initialize(adapter)
-    @adapter = adapter
-  end
-
-  def run(test)
-    type = test["test_type"]
-    case type
-    when "validity"    then run_validity(test)
-    when "parsing"     then run_parsing(test)
-    when "generation"  then run_generation(test)
-    when "equivalence" then run_equivalence(test)
-    when "arithmetic"  then run_arithmetic(test)
-    else
-      { result: "error", notes: "Unknown test type: #{type}" }
-    end
-  end
-
-  private
-
-  def run_validity(test)
-    expr = test.dig("given", "expression")
-    expected = test.dig("expect", "valid")
-    return { result: "error", notes: "Missing expression" } unless expr
-
-    parse_result = @adapter.try_parse(expr)
-    actual_valid = parse_result[:valid]
-
-    if actual_valid == expected
-      { result: "pass", actual: { valid: actual_valid }, api: parse_result[:api] }
-    else
-      { result: "fail", actual: { valid: actual_valid },
-        notes: "Expected #{expected}, got #{actual_valid}", api: parse_result[:api] }
-    end
-  end
-
-  def run_parsing(test)
-    expr = test.dig("given", "expression")
-    return { result: "error", notes: "Missing expression" } unless expr
-
-    expected_valid = test.dig("expect", "valid")
-    expected_components = test.dig("expect", "components")
-
-    parse_result = @adapter.try_parse(expr)
-
-    # Expression should not parse
-    if !parse_result[:valid] && expected_valid == false
-      return { result: "pass", actual: { valid: false }, api: parse_result[:api] }
-    end
-
-    # Expression should parse but didn't
-    if !parse_result[:valid]
-      return { result: "fail", actual: { valid: false, error: parse_result[:error] },
-               api: parse_result[:api] }
-    end
-
-    # Parse succeeded — extract and compare components
-    actual_components = @adapter.extract_components(parse_result[:parsed])
-
-    if components_match?(expected_components, actual_components)
-      { result: "pass", actual: { valid: true, components: actual_components },
-        api: parse_result[:api] }
-    else
-      { result: "fail", actual: { valid: true, components: actual_components },
-        notes: "Component mismatch", api: parse_result[:api] }
-    end
-  end
-
-  def run_generation(test)
-    given_components = test.dig("given", "components")
-    expected_expr = test.dig("expect", "expression")
-    return { result: "error", notes: "Missing components or expected expression" } unless given_components && expected_expr
-
-    result = @adapter.generate(given_components)
-
-    if result.nil?
-      return { result: "not-supported", notes: "Adapter cannot generate from given components" }
-    end
-
-    if result[:expression] == expected_expr
-      { result: "pass", actual: { returned: result[:expression] } }
-    else
-      { result: "fail", actual: { returned: result[:expression] },
-        notes: "Expected '#{expected_expr}'" }
-    end
-  end
-
-  def run_equivalence(test)
-    expr_a = test.dig("given", "expression_a")
-    expr_b = test.dig("given", "expression_b")
-    expected = test.dig("expect", "equivalent")
-    return { result: "error", notes: "Missing expressions" } unless expr_a && expr_b
-
-    parse_a = @adapter.try_parse(expr_a)
-    parse_b = @adapter.try_parse(expr_b)
-
-    if !parse_a[:valid] || !parse_b[:valid]
-      return { result: "not-supported",
-               notes: "Cannot parse one or both expressions",
-               api: [parse_a[:api], parse_b[:api]].join(", ") }
-    end
-
-    actual = @adapter.equivalent?(parse_a[:parsed], parse_b[:parsed])
-
-    if actual.nil?
-      { result: "not-supported", notes: "Adapter cannot determine equivalence" }
-    elsif actual == expected
-      { result: "pass", actual: { equivalent: actual } }
-    else
-      { result: "fail", actual: { equivalent: actual }, notes: "Expected #{expected}" }
-    end
-  end
-
-  def run_arithmetic(test)
-    @adapter.run_arithmetic(test)
-  end
-
-  def components_match?(expected, actual)
-    return true unless expected
-    return false unless actual
-
-    # Normalize string/symbol keys — YAML gives strings, Ruby adapters may use symbols
-    expected = stringify_keys(expected)
-    actual = stringify_keys(actual)
-
-    expected.each do |key, exp_val|
-      act_val = actual[key]
-      if exp_val.is_a?(Hash)
-        return false unless act_val.is_a?(Hash)
-        return false unless components_match?(exp_val, act_val)
-      elsif exp_val != act_val
-        return false
-      end
-    end
-    true
-  end
-
-  def stringify_keys(obj)
-    case obj
-    when Hash
-      obj.each_with_object({}) { |(k, v), h| h[k.to_s] = stringify_keys(v) }
-    when Array
-      obj.map { |v| stringify_keys(v) }
-    else
-      obj
-    end
-  end
-end
-
-# =============================================================================
-# Adapter Loader
-# =============================================================================
-module AdapterLoader
-  ADAPTERS_DIR = File.join(REPO_ROOT, "adapters")
-
-  def self.load(adapter_name)
-    # JSON protocol adapter — delegates to an external process
-    if adapter_name.start_with?("exec:")
-      command = adapter_name.sub("exec:", "")
-      return ExecAdapter.new(command)
-    end
-
-    path = File.join(ADAPTERS_DIR, "#{adapter_name}.rb")
-    unless File.exist?(path)
-      $stderr.puts T.red("ERROR: Adapter not found: #{path}")
-      $stderr.puts "  Available adapters: #{list.join(', ')}"
-      $stderr.puts "  Or use: --adapter exec:<command> for an external adapter"
-      exit 1
-    end
-
-    require File.expand_path(path)
-
-    # Find the adapter class — convention: class name derived from filename
-    # e.g. "ruby-date" → RubyDateAdapter
-    class_name = adapter_name.split("-").map(&:capitalize).join + "Adapter"
-    klass = Object.const_get(class_name)
-    klass.new
-  end
-
-  def self.list
-    Dir.glob(File.join(ADAPTERS_DIR, "*.rb"))
-      .map { |f| File.basename(f, ".rb") }
-      .reject { |n| n == "TEMPLATE" }
-      .sort
-  end
-end
-
-# =============================================================================
-# Exec Adapter — JSON protocol adapter for external processes
-# =============================================================================
-# Communicates with a child process via newline-delimited JSON (NDJSON).
-#
-# Usage:
-#   ruby run-tests --adapter "exec:python3 adapters/python-datetime.py"
-#   ruby run-tests --adapter "exec:node adapters/js-temporal.mjs"
-#   ruby run-tests --adapter exec:./adapters/rust-chrono
-#
-# The adapter process receives JSON commands on stdin, one per line:
-#   {"method":"try_parse","params":{"expression":"1985-04-12"}}
-#
-# And writes JSON responses on stdout, one per line:
-#   {"result":{"valid":true,"parsed":"h1","api":"date.fromisoformat"}}
-#
-# See adapters/python-datetime.py for a working example.
-# =============================================================================
-class ExecAdapter
-  def initialize(command)
-    @command = command
-    begin
-      @stdin, @stdout, @wait_thr = Open3.popen2(command)
-    rescue Errno::ENOENT, Errno::EACCES => e
-      $stderr.puts T.red("ERROR: Cannot start adapter process: #{command}")
-      $stderr.puts "  #{e.message}"
-      exit 1
-    end
-    @info = safe_call("info") || {}
-  end
-
-  def name    = @info["name"] || File.basename(@command.split.first || @command)
-  def language = @info["language"] || "unknown"
-  def version = @info["version"] || "unknown"
-
-  def try_parse(expression)
-    result = call("try_parse", "expression" => expression)
-    unless result
-      return { valid: false, error: "no response from adapter process", api: "exec" }
-    end
-    if result["valid"]
-      { valid: true, parsed: result["parsed"], api: result["api"] || "exec" }
-    else
-      { valid: false, error: result["error"] || "parse error", api: result["api"] || "exec" }
-    end
-  rescue => e
-    { valid: false, error: e.message, api: "exec" }
-  end
-
-  def extract_components(parsed)
-    call("extract_components", "parsed" => parsed) || {}
-  end
-
-  def generate(components)
-    result = call("generate", "components" => components)
-    return nil unless result
-    { expression: result["expression"] }
-  end
-
-  def equivalent?(parsed_a, parsed_b)
-    call("equivalent", "parsed_a" => parsed_a, "parsed_b" => parsed_b)
-  end
-
-  def run_arithmetic(test)
-    call("run_arithmetic", "test" => test) ||
-      { result: "not-supported", notes: "No response from adapter process" }
-  end
-
-  private
-
-  def call(method, params = {})
-    request = { "method" => method, "params" => params }.to_json
-    @stdin.puts(request)
-    @stdin.flush
-    line = @stdout.gets
-    return nil unless line
-    response = JSON.parse(line.strip)
-    raise response["error"] if response["error"]
-    response["result"]
-  rescue JSON::ParserError
-    nil
-  end
-
-  def safe_call(method, params = {})
-    call(method, params)
-  rescue
-    nil
-  end
-end
-
-# =============================================================================
-# Runner
-# =============================================================================
 class Runner
   def initialize(options = {})
     @adapter_name = options[:adapter] || "ruby-date"
@@ -421,44 +22,61 @@ class Runner
   end
 
   def run
-    suite = TestSuiteLoader.new.load_all
+    store = YamlStore.new
+    index = SuiteIndex.new(store)
+    suite = TestSuiteLoader.new(store, index)
 
     if @list
-      list_available(suite)
+      list_available(suite, index)
       return 0
     end
 
-    adapter = AdapterLoader.load(@adapter_name)
-    executor = TestExecutor.new(adapter)
+    adapter = begin
+      AdapterLoader.load(@adapter_name)
+    rescue AdapterNotFoundError => e
+      $stderr.puts Term.red("ERROR: #{e.message}")
+      return 1
+    end
 
-    # Determine which tests to run
-    tests, label = select_tests(suite)
+    tests, label = select_tests(suite, index)
 
     if tests.empty?
-      $stderr.puts T.red("No tests found for: #{@profile || @class_filter || 'unknown'}")
+      $stderr.puts Term.red("No tests found for: #{@profile || @class_filter || 'unknown'}")
       return 1
     end
 
     puts ""
-    puts T.bold("  ISO 8601 Test Runner")
-    puts T.dim("  Adapter: #{adapter.name} (#{adapter.language} #{adapter.version})")
-    puts T.dim("  Tests:   #{tests.length} | #{label}")
+    puts Term.bold("  ISO 8601 Test Runner")
+    puts Term.dim("  Adapter: #{adapter.name} (#{adapter.language} #{adapter.version})")
+    puts Term.dim("  Tests:   #{tests.length} | #{label}")
     puts ""
 
-    # Run tests
     results = []
     counts = { pass: 0, fail: 0, error: 0, not_supported: 0 }
+    declared = adapter.respond_to?(:declared_conformance_classes) ? adapter.declared_conformance_classes : nil
 
     tests.each do |test|
       tid = test["id"]
       desc = test["description"] || ""
 
-      result = executor.run(test)
-      result[:test] = tid
-      result[:description] = desc
+      if declared && !declared.empty?
+        type, id = infer_class(tid, index)
+        if type == :conformance_class && !declared.include?(id)
+          results << { test: tid, description: desc, result: "not-supported", notes: "Conformance class not declared by implementation" }
+          counts[:not_supported] += 1
+          unless @quiet
+            puts "  #{Term.dim("  N/S ")}  #{Term.cyan(tid)} #{Term.dim("not declared: #{id}")}"
+          end
+          next
+        end
+      end
+
+      result = TestTypeHandlers.run(adapter, test)
+      result["test"] = tid
+      result["description"] = desc
       results << result
 
-      status = result[:result]
+      status = result["result"]
       case status
       when "pass"          then counts[:pass] += 1
       when "fail"          then counts[:fail] += 1
@@ -468,74 +86,91 @@ class Runner
 
       unless @quiet
         icon = case status
-               when "pass"          then T.green("  PASS")
-               when "fail"          then T.bred("  FAIL")
-               when "error"         then T.red("  ERR ")
-               when "not-supported" then T.dim("  N/S ")
+               when "pass"          then Term.green("  PASS")
+               when "fail"          then Term.bred("  FAIL")
+               when "error"         then Term.red("  ERR ")
+               when "not-supported" then Term.dim("  N/S ")
                end
-        line = "  #{icon}  #{T.cyan(tid)}"
-        line << " #{T.dim(desc[0, 60])}" if @verbose
-        line << " #{T.dim(result[:notes])}" if result[:notes] && status != "pass"
+        line = "  #{icon}  #{Term.cyan(tid)}"
+        line << " #{Term.dim(desc[0, 60])}" if @verbose
+        line << " #{Term.dim(result["notes"])}" if result["notes"] && status != "pass"
         puts line
       end
     end
 
-    # Summary
     total = tests.length
     puts ""
-    puts T.dim("  #{'─' * 50}")
-    puts "  #{T.bold(total)} tests: " \
-         "#{T.green(counts[:pass])} passed, " \
-         "#{T.red(counts[:fail])} failed, " \
-         "#{T.red(counts[:error])} errors, " \
-         "#{T.dim(counts[:not_supported])} not-supported"
+    puts Term.dim("  #{'─' * 50}")
+    puts "  #{Term.bold(total)} tests: " \
+         "#{Term.green(counts[:pass])} passed, " \
+         "#{Term.red(counts[:fail])} failed, " \
+         "#{Term.red(counts[:error])} errors, " \
+         "#{Term.dim(counts[:not_supported])} not-supported"
     puts ""
 
-    if @output
-      write_results(results, adapter)
-    end
+    write_results(results, adapter, index) if @output
 
     counts[:fail] > 0 || counts[:error] > 0 ? 1 : 0
   end
 
   private
 
-  def select_tests(suite)
+  def select_tests(suite, index)
     if @profile
       [suite.tests_for_profile(@profile), "Profile #{@profile}"]
     elsif @class_filter
       [suite.tests_for_class(@class_filter), "Class #{@class_filter}"]
     else
-      [suite.conf_tests.values, "All tests"]
+      [suite.all_tests, "All tests"]
     end
   end
 
-  def list_available(suite)
+  def list_available(suite, index)
     puts ""
-    puts T.bold("  Adapters:")
-    AdapterLoader.list.each do |name|
-      puts "    #{T.cyan(name)}"
-    end
+    puts Term.bold("  Adapters:")
+    AdapterLoader.list.each { |name| puts "    #{Term.cyan(name)}" }
 
     puts ""
-    puts T.bold("  Profiles:")
+    puts Term.bold("  Profiles:")
     suite.profile_ids.each do |pid|
-      p = suite.profiles[pid]
-      cc = (p["conformance_classes"] || []).length
+      p = index.profiles[pid]
+      tc = (p["traceability"] || []).length
       at = (p["additional_tests"] || []).length
-      puts "    #{T.cyan(pid)} (#{cc} classes, #{at} additional tests)"
+      puts "    #{Term.cyan(pid)} (#{tc} traceability classes, #{at} additional tests)"
     end
 
     puts ""
-    puts T.bold("  Conformance classes:")
+    puts Term.bold("  Conformance classes:")
     suite.class_ids.each do |cid|
-      cc = suite.conf_classes[cid]
-      puts "    #{T.cyan(cid)} (#{cc[:tests].length} tests)"
+      tests = suite.tests_for_class(cid)
+      puts "    #{Term.cyan(cid)} (#{tests.length} tests)"
     end
     puts ""
   end
 
-  def write_results(results, adapter)
+  def write_results(results, adapter, index)
+    grouped = results.group_by { |r| infer_class(r["test"], index) }
+
+    cc_results = []
+    profile_results = []
+    grouped.each do |(type, id), tests|
+      key = type == :profile ? "profile" : "conformance_class"
+      entry = {
+        key => id,
+        "status" => aggregate_status(tests),
+        "test_results" => tests.map { |r|
+          e = { "test" => r["test"], "result" => r["result"] }
+          e["notes"] = r["notes"] if r["notes"]
+          e
+        }
+      }
+      if type == :profile
+        profile_results << entry
+      else
+        cc_results << entry
+      end
+    end
+
     output = {
       "id" => "result:#{adapter.name.downcase.gsub(/[^a-z0-9]+/, '-')}",
       "implementation" => {
@@ -546,77 +181,36 @@ class Runner
       "date" => Date.today.to_s,
       "tester" => "run-tests script",
       "verification" => "automated",
-      "conformance_class_results" => build_output(results)
-    }
+      "declared_conformance_classes" => adapter.respond_to?(:declared_conformance_classes) ? adapter.declared_conformance_classes : nil,
+      "conformance_class_results" => cc_results,
+      "profile_results" => profile_results.empty? ? nil : profile_results
+    }.compact
 
     FileUtils.mkdir_p(File.dirname(@output))
-    File.write(@output, YAML.dump(output))
-    puts T.dim("  Results written to #{@output}")
+    schema_ref = "# yaml-language-server: $schema=../schema/conformance-result.yaml"
+    File.write(@output, "#{schema_ref}\n#{YAML.dump(output)}")
+    puts Term.dim("  Results written to #{@output}")
   end
 
-  def build_output(results)
-    grouped = results.group_by { |r| infer_class(r[:test]) }
-    grouped.map do |cc_id, tests|
-      {
-        "conformance_class" => cc_id,
-        "status" => aggregate_status(tests),
-        "test_results" => tests.map { |r|
-          entry = { "test" => r[:test], "result" => r[:result] }
-          entry["notes"] = r[:notes] if r[:notes]
-          entry
-        }
-      }
-    end
-  end
+  def infer_class(test_id, index)
+    class_id = index.class_for_test(test_id)
+    return [:profile, class_id] if class_id&.start_with?("profile:")
+    return [:conformance_class, class_id] if class_id
 
-  def infer_class(test_id)
-    tid = test_id.sub(/^conf-test:/, "")
-    {
-      "fundamentals" => "conf-class:fundamentals",
-      "cal-date" => "conf-class:calendar-date",
-      "ord-date" => "conf-class:ordinal-date",
-      "week-date" => "conf-class:week-date",
-      "time" => "conf-class:time-of-day",
-      "date-time" => "conf-class:date-and-time",
-      "dur" => "conf-class:duration",
-      "interval" => "conf-class:time-interval",
-      "recur" => "conf-class:recurring-time-interval",
-      "explicit" => "8601-2:conf-class:explicit-representation",
-      "negative" => "8601-2:conf-class:negative-values",
-      "exponential" => "8601-2:conf-class:exponential-values",
-      "significant" => "8601-2:conf-class:significant-digits",
-      "qualification" => "8601-2:conf-class:qualification",
-      "unspecified" => "8601-2:conf-class:unspecified-digits",
-      "seasons" => "8601-2:conf-class:seasons",
-      "grouped" => "8601-2:conf-class:grouped-time-scale-units",
-      "set" => "8601-2:conf-class:set-representation",
-      "extended-interval" => "8601-2:conf-class:extended-time-intervals",
-      "selection" => "8601-2:conf-class:date-time-selection",
-      "recurring" => "8601-2:conf-class:recurring-time-intervals-with-rules",
-      "arithmetic" => "8601-2:conf-class:arithmetic",
-      "rfc-3339" => "profile:rfc-3339",
-      "edtf-level-0" => "profile:edtf-level-0",
-      "edtf-level-1" => "profile:edtf-level-1",
-      "edtf-level-2" => "profile:edtf-level-2",
-      "w3c-datetime" => "profile:w3c-datetime"
-    }.each { |prefix, class_id| return class_id if tid.start_with?(prefix) }
-    "unknown"
+    [:conformance_class, "unknown"]
   end
 
   def aggregate_status(tests)
-    statuses = tests.map { |r| r[:result] }.uniq
+    statuses = tests.map { |r| r["result"] }.uniq
     case
-    when statuses == ["pass"]                          then "passed"
-    when statuses.include?("fail") || statuses.include?("error") then "failed"
-    when statuses == ["not-supported"]                 then "not-supported"
-    else                                                    "partial"
+    when statuses == ["pass"]                                        then "passed"
+    when statuses.include?("fail") || statuses.include?("error")     then "failed"
+    when statuses == ["not-supported"]                               then "not-supported"
+    else                                                                  "partial"
     end
   end
 end
 
-# =============================================================================
-# Main
-# =============================================================================
 options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby run-tests [options]"

@@ -1,720 +1,125 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# =============================================================================
-# ISO 8601 Test Suite — Validation Script
-# =============================================================================
-# Validates YAML files against their declared schemas and performs structural
-# cross-reference checks across the entire test suite.
-#
-# Usage:  ruby scripts/validate [options]
-#   -q, --quiet     Only show errors and warnings
-#   -v, --verbose   Show every individual check
-#   -h, --help      Show help
-#
-# No gem dependencies — uses only Ruby stdlib.
-# =============================================================================
-
+require_relative '../lib/test_suite'
 require 'yaml'
 require 'optparse'
-require 'io/console'
+require 'set'
 
 REPO_ROOT = File.expand_path(File.join(__dir__, ".."))
 Dir.chdir(REPO_ROOT)
 
-# =============================================================================
-# Terminal UI — professional color output with emojis
-# =============================================================================
-module Term
-  # Detect terminal capabilities
-  COLORS_ENABLED = $stdout.tty? && ENV["NO_COLOR"].nil?
-  EMOJI_ENABLED  = COLORS_ENABLED && $stdout.tty?
+Phase = Struct.new(:name, :type, :subtitle, :handler, keyword_init: true)
 
-  # ── ANSI palette ──────────────────────────────────────────────────────────
-  RESET   = "\e[0m"
-  BOLD    = "\e[1m"
-  DIM     = "\e[2m"
-  ITALIC  = "\e[3m"
-  UNDER   = "\e[4m"
-
-  BLACK   = "\e[30m"
-  RED     = "\e[31m"
-  GREEN   = "\e[32m"
-  YELLOW  = "\e[33m"
-  BLUE    = "\e[34m"
-  MAGENTA = "\e[35m"
-  CYAN    = "\e[36m"
-  WHITE   = "\e[37m"
-
-  BRED    = "\e[91m"
-  BGREEN  = "\e[92m"
-  BYELLOW = "\e[93m"
-  BBLUE   = "\e[94m"
-  BMAGENTA= "\e[95m"
-  BCYAN   = "\e[96m"
-  BWHITE  = "\e[97m"
-
-  BG_RED    = "\e[41m"
-  BG_GREEN  = "\e[42m"
-  BG_YELLOW = "\e[43m"
-  BG_BLUE   = "\e[44m"
-
-  module_function
-
-  def color?(code, text)
-    COLORS_ENABLED ? "#{code}#{text}#{RESET}" : text.to_s
-  end
-
-  def bold(text)    = color?(BOLD, text)
-  def dim(text)     = color?(DIM, text)
-  def italic(text)  = color?(ITALIC, text)
-  def underline(text) = color?(UNDER, text)
-
-  def red(text)     = color?(RED, text)
-  def green(text)   = color?(GREEN, text)
-  def yellow(text)  = color?(YELLOW, text)
-  def blue(text)    = color?(BLUE, text)
-  def magenta(text) = color?(MAGENTA, text)
-  def cyan(text)    = color?(CYAN, text)
-  def white(text)   = color?(WHITE, text)
-
-  def bred(text)    = color?(BRED, text)
-  def bgreen(text)  = color?(BGREEN, text)
-  def byellow(text) = color?(BYELLOW, text)
-  def bblue(text)   = color?(BBLUE, text)
-  def bcyan(text)   = color?(BCYAN, text)
-  def bwhite(text)  = color?(BWHITE, text)
-  def bmag(text)    = color?(BMAGENTA, text)
-
-  def badge(text, color = BG_BLUE)
-    COLORS_ENABLED ? " #{color}#{BWHITE} #{text} #{RESET} " : " [#{text}] "
-  end
-
-  def ok_icon
-    EMOJI_ENABLED ? green("  \u2713") : green("PASS")
-  end
-
-  def fail_icon
-    EMOJI_ENABLED ? bred("  \u2717") : bred("FAIL")
-  end
-
-  def warn_icon
-    EMOJI_ENABLED ? byellow("  \u26A0") : byellow("WARN")
-  end
-
-  def info_icon
-    EMOJI_ENABLED ? bblue("  \u2139") : bblue("INFO")
-  end
-
-  def section_icon(type)
-    return "" unless EMOJI_ENABLED
-    case type
-    when :syntax      then "  "
-    when :schema      then "  "
-    when :requirements then "  "
-    when :tests       then "  "
-    when :coverage    then "  "
-    when :profiles    then "  "
-    when :results     then "  "
-    when :dag         then "  "
-    else "  "
-    end
-  end
-
-  def progress(current, total)
-    return "" unless EMOJI_ENABLED && total > 0
-    pct = (current.to_f / total * 100).round
-    filled = (pct / 5).clamp(0, 20)
-    bar = "\u2588" * filled + "\u2591" * (20 - filled)
-    dim(" #{bar} #{pct}%")
-  end
-
-  def hr(char = "\u2500", width = 60)
-    dim(char * width)
-  end
-
-  def double_hr(width = 60)
-    dim("\u2550" * width)
-  end
-end
-
-# =============================================================================
-# Statistics tracker
-# =============================================================================
-class Stats
-  attr_reader :errors, :warnings, :infos, :passed, :total_files
-
-  def initialize
-    @errors = []
-    @warnings = []
-    @infos = []
-    @passed = 0
-    @total_files = 0
-  end
-
-  def error(path, msg)
-    @errors << { path: path, msg: msg }
-  end
-
-  def warn(path, msg)
-    @warnings << { path: path, msg: msg }
-  end
-
-  def info(path, msg)
-    @infos << { path: path, msg: msg }
-  end
-
-  def pass!
-    @passed += 1
-  end
-
-  def file!
-    @total_files += 1
-  end
-
-  def ok?
-    @errors.empty?
-  end
-
-  def summary
-    total = @errors.length + @warnings.length
-    "#{Term.bgreen(@passed)} passed, #{Term.bred(@errors.length)} errors, #{Term.byellow(@warnings.length)} warnings"
-  end
-end
-
-# =============================================================================
-# YAML Schema Validator — validates data against our YAML Schema definitions
-# =============================================================================
-class SchemaValidator
-  def initialize(stats, verbose: false)
-    @stats = stats
-    @verbose = verbose
-  end
-
-  # Load a YAML Schema from file
-  def load_schema(path)
-    YAML.load_file(path, permitted_classes: [Symbol])
-  rescue => e
-    @stats.error(path, "Cannot parse schema: #{e.message}")
-    nil
-  end
-
-  # Resolve the $schema reference in a data file to a schema file path
-  def resolve_schema_ref(data_file)
-    lines = File.readlines(data_file, encoding: "UTF-8")
-    ref_line = lines.find { |l| l.include?("yaml-language-server") && l.include?("$schema") }
-    return nil unless ref_line
-
-    # Our files use: # yaml-language-server: $schema=path
-    match = ref_line.match(/\$schema=\s*(\S+)/) ||
-            ref_line.match(/\$schema:\s*(\S+)/)
-    return nil unless match
-
-    schema_rel = match[1].sub(/:$/, "") # strip trailing YAML colon if present
-    base = File.dirname(data_file)
-    schema_path = File.expand_path(schema_rel, base)
-    File.exist?(schema_path) ? schema_path : nil
-  end
-
-  # Validate a data file against its declared schema
-  def validate_file(data_file)
-    schema_path = resolve_schema_ref(data_file)
-    if schema_path.nil?
-      @stats.warn(data_file, "No $schema reference found")
-      return
-    end
-
-    schema = load_schema(schema_path)
-    return unless schema
-
-    begin
-      data = YAML.load_file(data_file, permitted_classes: [Symbol])
-    rescue => e
-      @stats.error(data_file, "YAML parse error: #{e.message}")
-      return
-    end
-
-    validate_node(data, schema, data_file, "")
-  end
-
-  private
-
-  # Core recursive validator
-  def validate_node(data, schema, file, path)
-    return unless schema.is_a?(Hash)
-
-    # Type checking
-    if schema.key?("type")
-      expected = schema["type"]
-      unless type_matches?(data, expected)
-        @stats.error(file, "#{path_label(path)}: expected type #{expected}, got #{ruby_type(data)} (#{truncate(data.inspect, 60)})")
-        return
-      end
-    end
-
-    # Required fields
-    if schema.key?("required") && data.is_a?(Hash)
-      schema["required"].each do |field|
-        unless data.key?(field)
-          @stats.error(file, "#{path_label(path)}: missing required field '#{field}'")
-        end
-      end
-    end
-
-    # Pattern matching (strings only)
-    if schema.key?("pattern") && data.is_a?(String)
-      pattern = schema["pattern"]
-      unless data.match?(/#{pattern}/)
-        @stats.error(file, "#{path_label(path)}: value '#{truncate(data, 40)}' does not match pattern /#{pattern}/")
-      end
-    end
-
-    # Enum check
-    if schema.key?("enum") && schema["enum"].is_a?(Array)
-      unless schema["enum"].include?(data)
-        @stats.error(file, "#{path_label(path)}: value '#{truncate(data.inspect, 40)}' not in enum #{schema["enum"]}")
-      end
-    end
-
-    # Properties (object)
-    if schema.key?("properties") && data.is_a?(Hash)
-      schema["properties"].each do |key, prop_schema|
-        next unless data.key?(key)
-        validate_node(data[key], prop_schema, file, "#{path}.#{key}")
-      end
-    end
-
-    # Items (array)
-    if schema.key?("items") && data.is_a?(Array)
-      item_schema = schema["items"]
-      data.each_with_index do |item, idx|
-        validate_node(item, item_schema, file, "#{path}[#{idx}]")
-      end
-    end
-
-    # oneOf
-    if schema.key?("oneOf")
-      validate_one_of(data, schema["oneOf"], file, path)
-    end
-  end
-
-  def validate_one_of(data, alternatives, file, path)
-    matches = 0
-    errors_per_alt = []
-
-    alternatives.each_with_index do |alt, idx|
-      prior_errors = @stats.errors.length
-      validate_node(data, alt, file, path)
-      new_errors = @stats.errors.length - prior_errors
-      if new_errors == 0
-        matches += 1
-      else
-        # Roll back errors from non-matching alternatives
-        new_errors.times { @stats.errors.pop }
-        errors_per_alt << idx
-      end
-    end
-
-    if matches == 0
-      @stats.error(file, "#{path_label(path)}: does not match any oneOf alternative")
-    elsif matches > 1
-      @stats.warn(file, "#{path_label(path)}: matches multiple oneOf alternatives (#{matches})")
-    end
-    # Exactly 1 match = valid, no action needed
-  end
-
-  def type_matches?(data, expected)
-    case expected
-    when "object"  then data.is_a?(Hash)
-    when "string"  then data.is_a?(String)
-    when "boolean" then data == true || data == false
-    when "integer" then data.is_a?(Integer)
-    when "number"  then data.is_a?(Numeric)
-    when "array"   then data.is_a?(Array)
-    else true # unknown type, don't fail
-    end
-  end
-
-  def ruby_type(data)
-    case data
-    when Hash   then "object"
-    when String then "string"
-    when TrueClass, FalseClass then "boolean"
-    when Integer then "integer"
-    when Float  then "number"
-    when Array  then "array"
-    when NilClass then "null"
-    else data.class.to_s
-    end
-  end
-
-  def path_label(path)
-    path.empty? ? "<root>" : path
-  end
-
-  def truncate(str, max)
-    str = str.to_s
-    str.length > max ? "#{str[0, max - 3]}..." : str
-  end
-end
-
-# =============================================================================
-# Cross-Reference Validator — structural consistency checks
-# =============================================================================
-class CrossRefValidator
-  def initialize(stats, verbose: false)
-    @stats = stats
-    @verbose = verbose
-    @req_ids = {}         # req:id => file
-    @req_class_ids = {}   # req-class:id => file
-    @conf_class_ids = {}  # conf-class:id => file (bare + prefixed)
-    @conf_test_ids = {}   # conf-test:id => file
-  end
-
-  attr_reader :req_ids, :req_class_ids, :conf_class_ids, :conf_test_ids
-
-  # ── Phase 1: Collect all IDs from requirements files ──
-  def index_requirements
-    files = Dir.glob("requirements/**/*.yaml").sort
-    files.each_with_index do |f, idx|
-      data = safe_load(f)
-      next unless data
-
-      id = data["id"]
-      @req_class_ids[id] = f
-
-      (data["requirements"] || []).each do |r|
-        rid = r["id"]
-        if rid.nil?
-          @stats.error(f, "requirement missing 'id' field")
-        elsif @req_ids.key?(rid)
-          prev = @req_ids[rid]
-          @stats.error(f, "duplicate requirement ID #{Term.bmag(rid)} (also in #{prev})")
-        else
-          @req_ids[rid] = f
-        end
-      end
-
-      if @verbose
-        count = (data["requirements"] || []).length
-        $stderr.puts "    #{Term.dim(f)} #{Term.dim("(#{count} reqs)")}"
-      end
-    end
-    { classes: @req_class_ids.length, requirements: @req_ids.length }
-  end
-
-  # ── Phase 2: Validate conformance test files ──
-  def index_tests
-    files = Dir.glob("tests/**/*.yaml").sort
-    files.each do |f|
-      data = safe_load(f)
-      next unless data
-
-      id = data["id"]
-      part = f.include?("8601-1") ? "8601-1" : "8601-2"
-      @conf_class_ids[id] = f
-      @conf_class_ids["#{part}:#{id}"] = f
-
-      # Verify requirements_class reference
-      rc_ref = data["requirements_class"]
-      if rc_ref && !@req_class_ids.key?(rc_ref)
-        @stats.error(f, "#{Term.bmag(id)}: requirements_class '#{rc_ref}' not found in requirements/")
-      end
-
-      (data["tests"] || []).each do |t|
-        tid = t["id"]
-        if tid.nil?
-          @stats.error(f, "test missing 'id' field")
-          next
-        end
-
-        if @conf_test_ids.key?(tid)
-          prev = @conf_test_ids[tid]
-          @stats.error(f, "duplicate test ID #{Term.bmag(tid)} (also in #{prev})")
-        else
-          @conf_test_ids[tid] = f
-        end
-
-        # Verify requirement references
-        (t["requirements"] || []).each do |r|
-          unless @req_ids.key?(r)
-            @stats.error(f, "#{Term.bmag(tid)}: references undefined requirement '#{r}'")
-          end
-        end
-      end
-    end
-    bare = @conf_class_ids.keys.count { |k| k !~ /^[0-9]/ }
-    { classes: bare, tests: @conf_test_ids.length }
-  end
-
-  # ── Phase 3: Requirements coverage ──
-  def check_coverage
-    referenced = Set.new
-    Dir.glob("tests/**/*.yaml").sort.each do |f|
-      data = safe_load(f)
-      next unless data
-      (data["tests"] || []).each do |t|
-        (t["requirements"] || []).each { |r| referenced << r }
-      end
-    end
-    unreferenced = @req_ids.keys - referenced.to_a
-    unreferenced.each { |r| @stats.warn(@req_ids[r], "#{r}: not referenced by any test") }
-    { total: @req_ids.length, referenced: referenced.length, unreferenced: unreferenced.length }
-  end
-
-  # ── Phase 4: Profile references ──
-  def check_profiles
-    profile_stats = []
-    Dir.glob("profiles/**/*.yaml").sort.each do |f|
-      data = safe_load(f)
-      next unless data
-
-      errors_before = @stats.errors.length
-
-      (data["conformance_classes"] || []).each do |cc|
-        unless @conf_class_ids.key?(cc)
-          @stats.error(f, "references unknown conformance class '#{cc}'")
-        end
-      end
-
-      (data["additional_tests"] || []).each do |t|
-        tid = t["id"]
-        (t["requirements"] || []).each do |r|
-          unless r =~ /^req:[a-z0-9-]+$/
-            @stats.error(f, "test #{tid}: requirement '#{r}' has unexpected format")
-          end
-        end
-        if @conf_test_ids.key?(tid)
-          prev = @conf_test_ids[tid]
-          @stats.error(f, "duplicate test ID '#{tid}' (also in #{prev})")
-        else
-          @conf_test_ids[tid] = f
-        end
-      end
-
-      cc_count = (data["conformance_classes"] || []).length
-      test_count = (data["additional_tests"] || []).length
-      new_errors = @stats.errors.length - errors_before
-      profile_stats << { file: f, classes: cc_count, tests: test_count, errors: new_errors }
-    end
-    profile_stats
-  end
-
-  # ── Phase 5: Result file cross-reference ──
-  def check_results
-    result_stats = []
-    Dir.glob("results/**/*.yaml").sort
-      .reject { |f| File.basename(f) == "TEMPLATE.yaml" }
-      .each do |f|
-        data = safe_load(f)
-        next unless data
-
-        impl = data.dig("implementation", "name") || File.basename(f)
-        total = 0
-        errors_before = @stats.errors.length
-
-        (data["conformance_class_results"] || []).each do |cc|
-          cc_ref = cc["conformance_class"]
-          unless @conf_class_ids.key?(cc_ref)
-            @stats.error(f, "references unknown conformance class '#{cc_ref}'")
-          end
-
-          (cc["test_results"] || []).each do |tr|
-            total += 1
-            tid = tr["test"]
-            unless @conf_test_ids.key?(tid)
-              @stats.error(f, "references undefined test '#{tid}'")
-            end
-          end
-        end
-
-        # Also validate profile additional test results
-        (data["profile_results"] || []).each do |pr|
-          (pr["test_results"] || []).each do |tr|
-            total += 1
-            tid = tr["test"]
-            unless @conf_test_ids.key?(tid)
-              @stats.error(f, "references undefined profile test '#{tid}'")
-            end
-          end
-        end
-
-        new_errors = @stats.errors.length - errors_before
-        result_stats << { file: f, impl: impl, tests: total, errors: new_errors }
-      end
-    result_stats
-  end
-
-  # ── Phase 6: Dependency DAG — cycle detection ──
-  def check_dag
-    adj = {}
-    @req_class_ids.each_key { |id| adj[id] = [] }
-
-    Dir.glob("requirements/**/*.yaml").sort.each do |f|
-      data = safe_load(f)
-      next unless data
-      (data["dependencies"] || []).each do |dep|
-        id = data["id"]
-        adj[id] ||= []
-        adj[id] << dep
-      end
-    end
-
-    color = {}
-    cycles = []
-
-    dfs = lambda do |node, path|
-      color[node] = :gray
-      path << node
-      (adj[node] || []).each do |neighbor|
-        case color[neighbor]
-        when :gray
-          cycle_path = path + [neighbor]
-          cycles << cycle_path
-        when nil
-          dfs.call(neighbor, path)
-        end
-      end
-      color[node] = :black
-      path.pop
-    end
-
-    adj.keys.sort.each do |node|
-      next if color[node]
-      dfs.call(node, [])
-    end
-
-    cycles.each do |cycle|
-      cycle_str = cycle.map { |n| Term.bmag(n) }.join(" #{Term.dim("\u2192")} ")
-      @stats.error("dependency-graph", "cycle detected: #{cycle_str}")
-    end
-
-    { classes: adj.length, cycles: cycles.length }
-  end
-
-  private
-
-  def safe_load(path)
-    YAML.load_file(path, permitted_classes: [Symbol])
-  rescue => e
-    @stats.error(path, "YAML parse error: #{e.message}")
-    nil
-  end
-end
-
-# =============================================================================
-# Runner — orchestrates all validation phases
-# =============================================================================
 class Runner
   def initialize(options = {})
     @quiet   = options[:quiet]
     @verbose = options[:verbose]
     @stats   = Stats.new
+    @store   = YamlStore.new
+    @index   = SuiteIndex.new(@store)
+    @vocab   = ComponentVocabulary.new(@store)
   end
 
   def run
     print_banner
     all_files = collect_files
 
-    # ── Phase 1: YAML Syntax ──
-    print_section(:syntax, "YAML Syntax", "Parsing #{all_files.length} files")
-    all_files.each { |f| @stats.file! }
-    check_syntax(all_files)
+    @index.load_all
 
-    # ── Phase 2: Schema References ──
-    print_section(:schema, "Schema References", "Verifying $schema headers")
-    check_schema_refs(all_files)
-
-    # ── Phase 3: Schema Validation ──
-    print_section(:schema, "Schema Validation", "Validating files against YAML Schema definitions")
-    run_schema_validation(all_files)
-
-    # ── Phase 4: Requirements ──
-    print_section(:requirements, "Requirements Classes", "Indexing requirements")
-    xref = CrossRefValidator.new(@stats, verbose: @verbose)
-    req_info = xref.index_requirements
-    print_counter(req_info[:classes], "classes", req_info[:requirements], "requirements")
-
-    # ── Phase 5: Conformance Tests ──
-    print_section(:tests, "Conformance Classes", "Indexing conformance tests")
-    test_info = xref.index_tests
-    print_counter(test_info[:classes], "classes", test_info[:tests], "tests")
-
-    # ── Phase 6: Coverage ──
-    print_section(:coverage, "Requirements Coverage", "Checking test-referenced requirements")
-    coverage = xref.check_coverage
-    if coverage[:unreferenced].zero?
-      print_ok("All #{Term.bold(coverage[:total])} requirements referenced by tests")
+    phases = build_phases(all_files)
+    phases.each do |phase|
+      print_section(phase.type, phase.name, phase.subtitle)
+      phase.handler.call
     end
 
-    # ── Phase 7: Profiles ──
-    print_section(:profiles, "Profile References", "Checking profile conformance class refs")
-    profile_stats = xref.check_profiles
-    profile_stats.each do |ps|
-      if ps[:errors].zero?
-        print_ok("#{Term.cyan(File.basename(ps[:file]))} \u2014 #{ps[:classes]} classes, #{ps[:tests]} additional tests")
-      else
-        print_fail("#{Term.cyan(File.basename(ps[:file]))} \u2014 #{ps[:errors]} error(s)")
-      end
-    end
-
-    # ── Phase 8: Results ──
-    print_section(:results, "Result Files", "Cross-referencing implementation results")
-    result_stats = xref.check_results
-    result_stats.each do |rs|
-      if rs[:errors].zero?
-        print_ok("#{Term.cyan(File.basename(rs[:file]))} \u2014 #{Term.bold(rs[:impl])} (#{rs[:tests]} tests)")
-      else
-        print_fail("#{Term.cyan(File.basename(rs[:file]))} \u2014 #{rs[:errors]} error(s)")
-      end
-    end
-
-    # ── Phase 9: Dependency DAG ──
-    print_section(:dag, "Dependency Graph", "Checking for cycles")
-    dag_info = xref.check_dag
-    if dag_info[:cycles].zero?
-      print_ok("No cycles in #{Term.bold(dag_info[:classes])} requirements class dependencies")
-    end
-
-    # ── Summary ──
     print_summary
-
     @stats.ok? ? 0 : 1
   end
 
   private
 
-  def collect_files
-    Dir.glob("{schema,suite,requirements,tests,profiles,results}/**/*.yaml").sort
+  def build_phases(all_files)
+    [
+      Phase.new(name: "YAML Syntax", type: :syntax,
+        subtitle: "Parsing #{all_files.length} files",
+        handler: -> { phase_syntax(all_files) }),
+
+      Phase.new(name: "Schema References", type: :schema,
+        subtitle: "Verifying $schema headers",
+        handler: -> { phase_schema_refs(all_files) }),
+
+      Phase.new(name: "Schema Validation", type: :schema,
+        subtitle: "Validating files against YAML Schema definitions",
+        handler: -> { phase_schema_validation(all_files) }),
+
+      Phase.new(name: "Requirements Classes", type: :requirements,
+        subtitle: "Indexing requirements",
+        handler: -> { phase_requirements }),
+
+      Phase.new(name: "Conformance Classes", type: :tests,
+        subtitle: "Indexing conformance tests",
+        handler: -> { phase_tests }),
+
+      Phase.new(name: "Requirements Coverage", type: :coverage,
+        subtitle: "Checking test-referenced requirements",
+        handler: -> { phase_coverage }),
+
+      Phase.new(name: "Profile References", type: :profiles,
+        subtitle: "Checking profile conformance class refs",
+        handler: -> { phase_profiles }),
+
+      Phase.new(name: "Result Files", type: :results,
+        subtitle: "Cross-referencing implementation results",
+        handler: -> { phase_results }),
+
+      Phase.new(name: "Dependency Graph", type: :dag,
+        subtitle: "Checking for cycles",
+        handler: -> { phase_dag }),
+
+      Phase.new(name: "Source Consistency", type: :source_consistency,
+        subtitle: "Checking req-class / conf-class source agreement",
+        handler: -> { phase_source_consistency }),
+
+      Phase.new(name: "Source URN Format", type: :urn_format,
+        subtitle: "Validating RFC 5141 URN syntax",
+        handler: -> { phase_urn_format }),
+
+      Phase.new(name: "Suite Statistics", type: :statistics,
+        subtitle: "Computing dynamic counts",
+        handler: -> { phase_statistics }),
+
+      Phase.new(name: "Pattern Coverage", type: :patterns,
+        subtitle: "Checking format requirements have patterns",
+        handler: -> { phase_pattern_coverage }),
+
+      Phase.new(name: "Component Validity", type: :components,
+        subtitle: "Checking expect.components keys",
+        handler: -> { phase_component_validity }),
+
+      Phase.new(name: "Test ID Naming", type: :naming,
+        subtitle: "Validating test ID naming convention",
+        handler: -> { phase_test_id_naming })
+    ]
   end
 
-  # ── Phase implementations ──
-
-  def check_syntax(files)
-    ok = 0
-    files.each do |f|
-      begin
-        YAML.load_file(f, permitted_classes: [Symbol])
-        ok += 1
-      rescue => e
-        @stats.error(f, "YAML parse error: #{e.message}")
-      end
-    end
-    if ok == files.length
+  def phase_syntax(files)
+    files.each { |f| @stats.file! }
+    ok = files.count { |f| result = @store.load(f); result.success? }
+    errors = files.length - ok
+    if errors.zero?
       print_ok("All #{Term.bold(ok)} files parse correctly")
     else
+      files.each do |f|
+        result = @store.load(f)
+        @stats.error(f, "YAML parse error: #{result.error_message}") if result.failure?
+      end
       print_fail("#{ok}/#{files.length} files parsed successfully")
     end
   end
 
-  def check_schema_refs(files)
-    missing = []
-    files.each do |f|
-      next if f.start_with?("schema/") # schema files are themselves schemas
-      lines = File.readlines(f, encoding: "UTF-8")
-      has_ref = lines.any? { |l| l.include?("yaml-language-server") && l.include?("$schema") }
-      missing << f unless has_ref
-    end
+  def phase_schema_refs(files)
+    missing = files.reject { |f| f.start_with?("schema/") || @store.schema_ref(f) }
     if missing.empty?
       print_ok("All #{Term.bold(files.length)} data files have $schema references")
     else
@@ -722,19 +127,19 @@ class Runner
     end
   end
 
-  def run_schema_validation(files)
-    validator = SchemaValidator.new(@stats, verbose: @verbose)
+  def phase_schema_validation(files)
+    validator = SchemaValidator.new(@stats, @store)
     validated = 0
-    schema_errors_before = @stats.errors.length
+    before = @stats.error_count_snapshot
 
     files.each do |f|
-      next if f.start_with?("schema/") # skip schema files themselves
-      next if File.basename(f) == "TEMPLATE.yaml" # skip template files
+      next if f.start_with?("schema/")
+      next if File.basename(f) == "TEMPLATE.yaml"
       validator.validate_file(f)
       validated += 1
     end
 
-    new_errors = @stats.errors.length - schema_errors_before
+    new_errors = @stats.error_count_snapshot - before
     if new_errors.zero?
       print_ok("#{Term.bold(validated)} files validated against their schemas")
     else
@@ -742,15 +147,268 @@ class Runner
     end
   end
 
-  # ── Output helpers ──
+  def phase_requirements
+    count = @index.req_ids.length
+    classes = @index.req_class_ids.length
+    print_counter(classes, "classes", count, "requirements")
+  end
+
+  def phase_tests
+    count = @index.conf_test_ids.length
+    classes = @index.bare_conf_class_ids.length
+    print_counter(classes, "classes", count, "tests")
+  end
+
+  def phase_coverage
+    referenced = @index.test_reqs.values.flatten.to_set
+    all_reqs = @index.all_req_ids
+    unreferenced = all_reqs - referenced.to_a
+    unreferenced.each do |r|
+      source = @index.req_ids[r] || @index.profile_req_ids[r]
+      @stats.warn(source, "#{r}: not referenced by any test")
+    end
+    if unreferenced.empty?
+      print_ok("All #{Term.bold(all_reqs.length)} requirements referenced by tests")
+    end
+  end
+
+  def phase_profiles
+    @store.files_in("profiles/**/*.yaml").each do |f|
+      next if File.basename(f) == "TEMPLATE.yaml"
+      result = @store.load(f)
+      next if result.failure?
+
+      data = result.data
+      before = @stats.error_count_snapshot
+
+      (data["conformance_classes"] || []).each do |cc|
+        unless @index.conf_class_ids.key?(cc)
+          @stats.error(f, "references unknown conformance class '#{cc}'")
+        end
+      end
+
+      (data["additional_tests"] || []).each do |t|
+        tid = t["id"]
+        (t["requirements"] || []).each do |r|
+          unless @index.req_ids.key?(r) || @index.profile_req_ids.key?(r)
+            @stats.error(f, "test #{tid}: references undefined requirement '#{r}' (not in requirements/ or profile additional_requirements)")
+          end
+        end
+        if @index.conf_test_ids.key?(tid) && @index.conf_test_ids[tid] != f
+          prev = @index.conf_test_ids[tid]
+          @stats.error(f, "duplicate test ID '#{tid}' (also in #{prev})")
+        end
+      end
+
+      errors = @stats.error_count_snapshot - before
+      tc_count = (data["traceability"] || []).length
+      test_count = (data["additional_tests"] || []).length
+      if errors.zero?
+        print_ok("#{Term.cyan(File.basename(f))} — #{tc_count} traceability classes, #{test_count} additional tests")
+      else
+        print_fail("#{Term.cyan(File.basename(f))} — #{errors} error(s)")
+      end
+    end
+  end
+
+  def phase_results
+    @store.files_in("results/**/*.yaml")
+      .reject { |f| File.basename(f) == "TEMPLATE.yaml" }
+      .each do |f|
+        result = @store.load(f)
+        next if result.failure?
+
+        data = result.data
+        impl = data.dig("implementation", "name") || File.basename(f)
+        total = 0
+        before = @stats.error_count_snapshot
+
+        (data["conformance_class_results"] || []).each do |cc|
+          cc_ref = cc["conformance_class"]
+          @stats.error(f, "references unknown conformance class '#{cc_ref}'") unless @index.conf_class_ids.key?(cc_ref)
+          (cc["test_results"] || []).each do |tr|
+            total += 1
+            @stats.error(f, "references undefined test '#{tr['test']}'") unless @index.conf_test_ids.key?(tr["test"])
+          end
+        end
+
+        (data["profile_results"] || []).each do |pr|
+          (pr["test_results"] || []).each do |tr|
+            total += 1
+            @stats.error(f, "references undefined profile test '#{tr['test']}'") unless @index.conf_test_ids.key?(tr["test"])
+          end
+        end
+
+        errors = @stats.error_count_snapshot - before
+        if errors.zero?
+          print_ok("#{Term.cyan(File.basename(f))} — #{Term.bold(impl)} (#{total} tests)")
+        else
+          print_fail("#{Term.cyan(File.basename(f))} — #{errors} error(s)")
+        end
+      end
+  end
+
+  def phase_dag
+    cycles = GraphUtil.detect_cycles(@index.dependencies)
+    cycles.each do |cycle|
+      cycle_str = cycle.map { |n| Term.bmag(n) }.join(" #{Term.dim("→")} ")
+      @stats.error("dependency-graph", "cycle detected: #{cycle_str}")
+    end
+
+    print_ok("No cycles in #{Term.bold(@index.dependencies.length)} requirements class dependencies") if cycles.empty?
+  end
+
+  URN_PATTERN = /\Aurn:iso:std:iso:8601:-[12]:ed-1:en(:clause:[0-9A-Za-z.,]+)?\z/
+  URL_PATTERN = /\Ahttps?:\/\/.+\z/
+
+  def phase_source_consistency
+    mismatches = 0
+    @index.bare_conf_class_ids.each do |cc_id|
+      cc_file = @index.conf_class_ids[cc_id]
+      cc_source = @index.source_map[cc_file]
+
+      cc_result = @store.load(cc_file)
+      next if cc_result.failure?
+      rc_ref = cc_result.data["requirements_class"]
+      next unless rc_ref
+
+      rc_file = @index.req_class_ids[rc_ref]
+      next unless rc_file
+
+      rc_source = @index.source_map[rc_file]
+      next if rc_source.nil? || cc_source.nil?
+
+      rc_set = Array(rc_source).to_set
+      cc_set = Array(cc_source).to_set
+
+      unless rc_set == cc_set
+        only_rc = rc_set - cc_set
+        only_cc = cc_set - rc_set
+        details = []
+        details << "only in req-class: #{only_rc.to_a.join(', ')}" unless only_rc.empty?
+        details << "only in conf-class: #{only_cc.to_a.join(', ')}" unless only_cc.empty?
+        @stats.warn(cc_file, "source mismatch with #{rc_file}: #{details.join('; ')}")
+        mismatches += 1
+      end
+    end
+    checked = @index.bare_conf_class_ids.length
+    print_ok("#{Term.bold(checked)} conformance classes have consistent sources") if mismatches.zero?
+  end
+
+  def phase_urn_format
+    checked = 0
+    bad = 0
+    @index.source_map.each do |f, sources|
+      next unless f.start_with?("requirements/", "tests/", "profiles/")
+      Array(sources).each do |s|
+        checked += 1
+        unless s.match?(URN_PATTERN) || s.match?(URL_PATTERN)
+          @stats.error(f, "source '#{s}' does not match RFC 5141 URN or URL format")
+          bad += 1
+        end
+      end
+    end
+    print_ok("#{Term.bold(checked)} source references have valid format") if bad.zero?
+  end
+
+  def phase_statistics
+    total_reqs = @index.all_req_ids.length
+    total_tests = @index.total_test_count
+    total_profiles = @index.profile_ids.length
+    req_class_count = @index.req_class_ids.length
+    print_info("#{Term.bold(total_reqs)} requirements (#{@index.req_ids.length} in classes + #{@index.profile_req_ids.length} in profiles)")
+    print_info("#{Term.bold(total_tests)} conformance tests")
+    print_info("#{Term.bold(req_class_count)} requirements classes")
+    print_info("#{Term.bold(total_profiles)} profiles")
+    print_ok("Statistics computed dynamically from file contents")
+  end
+
+  FORMAT_KEYWORDS = /\b(basic format|extended format|representation|shall be represented|in the form|format|pattern)\b/i
+
+  def phase_pattern_coverage
+    total_format = 0
+    missing = 0
+    @store.files_in("requirements/**/*.yaml").each do |f|
+      result = @store.load(f)
+      next if result.failure?
+      data = result.data
+      (data["requirements"] || []).each do |r|
+        stmt = r["statement"]
+        next unless stmt
+        next if r["format"] == "any"
+        if stmt.match?(FORMAT_KEYWORDS)
+          total_format += 1
+          unless r.key?("pattern")
+            @stats.warn(f, "#{r['id']}: statement references format but has no 'pattern' field")
+            missing += 1
+          end
+        end
+      end
+    end
+    print_ok("All #{Term.bold(total_format)} format requirements have pattern fields") if missing.zero?
+  end
+
+  def phase_component_validity
+    checked = 0
+    (@store.files_in("tests/**/*.yaml") + @store.files_in("profiles/**/*.yaml")).each do |f|
+      result = @store.load(f)
+      next if result.failure?
+      data = result.data
+      tests = data["tests"] || data["additional_tests"] || []
+      tests.each do |t|
+        components = t.dig("expect", "components")
+        next unless components
+        checked += 1
+        validate_component_keys(f, t["id"], components)
+      end
+    end
+    print_ok("#{Term.bold(checked)} test component sets validated")
+  end
+
+  TEST_ID_PATTERN = /\Aconf-test:[a-z][a-z0-9]*(-[a-z0-9]+)*-\d{3}\z/
+
+  def phase_test_id_naming
+    checked = 0
+    bad = 0
+    @index.conf_test_ids.each do |tid, f|
+      checked += 1
+      unless tid.match?(TEST_ID_PATTERN)
+        @stats.warn(f, "test ID '#{tid}' does not follow naming convention conf-test:{prefix}-{type}-{NNN}")
+        bad += 1
+      end
+    end
+    print_ok("#{Term.bold(checked)} test IDs follow naming convention") if bad.zero?
+  end
+
+  def validate_component_keys(file, test_id, components)
+    return unless components.is_a?(Hash)
+
+    components.each_key do |key|
+      unless @vocab.known_top_key?(key)
+        @stats.warn(file, "#{test_id}: unknown component key '#{key}'")
+      end
+    end
+
+    components.each do |parent, sub|
+      next unless sub.is_a?(Hash)
+      sub.each_key do |key|
+        unless @vocab.known_sub_key?(parent, key)
+          @stats.warn(file, "#{test_id}: unknown #{parent} component key '#{key}'")
+        end
+      end
+    end
+  end
+
+  def collect_files
+    @store.files_in("{schema,suite,requirements,tests,profiles,results}/**/*.yaml")
+  end
 
   def print_banner
     return if @quiet
-    width = 60
     puts ""
-    puts Term.double_hr(width)
+    puts Term.double_hr
     puts "#{Term.bold(Term.white("  ISO 8601 Test Suite"))} #{Term.dim("— Validation Report")}"
-    puts Term.double_hr(width)
+    puts Term.double_hr
     puts ""
   end
 
@@ -760,7 +418,7 @@ class Runner
     label = Term.bold(Term.white(title))
     sub = subtitle ? Term.dim("  #{subtitle}") : ""
     puts " #{icon} #{label}#{sub}"
-    puts " #{Term.hr("\u2504", 56)}"
+    puts " #{Term.hr("┄", 56)}"
   end
 
   def print_ok(msg)
@@ -777,7 +435,7 @@ class Runner
   end
 
   def print_info(msg)
-    puts " #{Term.info_icon}  #{msg}" if @verbose
+    puts " #{Term.info_icon}  #{msg}" if !@quiet
   end
 
   def print_counter(*args)
@@ -794,46 +452,41 @@ class Runner
 
     width = 60
     puts ""
-    puts " #{Term.hr("\u2500", width)}"
+    puts " #{Term.hr("─", width)}"
 
-    # Print errors
     if @stats.errors.any?
       puts " #{Term.bred(Term.bold("  Errors (#{@stats.errors.length})"))}"
       @stats.errors.each do |e|
         path_part = e[:path] ? "#{Term.cyan(e[:path])}: " : ""
-        puts "   #{Term.bred("\u2022")} #{path_part}#{e[:msg]}"
+        puts "   #{Term.bred("•")} #{path_part}#{e[:msg]}"
       end
     end
 
-    # Print warnings
     if @stats.warnings.any? && !@quiet
       puts ""
       puts " #{Term.byellow(Term.bold("  Warnings (#{@stats.warnings.length})"))}"
       @stats.warnings.each do |w|
         path_part = w[:path] ? "#{Term.cyan(w[:path])}: " : ""
-        puts "   #{Term.byellow("\u2022")} #{path_part}#{w[:msg]}"
+        puts "   #{Term.byellow("•")} #{path_part}#{w[:msg]}"
       end
     end
 
     puts ""
-    puts " #{Term.hr("\u2500", width)}"
+    puts " #{Term.hr("─", width)}"
 
     if @stats.ok?
-      puts " #{Term.badge("ALL PASSED", Term::BG_GREEN)} #{Term.bgreen(Term.bold("All checks passed"))}"
+      puts " #{Term.badge("ALL PASSED")} #{Term.bgreen(Term.bold("All checks passed"))}"
     else
       puts " #{Term.badge("FAILED", Term::BG_RED)} #{Term.bred(Term.bold("#{@stats.errors.length} error(s), #{@stats.warnings.length} warning(s)"))}"
     end
     puts " #{Term.dim("  #{@stats.total_files} files checked")}"
 
     puts ""
-    puts Term.double_hr(width)
+    puts Term.double_hr
     puts ""
   end
 end
 
-# =============================================================================
-# Main entry point
-# =============================================================================
 options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby validate [options]"
