@@ -19,19 +19,56 @@ Clause references in requirements use RFC 5141 partial URNs: `iso:8601:-{part}:e
 - `suite.yaml` — Machine-readable suite manifest
 - `scripts/run-tests` — Test runner (`ruby scripts/run-tests`)
 - `scripts/validate` — Validation script (`ruby scripts/validate`)
+- `scripts/capability-matrix` — Cross-adapter capability matrix generator
+- `lib/test_suite.rb` — Entry point; autoloads all modules
+- `lib/test_suite/` — Shared Ruby modules used by all scripts
+  - `load_result.rb` — Success/failure value object for YamlStore returns
+  - `yaml_store.rb` — Cached YAML file loader, returns LoadResult
+  - `suite_index.rb` — Cross-reference index (IDs → files, test → class mapping, ID normalization)
+  - `component_vocab.rb` — Component vocabulary loaded from `schema/components.yaml`
+  - `stats.rb` — Error/warning/pass tracker with savepoint rollback
+  - `schema_validator.rb` — YAML Schema validation engine
+  - `test_type_handlers.rb` — Test type handler registry (OCP)
+  - `test_suite_loader.rb` — Test list builder from suite index
+  - `adapter_loader.rb` — Adapter discovery and instantiation (raises AdapterNotFoundError)
+  - `exec_adapter.rb` — JSON protocol adapter for external processes
+  - `graph_util.rb` — Directed cycle detection
+  - `term.rb` — Terminal output (colors, icons, formatting)
+  - `capability_matrix.rb` — Cross-adapter comparison and JSON output
 - `adapters/` — Pluggable implementation adapters (TEMPLATE.rb + implementations)
-- `schema/` — YAML Schema definitions (5 files)
-- `requirements/8601-1/` — Part 1 requirements classes (9 files, 99 requirements)
-- `requirements/8601-2/` — Part 2 requirements classes (13 files, 158 requirements)
-- `tests/8601-1/` — Part 1 conformance classes (9 files, 275 tests)
-- `tests/8601-2/` — Part 2 conformance classes (13 files, 363 tests)
+- `schema/` — YAML Schema definitions (7 files including components.yaml and meta.yaml)
+- `requirements/8601-1/` — Part 1 requirements classes (9 files)
+- `requirements/8601-2/` — Part 2 requirements classes (13 files)
+- `tests/8601-1/` — Part 1 conformance classes (9 files)
+- `tests/8601-2/` — Part 2 conformance classes (13 files)
 - `profiles/` — Profile definitions (7 files)
 - `results/` — Conformance test results per implementation (TEMPLATE.yaml + result files)
+- `spec/` — RSpec test suite (`bundle exec rspec`)
+
+## Architecture
+
+Scripts use `require_relative '../lib/test_suite'` as the single entry point. All modules are autoloaded on first reference. The design follows OCP (Open-Closed Principle):
+- **Phase registry** (validate): add validation phases by appending to the `build_phases` array
+- **Test type handler registry** (run-tests): add test types by appending to the `HANDLERS` hash
+- **Data-driven component validation**: keys loaded from `schema/components.yaml`, not hardcoded
+- **Data-driven class inference**: test→class mapping built by `SuiteIndex`, not hardcoded prefix logic
+- **ID normalization in SuiteIndex**: `bare_id` and `resolve_class` centralize bare/prefixed ID handling
+
+### Key design decisions
+
+- **LoadResult value object**: `YamlStore.load` returns `LoadResult.success(data)` or `LoadResult.failure(message)`. Consumers use `result.success?`/`result.failure?` predicates, never hash probing.
+- **Stats savepoint**: `Stats#savepoint { }` returns the number of errors added inside the block and auto-rolls them back. Used by `SchemaValidator` for oneOf validation.
+- **Exceptions for adapter errors**: `AdapterLoader` raises `AdapterNotFoundError` instead of printing+exit. Scripts handle formatting.
+- **String keys throughout**: Adapter return hashes use string keys (`{ "valid" => true }`). No symbol/string key bridging needed.
+- **Defensive accessors**: `Stats#errors` and `Stats#warnings` return frozen copies; consumers cannot mutate internals.
 
 ## Conventions
 
 - Documentation uses AsciiDoc (`.adoc`)
 - Test data uses YAML (`.yaml`) with YAML Schema validation
+- Adapter return values use string keys
+- lib/ modules never use `Term` for output — they raise exceptions or return data
 - This is an ISO standards project; precision in terminology and formatting matters
 - Each YAML file includes `# yaml-language-server: $schema=...` for editor validation
 - Run `ruby scripts/validate` after any changes to YAML files
+- Run `bundle exec rspec` to verify module specs
