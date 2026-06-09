@@ -14,3 +14,6 @@ vendor/bundle/
 .idea/
 .vscode/
 *.code-workspace
+
+# Node
+node_modules/

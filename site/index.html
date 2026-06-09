@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ISO 8601 Conformance Test Suite</title>
+  <meta name="description" content="Machine-readable test suite for ISO 8601-1:2026 and ISO 8601-2:2026 date/time format conformance" />
+  <link rel="icon" href="/logos/iso-red.svg" type="image/svg+xml" />
+  <script>
+    if (localStorage.getItem('theme') === 'light' ||
+        (!localStorage.getItem('theme') && matchMedia('(prefers-color-scheme: light)').matches)) {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-gray-950 text-gray-100 antialiased min-h-screen">
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
