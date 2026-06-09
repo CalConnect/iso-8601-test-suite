@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=../../schema/test-schema.yaml
+id: req-class:test-fixture
+name: Test Fixture Requirements Class
+requirements:
+  - id: req:test-req-001
+    statement: "A test requirement"
+    format: basic
+  - id: req:test-req-002
+    statement: "Another test requirement"
+    format: extended

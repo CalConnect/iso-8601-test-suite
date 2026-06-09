@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../../schema/test-schema.yaml
+id: conf-class:test-fixture
+name: Test Fixture Conformance Class
+requirements_class: req-class:test-fixture
+tests:
+  - id: conf-test:test-fixture-parse-001
+    description: "Parse a calendar date"
+    requirements:
+      - req:test-req-001
+    test_type: parsing
+    given:
+      expression: "2024-01-15"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 2024
+          month: 1
+          day: 15
+  - id: conf-test:test-fixture-valid-001
+    description: "Validate a calendar date"
+    requirements:
+      - req:test-req-002
+    test_type: validity
+    given:
+      expression: "2024-01-15"
+    expect:
+      valid: true

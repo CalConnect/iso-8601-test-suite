@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/test-schema.yaml
+id: result:test-implementation
+implementation:
+  name: Test Implementation
+  language: ruby
+  version: "1.0.0"
+date: "2024-01-15"
+tester: test
+verification: automated
+declared_conformance_classes:
+  - conf-class:test-fixture
+conformance_class_results:
+  - conformance_class: conf-class:test-fixture
+    status: passed
+    test_results:
+      - test: conf-test:test-fixture-parse-001
+        result: pass
+      - test: conf-test:test-fixture-valid-001
+        result: pass

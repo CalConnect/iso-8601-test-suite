@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../../schema/test-schema.yaml
+id: profile:test-fixture
+name: Test Fixture Profile
+traceability:
+  - conformance_class: conf-class:test-fixture
+    requirements:
+      - req:test-req-001
+additional_requirements:
+  - id: req:test-profile-req-001
+    statement: "Profile-specific requirement"
+additional_tests:
+  - id: conf-test:test-fixture-profile-001
+    description: "Profile-specific test"
+    requirements:
+      - req:test-profile-req-001
+    test_type: validity
+    given:
+      expression: "2024"
+    expect:
+      valid: true
