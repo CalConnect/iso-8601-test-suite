@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:conf-class:fundamentals
 requirements_class: req-class:seasons
-source: ISO 8601-2:2026 Clause 4.7
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8
 tests:
   # --- Basic seasons (21-24) ---
-  - id: conf-test:seasons-basic-spring-parsing-001
+  - id: conf-test:seasons-basic-spring-parse-001
     description: "Parse Spring of 2001 '2001-21'"
     requirements:
       - req:season-as-month-basic
@@ -25,7 +26,7 @@ tests:
         year: 2001
         season: 21
 
-  - id: conf-test:seasons-basic-summer-parsing-001
+  - id: conf-test:seasons-basic-summer-parse-001
     description: "Parse Summer of 2001 '2001-22'"
     requirements:
       - req:season-as-month-basic
@@ -38,7 +39,7 @@ tests:
         year: 2001
         season: 22
 
-  - id: conf-test:seasons-basic-autumn-parsing-001
+  - id: conf-test:seasons-basic-autumn-parse-001
     description: "Parse Autumn of 2001 '2001-23'"
     requirements:
       - req:season-as-month-basic
@@ -51,7 +52,7 @@ tests:
         year: 2001
         season: 23
 
-  - id: conf-test:seasons-basic-winter-parsing-001
+  - id: conf-test:seasons-basic-winter-parse-001
     description: "Parse Winter of 2001 '2001-24'"
     requirements:
       - req:season-as-month-basic
@@ -65,7 +66,7 @@ tests:
         season: 24
 
   # --- Advanced sub-year groupings (25-41) ---
-  - id: conf-test:seasons-quarter-parsing-001
+  - id: conf-test:seasons-quarter-parse-001
     description: "Parse second quarter of 2001 '2001-34'"
     requirements:
       - req:season-as-month-advanced
@@ -78,7 +79,7 @@ tests:
         year: 2001
         ydivision: 34
 
-  - id: conf-test:seasons-northern-spring-parsing-001
+  - id: conf-test:seasons-northern-spring-parse-001
     description: "Parse Northern Hemisphere Spring '2001-25'"
     requirements:
       - req:season-as-month-advanced
@@ -91,7 +92,7 @@ tests:
         year: 2001
         ydivision: 25
 
-  - id: conf-test:seasons-quarter1-parsing-001
+  - id: conf-test:seasons-quarter1-parse-001
     description: "Parse Quarter 1 '2001-33'"
     requirements:
       - req:season-as-month-advanced
@@ -104,7 +105,7 @@ tests:
         year: 2001
         ydivision: 33
 
-  - id: conf-test:seasons-semestral1-parsing-001
+  - id: conf-test:seasons-semestral1-parse-001
     description: "Parse Semestral 1 '2001-40'"
     requirements:
       - req:season-as-month-advanced
@@ -118,7 +119,7 @@ tests:
         ydivision: 40
 
   # --- Explicit season form ---
-  - id: conf-test:seasons-explicit-parsing-001
+  - id: conf-test:seasons-explicit-parse-001
     description: "Parse explicit season '21A'"
     requirements:
       - req:season-explicit
@@ -131,7 +132,7 @@ tests:
         season: 21
 
   # --- Generation tests ---
-  - id: conf-test:seasons-generation-001
+  - id: conf-test:seasons-gen-001
     description: "Generate season expression from components"
     requirements:
       - req:season-as-month-basic
@@ -143,7 +144,7 @@ tests:
     expect:
       expression: "2001-21"
 
-  - id: conf-test:seasons-generation-002
+  - id: conf-test:seasons-gen-002
     description: "Generate quarter expression from components"
     requirements:
       - req:season-as-month-advanced
@@ -156,7 +157,7 @@ tests:
       expression: "2001-34"
 
   # --- Validity tests ---
-  - id: conf-test:seasons-validity-001
+  - id: conf-test:seasons-valid-001
     description: "Verify season value below range is invalid"
     requirements:
       - req:season-basic-values
@@ -166,7 +167,7 @@ tests:
     expect:
       valid: false
 
-  - id: conf-test:seasons-validity-002
+  - id: conf-test:seasons-valid-002
     description: "Verify season value above range is invalid"
     requirements:
       - req:season-basic-values
@@ -178,7 +179,7 @@ tests:
       valid: false
 
   # --- Implicit basic season form (Clause 4.8.2) ---
-  - id: conf-test:seasons-implicit-basic-parsing-001
+  - id: conf-test:seasons-implicit-basic-parse-001
     description: "Parse implicit basic season Spring '21'"
     requirements:
       - req:season-implicit-basic
@@ -190,7 +191,7 @@ tests:
       components:
         season: 21
 
-  - id: conf-test:seasons-implicit-basic-parsing-002
+  - id: conf-test:seasons-implicit-basic-parse-002
     description: "Parse implicit basic season Winter '24'"
     requirements:
       - req:season-implicit-basic
@@ -203,7 +204,7 @@ tests:
         season: 24
 
   # --- Implicit advanced season form (Clause 4.8.2) ---
-  - id: conf-test:seasons-implicit-advanced-parsing-001
+  - id: conf-test:seasons-implicit-advanced-parse-001
     description: "Parse implicit advanced ydivision '34'"
     requirements:
       - req:season-implicit-advanced
@@ -215,7 +216,7 @@ tests:
       components:
         ydivision: 34
 
-  - id: conf-test:seasons-implicit-advanced-parsing-002
+  - id: conf-test:seasons-implicit-advanced-parse-002
     description: "Parse implicit advanced hemispheric spring '25'"
     requirements:
       - req:season-implicit-advanced

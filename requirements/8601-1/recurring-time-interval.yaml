@@ -9,10 +9,11 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:time-interval
-source: ISO 8601-1:2026 Clause 5.6
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6
 requirements:
   - id: req:recur-start-end-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-start-end-basic"
     statement: >
       A recurring time interval with start and end in basic format prefixes the
       interval with a recurrence marker:
@@ -21,7 +22,7 @@ requirements:
     format: basic
     pattern: "[\"R\"][n][\"/\"][date][\"T\"][time][\"/\"][date][\"T\"][time]"
   - id: req:recur-start-end-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-start-end-extended"
     statement: >
       A recurring time interval with start and end in extended format prefixes the
       interval with a recurrence marker:
@@ -29,42 +30,42 @@ requirements:
     format: extended
     pattern: "[\"R\"][n][\"/\"][dateX][\"T\"][timeX][\"/\"][dateX][\"T\"][timeX]"
   - id: req:recur-start-dur-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-start-dur-basic"
     statement: >
       A recurring time interval with start and duration in basic format:
       ["R"][n]["/"][date]["T"][time]["/"][duration].
     format: basic
     pattern: "[\"R\"][n][\"/\"][date][\"T\"][time][\"/\"][duration]"
   - id: req:recur-start-dur-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-start-dur-extended"
     statement: >
       A recurring time interval with start and duration in extended format:
       ["R"][n]["/"][dateX]["T"][timeX]["/"][duration].
     format: extended
     pattern: "[\"R\"][n][\"/\"][dateX][\"T\"][timeX][\"/\"][duration]"
   - id: req:recur-dur-end-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-dur-end-basic"
     statement: >
       A recurring time interval with duration and end in basic format:
       ["R"][n]["/"][duration]["/"][date]["T"][time].
     format: basic
     pattern: "[\"R\"][n][\"/\"][duration][\"/\"][date][\"T\"][time]"
   - id: req:recur-dur-end-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.3:tech:recur-dur-end-extended"
     statement: >
       A recurring time interval with duration and end in extended format:
       ["R"][n]["/"][duration]["/"][dateX]["T"][timeX].
     format: extended
     pattern: "[\"R\"][n][\"/\"][duration][\"/\"][dateX][\"T\"][timeX]"
   - id: req:recur-unbounded
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.2:tech:recur-unbounded"
     statement: >
       When no recurrence count is provided, occurrences continue without bound.
       The designator ["R"] is immediately followed by a solidus ["/"].
     format: any
     pattern: "[\"R\"][\"/\"]..."
   - id: req:recur-designator
-    clause: "iso:8601:-1:ed-1:en:clause:5.6.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6.2:tech:recur-designator"
     statement: >
       Every recurring time interval begins with the recurrence designator ["R"],
       followed without spaces by an optional recurrence count [n], then a

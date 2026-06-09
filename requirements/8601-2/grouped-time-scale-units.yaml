@@ -9,10 +9,11 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:fundamentals
-source: ISO 8601-2:2026 Clause 5
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:5
 requirements:
   - id: req:grouped-unit-definition
-    clause: "iso:8601:-2:ed-1:en:clause:5.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.2"
     statement: >
       A grouped time scale unit is enclosed by the G prefix and U suffix, with
       one or more positive duration components in between:
@@ -20,45 +21,45 @@ requirements:
     format: any
     pattern: '["G"][durationUnits]["U"]'
   - id: req:grouped-unit-value
-    clause: "iso:8601:-2:ed-1:en:clause:5.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.3"
     statement: >
       The value of a grouped unit combines a coefficient with the grouped unit
       definition: [i][groupUnit], where [i] selects the specific sub-unit.
     format: any
     pattern: "[i][groupUnit]"
   - id: req:grouped-application-date
-    clause: "iso:8601:-2:ed-1:en:clause:5.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4:tech:grouped-application-date"
     statement: >
       Grouped time scale units may replace any time scale unit in a date or time
       expression, provided the resulting expression remains valid.
     format: any
   - id: req:grouped-application-order
-    clause: "iso:8601:-2:ed-1:en:clause:5.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4:tech:grouped-application-order"
     statement: >
       Components appearing to the right of a grouped time scale unit describe
       instances within that grouped unit.
     format: any
   - id: req:grouped-boundary-adherence
-    clause: "iso:8601:-2:ed-1:en:clause:5.4.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.3"
     statement: >
       Lower-order component values must remain within the bounds established by
       the grouped time scale unit definition.
     format: any
   - id: req:grouped-representation-with-shift
-    clause: "iso:8601:-2:ed-1:en:clause:5.4.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.4"
     statement: >
       An expression using grouped time scale units may include a time shift:
       [groupDateTime][shiftE].
     format: any
     pattern: "[groupDateTime][shiftE]"
   - id: req:grouped-conversion-to-interval
-    clause: "iso:8601:-2:ed-1:en:clause:5.4.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.5"
     statement: >
       A grouped time scale unit expression can be converted into an equivalent
       time interval using basic time scale units.
     format: any
   - id: req:grouped-truncation-partial
-    clause: "iso:8601:-2:ed-1:en:clause:5.4.5.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.5.2"
     statement: >
       When a grouped unit does not evenly divide the original component, the
       final unit spans only the remaining bounded duration.

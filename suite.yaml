@@ -43,28 +43,6 @@ identifier_scheme:
     profile: "Profile"
     result: "Conformance result set"
 
-statistics:
-  requirements:
-    part1: 99
-    part2: 158
-    total: 257
-  conformance_tests:
-    part1: 275
-    part2: 363
-    profiles: 75
-    total: 713
-  requirements_classes:
-    part1: 9
-    part2: 13
-    total: 22
-  profiles: 7
-
-file_counts:
-  schemas: 5
-  requirements_files: 22
-  conformance_class_files: 22
-  profile_files: 7
-
 directory_layout:
   schema: "YAML Schema definitions"
   requirements: "Requirements classes organized by standard part"
@@ -83,3 +61,5 @@ test_types:
     description: "Two expressions resolve to the same instant"
   - id: arithmetic
     description: "Date/time arithmetic operations"
+  - id: round_trip
+    description: "Parse → extract → generate → compare (exact or semantic equivalence)"

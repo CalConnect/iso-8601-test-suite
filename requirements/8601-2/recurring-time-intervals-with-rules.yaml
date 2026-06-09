@@ -9,36 +9,37 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:recurring-time-interval
-source: ISO 8601-2:2026 Clause 13
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:13
 requirements:
   - id: req:recurring-rule-method
-    clause: "iso:8601:-2:ed-1:en:clause:13.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.2"
     statement: >
       A recurring time interval with repeat rules consists of an optional
       occurrence count, a time interval, and a repeat rule.
     format: any
   - id: req:recurring-rule-repeat-rule
-    clause: "iso:8601:-2:ed-1:en:clause:13.4.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.4.1"
     statement: >
       A repeat rule combines an eligibility part (mandatory) and a selection
       part (optional): [eligibility-part][selection-part].
     format: any
     pattern: "[eligibility-part][selection-part]"
   - id: req:recurring-rule-eligibility
-    clause: "iso:8601:-2:ed-1:en:clause:13.4.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.4.2"
     statement: >
       The eligibility part determines frequency and duration using the F
       designator: ["F"][eligible-time-intervals].
     format: any
     pattern: '["F"][eligible-time-intervals]'
   - id: req:recurring-rule-selection
-    clause: "iso:8601:-2:ed-1:en:clause:13.4.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.4.3"
     statement: >
       The selection part provides matching conditions for instants within the
       eligible time intervals.
     format: any
   - id: req:recurring-rule-representation
-    clause: "iso:8601:-2:ed-1:en:clause:13.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.5"
     statement: >
       A recurring time interval with repeat rules combines the recurrence
       designator, count, interval, and repeat rule:
@@ -46,19 +47,19 @@ requirements:
     format: any
     pattern: '["R"][!][i]["/"][time-interval]["/"][repeat-rule]'
   - id: req:recurring-rule-evaluation
-    clause: "iso:8601:-2:ed-1:en:clause:13.6"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.6"
     statement: >
       Evaluating a repeat rule identifies eligible time intervals, applies
       selection rules, and derives the resulting occurrences.
     format: any
   - id: req:recurring-rule-precision
-    clause: "iso:8601:-2:ed-1:en:clause:13.6.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.6.2"
     statement: >
       Resulting occurrences carry a time scale unit resolution matching the
       lowest-order unit specified in the repeat rule.
     format: any
   - id: req:recurring-rule-inheritance
-    clause: "iso:8601:-2:ed-1:en:clause:13.6.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:13.6.3"
     statement: >
       Selection rules inherit values of lower-order time scale units from the
       time interval start, for units not specified in the eligibility part.

@@ -10,7 +10,8 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - conf-class:time-interval
 requirements_class: req-class:recurring-time-interval
-source: ISO 8601-1:2026 Clause 5.7
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.6
 tests:
   # Parsing tests: start/end with recurrences
   - id: conf-test:recur-parse-001

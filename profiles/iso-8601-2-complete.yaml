@@ -5,30 +5,311 @@ name: ISO 8601-2 Complete
 description: >-
   Profile covering all conformance classes defined in both ISO 8601-1 (Basic
   rules) and ISO 8601-2 (Extensions).
-source: ISO 8601-1:2019 / ISO 8601-2:2019
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en
+  - urn:iso:std:iso:8601:-2:ed-1:en
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:fundamentals
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:ordinal-date
-  - 8601-1:conf-class:week-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
-  - 8601-1:conf-class:duration
-  - 8601-1:conf-class:time-interval
-  - 8601-1:conf-class:recurring-time-interval
-  - 8601-2:conf-class:explicit-representation
-  - 8601-2:conf-class:negative-values
-  - 8601-2:conf-class:exponential-values
-  - 8601-2:conf-class:significant-digits
-  - 8601-2:conf-class:qualification
-  - 8601-2:conf-class:unspecified-digits
-  - 8601-2:conf-class:seasons
-  - 8601-2:conf-class:grouped-time-scale-units
-  - 8601-2:conf-class:set-representation
-  - 8601-2:conf-class:extended-time-intervals
-  - 8601-2:conf-class:date-time-selection
-  - 8601-2:conf-class:recurring-time-intervals-with-rules
-  - 8601-2:conf-class:arithmetic
+traceability:
+  - conformance_class: 8601-1:conf-class:fundamentals
+    requirements:
+      - req:character-set
+      - req:decreasing-order
+      - req:gregorian-calendar
+      - req:leap-year-rules
+      - req:days-per-month
+      - req:week-calendar
+      - req:24-hour-clock
+      - req:year-representation
+      - req:month-representation
+      - req:week-number-representation
+      - req:day-of-week-representation
+      - req:day-of-year-representation
+      - req:decade-representation
+      - req:century-representation
+      - req:time-shift
+      - req:expansion
+      - req:leading-zeros
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-basic-full
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+      - req:cal-date-reduced-decade
+      - req:cal-date-reduced-century
+      - req:cal-date-expanded-basic-full
+      - req:cal-date-expanded-extended-full
+      - req:cal-date-expanded-extended-month
+      - req:cal-date-expanded-basic-year
+      - req:cal-date-expanded-basic-decade
+      - req:cal-date-expanded-basic-century
+  - conformance_class: 8601-1:conf-class:ordinal-date
+    requirements:
+      - req:ord-date-basic-full
+      - req:ord-date-extended-full
+      - req:ord-date-expanded-basic
+      - req:ord-date-expanded-extended
+  - conformance_class: 8601-1:conf-class:week-date
+    requirements:
+      - req:week-date-basic-full
+      - req:week-date-extended-full
+      - req:week-date-basic-week-only
+      - req:week-date-extended-week-only
+      - req:week-date-expanded-basic-full
+      - req:week-date-expanded-extended-full
+      - req:week-date-expanded-basic-week-only
+      - req:week-date-expanded-extended-week-only
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-basic-full
+      - req:time-extended-full
+      - req:time-basic-hm
+      - req:time-extended-hm
+      - req:time-basic-h
+      - req:time-fraction-second
+      - req:time-fraction-minute
+      - req:time-fraction-hour
+      - req:time-beginning-of-day
+      - req:time-ending-of-day
+      - req:time-utc
+      - req:time-offset-basic
+      - req:time-offset-extended
+      - req:time-designator-omission
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-basic-local
+      - req:date-time-cal-basic-utc
+      - req:date-time-cal-basic-offset
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-ord-basic-local
+      - req:date-time-ord-basic-utc
+      - req:date-time-ord-basic-offset
+      - req:date-time-ord-extended-local
+      - req:date-time-ord-extended-utc
+      - req:date-time-ord-extended-offset
+      - req:date-time-week-basic-local
+      - req:date-time-week-basic-utc
+      - req:date-time-week-basic-offset
+      - req:date-time-week-extended-local
+      - req:date-time-week-extended-utc
+      - req:date-time-week-extended-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:duration
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-complete-week
+      - req:dur-reduced
+      - req:dur-fraction
+      - req:dur-time-designator
+      - req:dur-alt-calendar-basic
+      - req:dur-alt-calendar-extended
+      - req:dur-alt-ordinal-basic
+      - req:dur-alt-ordinal-extended
+  - conformance_class: 8601-1:conf-class:time-interval
+    requirements:
+      - req:interval-start-end-basic
+      - req:interval-start-end-extended
+      - req:interval-start-dur-basic
+      - req:interval-start-dur-extended
+      - req:interval-dur-end-basic
+      - req:interval-dur-end-extended
+      - req:interval-abbreviated-end
+      - req:interval-time-shift-inheritance
+  - conformance_class: 8601-1:conf-class:recurring-time-interval
+    requirements:
+      - req:recur-start-end-basic
+      - req:recur-start-end-extended
+      - req:recur-start-dur-basic
+      - req:recur-start-dur-extended
+      - req:recur-dur-end-basic
+      - req:recur-dur-end-extended
+      - req:recur-unbounded
+      - req:recur-designator
+  - conformance_class: 8601-2:conf-class:explicit-representation
+    requirements:
+      - req:explicit-calendar-date
+      - req:explicit-ordinal-date
+      - req:explicit-week-date
+      - req:explicit-local-time
+      - req:explicit-time-reduced-precision
+      - req:explicit-beginning-of-day
+      - req:explicit-time-shift
+      - req:explicit-date-with-shift
+      - req:explicit-time-with-shift
+      - req:explicit-datetime
+      - req:explicit-datetime-with-shift
+      - req:explicit-decade
+      - req:explicit-century
+      - req:explicit-omission-zero
+      - req:explicit-precision
+      - req:explicit-decimal-fractions
+      - req:explicit-time-interval-start-end
+      - req:explicit-time-interval-start-duration
+      - req:explicit-time-interval-end-duration
+      - req:explicit-time-interval-component-order
+      - req:explicit-time-interval-shift
+      - req:explicit-recurring-time-interval
+      - req:explicit-additional-forms-day-of-week
+      - req:explicit-additional-forms-day-of-year
+      - req:explicit-additional-forms-decade
+      - req:explicit-additional-forms-century
+      - req:explicit-value-prefixing
+  - conformance_class: 8601-2:conf-class:negative-values
+    requirements:
+      - req:negative-year-implicit
+      - req:negative-year-explicit
+      - req:negative-week-explicit
+      - req:negative-day-of-month-explicit
+      - req:negative-day-of-year-explicit
+      - req:negative-year-before-one-explicit
+      - req:negative-decade-implicit
+      - req:negative-decade-explicit
+      - req:negative-century-implicit
+      - req:negative-century-explicit
+      - req:negative-duration
+  - conformance_class: 8601-2:conf-class:exponential-values
+    requirements:
+      - req:exponential-notation
+      - req:exponential-time-scale-component
+      - req:exponential-calendar-year
+      - req:exponential-letter-prefixed-year
+  - conformance_class: 8601-2:conf-class:significant-digits
+    requirements:
+      - req:significant-digits-notation
+      - req:significant-digits-time-scale-component
+      - req:significant-digits-four-digit-year
+      - req:significant-digits-letter-prefixed-year
+      - req:significant-digits-exponential-year
+  - conformance_class: 8601-2:conf-class:qualification
+    requirements:
+      - req:qualification-implicit-form
+      - req:qualification-explicit-form
+      - req:qualification-complete
+      - req:qualification-group
+      - req:qualification-individual
+      - req:qualification-year-implicit
+      - req:qualification-year-explicit
+      - req:qualification-month-implicit
+      - req:qualification-month-explicit
+      - req:qualification-week-implicit
+      - req:qualification-week-explicit
+      - req:qualification-day-implicit
+      - req:qualification-day-explicit
+      - req:qualification-day-of-week-implicit
+      - req:qualification-day-of-week-explicit
+      - req:qualification-day-of-year-implicit
+      - req:qualification-day-of-year-explicit
+      - req:qualification-hour-implicit
+      - req:qualification-hour-explicit
+      - req:qualification-minute-implicit
+      - req:qualification-minute-explicit
+      - req:qualification-second-implicit
+      - req:qualification-second-explicit
+      - req:qualification-decade-implicit
+      - req:qualification-decade-explicit
+      - req:qualification-century-implicit
+      - req:qualification-century-explicit
+      - req:qualification-calendar-date-complete
+      - req:qualification-calendar-date-group-all
+      - req:qualification-calendar-date-group-month-year
+      - req:qualification-calendar-date-group-year
+      - req:qualification-calendar-date-individual
+      - req:qualification-datetime
+  - conformance_class: 8601-2:conf-class:unspecified-digits
+    requirements:
+      - req:unspecified-explicit-forms-x-star
+      - req:unspecified-explicit-forms-single-x
+      - req:unspecified-implicit-forms
+      - req:unspecified-right-day-implicit
+      - req:unspecified-right-day-explicit
+      - req:unspecified-right-month-day-implicit
+      - req:unspecified-right-month-day-explicit
+      - req:unspecified-right-all-implicit
+      - req:unspecified-right-all-explicit
+      - req:unspecified-reduced-month-implicit
+      - req:unspecified-reduced-month-explicit
+      - req:unspecified-reduced-year-digits
+      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-datetime-expression
+  - conformance_class: 8601-2:conf-class:seasons
+    requirements:
+      - req:season-basic-values
+      - req:season-advanced-values
+      - req:season-implicit-basic
+      - req:season-implicit-advanced
+      - req:season-explicit
+      - req:season-as-month-basic
+      - req:season-as-month-advanced
+  - conformance_class: 8601-2:conf-class:grouped-time-scale-units
+    requirements:
+      - req:grouped-unit-definition
+      - req:grouped-unit-value
+      - req:grouped-application-date
+      - req:grouped-application-order
+      - req:grouped-boundary-adherence
+      - req:grouped-representation-with-shift
+      - req:grouped-conversion-to-interval
+      - req:grouped-truncation-partial
+  - conformance_class: 8601-2:conf-class:set-representation
+    requirements:
+      - req:set-enumeration
+      - req:set-single-element
+      - req:set-range-before
+      - req:set-range-after
+      - req:set-range-between
+      - req:set-range-combined
+      - req:set-expansion-in-set
+      - req:set-integer-expressions
+  - conformance_class: 8601-2:conf-class:extended-time-intervals
+    requirements:
+      - req:extended-interval-open-end
+      - req:extended-interval-open-start
+      - req:extended-interval-unknown-end
+      - req:extended-interval-unknown-start
+      - req:extended-interval-qualification-complete
+      - req:extended-interval-qualification-partial
+      - req:extended-interval-unspecified
+      - req:extended-interval-qualified-open
+      - req:extended-interval-before-after
+  - conformance_class: 8601-2:conf-class:date-time-selection
+    requirements:
+      - req:selection-rule-set
+      - req:selection-month
+      - req:selection-week
+      - req:selection-day-of-month
+      - req:selection-week-day
+      - req:selection-ordinal-day
+      - req:selection-hour
+      - req:selection-minute
+      - req:selection-second
+      - req:selection-position
+      - req:selection-time-interval
+      - req:selection-application
+      - req:selection-context-set
+      - req:selection-within-interval
+  - conformance_class: 8601-2:conf-class:recurring-time-intervals-with-rules
+    requirements:
+      - req:recurring-rule-method
+      - req:recurring-rule-repeat-rule
+      - req:recurring-rule-eligibility
+      - req:recurring-rule-selection
+      - req:recurring-rule-representation
+      - req:recurring-rule-evaluation
+      - req:recurring-rule-precision
+      - req:recurring-rule-inheritance
+  - conformance_class: 8601-2:conf-class:arithmetic
+    requirements:
+      - req:arithmetic-addition-duration
+      - req:arithmetic-subtraction-duration
+      - req:arithmetic-composite-addition
+      - req:arithmetic-precedence-addition
+      - req:arithmetic-multiplication
+      - req:arithmetic-date-duration
+      - req:arithmetic-date-precedence
+      - req:arithmetic-overflow-underflow
+      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-canonical-form
 additional_requirements: []
 additional_tests: []

@@ -9,56 +9,57 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:date-and-time
-source: ISO 8601-2:2026 Clause 6
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:6
 requirements:
   - id: req:set-enumeration
-    clause: "iso:8601:-2:ed-1:en:clause:6.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.2"
     statement: >
       An enumeration set encloses comma-separated date-time expressions in curly
       braces: ["{"][expr1][","][expr2]...["}"].
     format: any
     pattern: '["{"][expr1][","][expr2]...["}"]'
   - id: req:set-single-element
-    clause: "iso:8601:-2:ed-1:en:clause:6.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.3"
     statement: >
       A single-element choice set encloses comma-separated expressions in square
       brackets: ["["][expr1][","][expr2]...["]"].
     format: any
     pattern: '["["][expr1][","][expr2]...["]"]'
   - id: req:set-range-before
-    clause: "iso:8601:-2:ed-1:en:clause:6.4.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.4.1"
     statement: >
       A range of dates on or before a given expression, inclusive:
       [".."][expr].
     format: any
     pattern: '[".."][expr]'
   - id: req:set-range-after
-    clause: "iso:8601:-2:ed-1:en:clause:6.4.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.4.2"
     statement: >
       A range of dates on or after a given expression, inclusive:
       [expr][".."].
     format: any
     pattern: '[expr][".."]'
   - id: req:set-range-between
-    clause: "iso:8601:-2:ed-1:en:clause:6.4.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.4.3"
     statement: >
       A range spanning all values between two expressions, inclusive:
       [expr1][".."][expr2].
     format: any
     pattern: '[expr1][".."][expr2]'
   - id: req:set-range-combined
-    clause: "iso:8601:-2:ed-1:en:clause:6.4.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.4.4"
     statement: >
       The "on or before", "on or after", and "between" range notations may be
       freely combined within a single set.
     format: any
   - id: req:set-expansion-in-set
-    clause: "iso:8601:-2:ed-1:en:clause:6.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.5"
     statement: >
       Range expansion may be applied inside enumeration and single-element sets.
     format: any
   - id: req:set-integer-expressions
-    clause: "iso:8601:-2:ed-1:en:clause:6.7"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:6.7"
     statement: >
       Set notations and range expansion may also be used with integer values in
       date and time selection expressions.

@@ -99,7 +99,17 @@ Examples:
 | `validity` | expression → boolean | Check if expression is syntactically valid
 | `equivalence` | two expressions → boolean | Two expressions resolve to the same instant
 | `arithmetic` | expression + operation → result | Date/time arithmetic
+| `round_trip` | expression → expression | Parse → extract → generate → compare (exact or semantic equivalence)
 |===
+
+=== Parsing modes
+
+Parsing and validity tests support a `parse_mode` field:
+
+* `dedicated` (default) — format-specific parser (e.g. strptime with explicit format string)
+* `undifferentiated` — general/lenient parser (e.g. `Date.parse`, `Date.iso8601`)
+
+When `parse_mode` is omitted, it defaults to `dedicated`.
 
 == Directory structure
 
@@ -110,6 +120,19 @@ iso-8601-test-suite/
 ├── scripts/
 │   ├── run-tests                     # Test runner (ruby scripts/run-tests)
 │   └── validate                      # Validation script (ruby scripts/validate)
+├── lib/                              # Shared Ruby modules
+│   ├── term.rb                       # Terminal output (colors, icons)
+│   ├── yaml_store.rb                 # Cached YAML loader with error tracking
+│   ├── suite_index.rb                # Cross-reference index (IDs → files)
+│   ├── component_vocab.rb            # Component vocabulary (data-driven)
+│   ├── stats.rb                      # Error/warning/pass tracker
+│   ├── schema_validator.rb           # YAML Schema validation engine
+│   ├── test_type_handlers.rb         # Test type handler registry (OCP)
+│   ├── test_suite_loader.rb          # Test list builder
+│   ├── adapter_loader.rb             # Adapter discovery and instantiation
+│   ├── exec_adapter.rb               # JSON protocol adapter for external processes
+│   ├── graph_util.rb                 # Directed cycle detection
+│   └── hash_util.rb                  # Hash key normalization
 ├── adapters/                         # Pluggable implementation adapters
 │   ├── TEMPLATE.rb                   # Adapter interface template
 │   ├── ruby-date.rb                  # Ruby stdlib Date/DateTime/Time adapter
@@ -119,14 +142,16 @@ iso-8601-test-suite/
 │   ├── requirements-class.yaml       # YAML Schema for requirements class files
 │   ├── conformance-class.yaml        # YAML Schema for conformance class files
 │   ├── conformance-result.yaml       # YAML Schema for conformance result files
-│   └── profile.yaml                  # YAML Schema for profile files
+│   ├── profile.yaml                  # YAML Schema for profile files
+│   ├── components.yaml               # Component vocabulary schema
+│   └── meta.yaml                     # Shared YAML Schema types
 ├── requirements/
 │   ├── 8601-1/                       # ISO 8601-1 requirements (9 files)
 │   └── 8601-2/                       # ISO 8601-2 requirements (13 files)
 ├── tests/
 │   ├── 8601-1/                       # ISO 8601-1 conformance tests (9 files)
 │   └── 8601-2/                       # ISO 8601-2 conformance tests (13 files)
-├── profiles/                         # Profile definitions (7 files)
+├── profiles/                         # Profile definitions (8 + TEMPLATE)
 ├── results/                          # Conformance test results per implementation
 │   ├── TEMPLATE.yaml                 # Template for new result files
 │   └── ruby-date.yaml                # Ruby Date/DateTime/Time results
@@ -174,27 +199,34 @@ iso-8601-test-suite/
 
 === Profiles
 
+Profiles use a `traceability` field that explicitly selects specific requirements
+from conformance classes. This replaces the legacy `conformance_classes` field
+(which referenced entire classes wholesale).
+
 [cols="1,3,1",options="header"]
 |===
-| Profile | Conformance classes | Add'l tests
+| Profile | Description | Add'l tests
 
-| `profile:iso-8601-1-complete` | 9 (all Part 1) | —
-| `profile:iso-8601-2-complete` | 22 (all Part 1 + Part 2) | —
-| `profile:edtf-level-0` | 4 | 10
-| `profile:edtf-level-1` | 7 | 19
-| `profile:edtf-level-2` | 10 | 24
-| `profile:rfc-3339` | 3 | 9
-| `profile:w3c-datetime` | 3 | 13
+| `profile:iso-8601-1-complete` | All ISO 8601-1:2026 requirements (9 classes) | —
+| `profile:iso-8601-2-complete` | All ISO 8601-1 + ISO 8601-2 requirements (22 classes) | —
+| `profile:iso-8601-1-basic-format` | Basic format representations only (no delimiters) | —
+| `profile:edtf-level-0` | Extended Date/Time Format Level 0 | 10
+| `profile:edtf-level-1` | EDTF Level 1 (uncertain, approximate, unspecified) | 19
+| `profile:edtf-level-2` | EDTF Level 2 (structured date/time expressions) | 24
+| `profile:rfc-3339` | RFC 3339 (Internet date/time) | 9
+| `profile:w3c-datetime` | W3C Date and Time Formats (NOTE-datetime) | 13
 |===
 
 == Statistics
 
 * **99 requirements** in ISO 8601-1:2026 across 9 requirements classes
 * **158 requirements** in ISO 8601-2:2026 across 13 requirements classes
+* **51 additional requirements** across 8 profiles
+* **308 total requirements**
 * **275 conformance tests** for ISO 8601-1
 * **363 conformance tests** for ISO 8601-2
-* **75 additional tests** across 7 profiles
-* **713 total tests**
+* **95 additional tests** across 8 profiles
+* **733 total tests**
 
 == How to use
 
@@ -206,23 +238,23 @@ against a pluggable adapter. The default adapter uses Ruby's standard library
 
 [source,bash]
 ----
-ruby scripts/run-tests                            # run all 713 tests (default: ruby-date)
+ruby scripts/run-tests                            # run all 733 tests (default: ruby-date)
 ruby scripts/run-tests --adapter ruby-date        # explicit adapter selection
-ruby scripts/run-tests --profile rfc-3339         # run RFC 3339 profile (130 tests)
-ruby scripts/run-tests --profile w3c-datetime     # run W3C Datetime profile (134 tests)
-ruby scripts/run-tests --profile edtf-level-0     # run EDTF Level 0 profile (185 tests)
+ruby scripts/run-tests --profile rfc-3339         # run RFC 3339 profile
+ruby scripts/run-tests --profile w3c-datetime     # run W3C Datetime profile
+ruby scripts/run-tests --profile edtf-level-0     # run EDTF Level 0 profile
 ruby scripts/run-tests --class calendar-date      # run a single conformance class (32 tests)
-ruby scripts/run-tests --class time-of-day        # run time-of-day tests (52 tests)
+ruby scripts/run-tests --class time-of-day        # run time-of-day tests
 ruby scripts/run-tests --list                     # list available adapters, profiles, and classes
 ruby scripts/run-tests --verbose                  # show test descriptions
 ruby scripts/run-tests --quiet                    # only show summary
 ruby scripts/run-tests --output results/new.yaml  # write results to YAML file
 ----
 
-A profile runs all tests from its conformance classes plus the profile-specific
-additional tests. For example, `--profile rfc-3339` runs the `calendar-date`,
-`time-of-day`, and `date-and-time` conformance classes (121 base tests) plus
-9 RFC 3339-specific additional tests, for 130 total.
+A profile runs all tests from its traceability requirements plus the profile-specific
+additional tests. For example, `--profile rfc-3339` runs tests from the `calendar-date`,
+`time-of-day`, and `date-and-time` conformance classes (filtered by RFC 3339's
+traceability requirements) plus 15 RFC 3339-specific additional tests.
 
 ==== Writing a new adapter
 
@@ -232,7 +264,7 @@ Each adapter implements a well-defined interface:
 
 [cols="1,4"]
 |===
-| `try_parse(expression)` | Parse an expression; return `{valid:, parsed:, api:}` or `{valid: false, error:, api:}`
+| `try_parse(expression, options)` | Parse an expression; return `{valid:, parsed:, api:}` or `{valid: false, error:, api:}`. `options` may include `parse_mode` ("dedicated" or "undifferentiated").
 | `extract_components(parsed)` | Extract components (year, month, day, etc.) from a parsed object
 | `generate(components)` | Build an expression from components; return `{expression:}` or `nil`
 | `equivalent?(obj_a, obj_b)` | Check if two parsed objects represent the same instant
@@ -297,9 +329,10 @@ Protocol methods:
   Called once at startup.
 
 | `try_parse`
-| Params: `{"expression":"..."}`. +
+| Params: `{"expression":"...","options":{"parse_mode":"dedicated"}}`. +
 Return `{"valid":true,"parsed":"<handle>","api":"Class.method"}` +
-or `{"valid":false,"error":"...","api":"Class.method"}`.
+or `{"valid":false,"error":"...","api":"Class.method"}`. +
+`options.parse_mode` is `"dedicated"` (format-specific) or `"undifferentiated"` (general parser).
 
 | `extract_components`
 | Params: `{"parsed":"<handle>"}`. +
@@ -325,7 +358,32 @@ object and returns a handle. The harness passes this handle to
 by handle.
 
 See `adapters/python-datetime.py` for a working example (Python standard library).
+See `adapters/node-datetime.js` for a working example (JavaScript Date).
 See `adapters/TEMPLATE.rb` for the full adapter interface specification.
+
+=== Creating a new profile
+
+Profiles define subsets of ISO 8601 for specific use cases. To create one:
+
+. Copy `profiles/TEMPLATE.yaml` to `profiles/{name}.yaml`
+. Set `id: profile:{name}`, `name`, and `description`
+. Define `traceability` — list the specific requirements selected from each conformance class:
++
+[source,yaml]
+----
+traceability:
+  - conformance_class: conf-class:calendar-date
+    requirements:
+      - req:cal-date-parse-001
+      - req:cal-date-gen-001
+----
+. Optionally add `additional_requirements` and `additional_tests` for profile-specific rules
+. Validate: `ruby scripts/validate`
+. Test against an adapter: `ruby scripts/run-tests --profile {name}`
+
+Available requirement IDs are defined in `requirements/8601-1/*.yaml` and
+`requirements/8601-2/*.yaml`. Each requirements class file lists its requirements
+with their `req:` identifiers.
 
 === Running conformance tests manually
 
@@ -381,7 +439,7 @@ To add a new implementation result:
 
 === Validating the test suite
 
-The `scripts/validate` script performs 9 phases of validation:
+The `scripts/validate` script performs 15 phases of validation:
 
 . **YAML syntax** — all files parse correctly
 . **Schema references** — every data file has a `$schema` header
@@ -393,6 +451,12 @@ The `scripts/validate` script performs 9 phases of validation:
 . **Profile references** — all conformance class references resolve
 . **Result cross-references** — all test IDs in result files match test definitions
 . **Dependency graph** — no cycles in requirements class dependencies
+. **Source consistency** — source clause references are consistent across related files
+. **URN format** — clause references follow RFC 5141 URN format
+. **Statistics** — summary counts (requirements, tests, files)
+. **Pattern coverage** — pattern fields are present where expected
+. **Component validity** — component keys match the vocabulary in `schema/components.yaml`
+. **Test ID naming** — test IDs follow the `conf-test:{prefix}-{type}-{NNN}` convention
 
 [source,bash]
 ----

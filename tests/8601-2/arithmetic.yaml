@@ -11,7 +11,8 @@ dependencies:
   - 8601-1:conf-class:date-and-time
   - 8601-1:conf-class:duration
 requirements_class: req-class:arithmetic
-source: ISO 8601-2:2026 Clause 14
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:14
 tests:
   # --- Composite duration addition (Clause 14.3) ---
   - id: conf-test:arithmetic-composite-addition-001

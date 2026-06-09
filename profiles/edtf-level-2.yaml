@@ -7,19 +7,95 @@ description: >-
   (Library of Congress EDTF specification). EDTF Level 2 extends Level 1
   with partial uncertain/approximate qualification, sets and ranges,
   extended time intervals, and exponential values.
-source: ISO 8601-2:2019 Annex A (EDTF Level 2)
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:A
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
-  - 8601-1:conf-class:time-interval
-  - 8601-2:conf-class:qualification
-  - 8601-2:conf-class:unspecified-digits
-  - 8601-2:conf-class:seasons
-  - 8601-2:conf-class:set-representation
-  - 8601-2:conf-class:exponential-values
-  - 8601-2:conf-class:extended-time-intervals
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-extended-full
+      - req:time-extended-hm
+      - req:time-fraction-second
+      - req:time-beginning-of-day
+      - req:time-utc
+      - req:time-offset-extended
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:time-interval
+    requirements:
+      - req:interval-start-end-extended
+      - req:interval-start-dur-extended
+      - req:interval-dur-end-extended
+      - req:interval-abbreviated-end
+      - req:interval-time-shift-inheritance
+  - conformance_class: 8601-2:conf-class:qualification
+    requirements:
+      - req:qualification-implicit-form
+      - req:qualification-explicit-form
+      - req:qualification-complete
+      - req:qualification-group
+      - req:qualification-individual
+      - req:qualification-year-implicit
+      - req:qualification-year-explicit
+      - req:qualification-month-implicit
+      - req:qualification-month-explicit
+      - req:qualification-day-implicit
+      - req:qualification-day-explicit
+      - req:qualification-calendar-date-complete
+      - req:qualification-calendar-date-group-all
+      - req:qualification-calendar-date-group-month-year
+      - req:qualification-calendar-date-group-year
+      - req:qualification-calendar-date-individual
+      - req:qualification-datetime
+  - conformance_class: 8601-2:conf-class:unspecified-digits
+    requirements:
+      - req:unspecified-explicit-forms-x-star
+      - req:unspecified-explicit-forms-single-x
+      - req:unspecified-implicit-forms
+      - req:unspecified-right-day-implicit
+      - req:unspecified-right-day-explicit
+      - req:unspecified-right-month-day-implicit
+      - req:unspecified-right-month-day-explicit
+      - req:unspecified-right-all-implicit
+      - req:unspecified-right-all-explicit
+      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-datetime-expression
+  - conformance_class: 8601-2:conf-class:seasons
+    requirements:
+      - req:season-basic-values
+      - req:season-advanced-values
+      - req:season-implicit-basic
+      - req:season-implicit-advanced
+      - req:season-explicit
+  - conformance_class: 8601-2:conf-class:set-representation
+    requirements:
+      - req:set-enumeration
+      - req:set-single-element
+      - req:set-range-before
+      - req:set-range-after
+      - req:set-range-between
+      - req:set-range-combined
+  - conformance_class: 8601-2:conf-class:exponential-values
+    requirements:
+      - req:exponential-notation
+      - req:exponential-calendar-year
+      - req:exponential-letter-prefixed-year
+  - conformance_class: 8601-2:conf-class:extended-time-intervals
+    requirements:
+      - req:extended-interval-open-end
+      - req:extended-interval-open-start
+      - req:extended-interval-unknown-end
+      - req:extended-interval-unknown-start
+      - req:extended-interval-unspecified
 additional_requirements:
   - id: req:edtf-level-2-extended-format-only
     statement: >-

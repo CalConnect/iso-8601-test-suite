@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/schema-org.yaml
+# yaml-language-server: $schema=meta.yaml
 # YAML Schema for ISO 8601 Test Suite — Requirements Class
 ---
 type: object
@@ -29,8 +29,11 @@ properties:
       pattern: "^(8601-[12]:)?req-class:[a-z0-9-]+$"
     description: "Other requirements classes this class depends on"
   source:
-    type: string
-    description: "Source reference in the ISO 8601 standard"
+    type: array
+    items:
+      type: string
+      pattern: "^urn:iso:std:iso:8601:-[12]:ed-1:en(:clause:[0-9A-Za-z.,]+)?$"
+    description: "RFC 5141 URN references to source clauses in the ISO 8601 standard"
   requirements:
     type: array
     items:
@@ -46,8 +49,8 @@ properties:
           description: "Local identifier for this requirement (e.g. req:cal-date-basic-full)"
         clause:
           type: string
-          pattern: "^iso:8601:-[12]:ed-1:en:clause:[0-9A-Za-z.,\\-]+$"
-          description: "RFC 5141 partial URN clause reference (e.g. iso:8601:-1:ed-1:en:clause:5.2.2.1)"
+          pattern: "^urn:iso:std:iso:8601:-[12]:ed-1:en:clause:[0-9A-Za-z.,\\-]+(:tech:[a-z0-9-]+)?$"
+          description: "RFC 5141-bis URN clause reference with optional :tech: disambiguation (e.g. urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.2.1:tech:cal-date-basic-full)"
         statement:
           type: string
           description: "The normative requirement statement"

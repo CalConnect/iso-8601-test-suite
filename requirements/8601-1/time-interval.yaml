@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:date-and-time
   - req-class:duration
-source: ISO 8601-1:2026 Clause 5.5
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5
 requirements:
   - id: req:interval-start-end-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.1:tech:interval-start-end-basic"
     statement: >
       A time interval specified by start and end in basic format concatenates
       two date-time expressions with a solidus separator:
@@ -20,7 +21,7 @@ requirements:
     format: basic
     pattern: "[date][\"T\"][time][\"/\"][date][\"T\"][time]"
   - id: req:interval-start-end-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.1:tech:interval-start-end-extended"
     statement: >
       A time interval specified by start and end in extended format concatenates
       two extended date-time expressions with a solidus separator:
@@ -28,7 +29,7 @@ requirements:
     format: extended
     pattern: "[dateX][\"T\"][timeX][\"/\"][dateX][\"T\"][timeX]"
   - id: req:interval-start-dur-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.2:tech:interval-start-dur-basic"
     statement: >
       A time interval specified by start and duration in basic format encodes
       the start date-time followed by a solidus and a duration:
@@ -36,7 +37,7 @@ requirements:
     format: basic
     pattern: "[date][\"T\"][time][\"/\"][duration]"
   - id: req:interval-start-dur-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.2:tech:interval-start-dur-extended"
     statement: >
       A time interval specified by start and duration in extended format encodes
       the start date-time followed by a solidus and a duration:
@@ -44,7 +45,7 @@ requirements:
     format: extended
     pattern: "[dateX][\"T\"][timeX][\"/\"][duration]"
   - id: req:interval-dur-end-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.3:tech:interval-dur-end-basic"
     statement: >
       A time interval specified by duration and end in basic format encodes
       a duration followed by a solidus and the end date-time:
@@ -52,7 +53,7 @@ requirements:
     format: basic
     pattern: "[duration][\"/\"][date][\"T\"][time]"
   - id: req:interval-dur-end-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.3.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.3.3:tech:interval-dur-end-extended"
     statement: >
       A time interval specified by duration and end in extended format encodes
       a duration followed by a solidus and the end date-time:
@@ -60,14 +61,14 @@ requirements:
     format: extended
     pattern: "[duration][\"/\"][dateX][\"T\"][timeX]"
   - id: req:interval-abbreviated-end
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviated-end"
     statement: >
       In a start/end interval, higher-order time scale components may be omitted
       from the end expression when the result remains unambiguous. The omitted
       components inherit their values from the start expression.
     format: any
   - id: req:interval-time-shift-inheritance
-    clause: "iso:8601:-1:ed-1:en:clause:5.5.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-time-shift-inheritance"
     statement: >
       A UTC offset provided with the component before the solidus is assumed to
       apply to the component after the solidus, unless the latter provides its

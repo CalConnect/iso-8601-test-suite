@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - conf-class:explicit-representation
 requirements_class: req-class:significant-digits
-source: ISO 8601-2:2026 Clause 4.4.3
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.3
 tests:
   # --- Significant digits notation (Clause 4.4.3) ---
-  - id: conf-test:significant-digits-parsing-001
+  - id: conf-test:significant-digits-parse-001
     description: "Parse significant digits '1230S2' (value 1200-1299)"
     requirements:
       - req:significant-digits-notation
@@ -26,7 +27,7 @@ tests:
           value: 1230
           digits: 2
 
-  - id: conf-test:significant-digits-parsing-002
+  - id: conf-test:significant-digits-parse-002
     description: "Parse significant digits '3141592653S4'"
     requirements:
       - req:significant-digits-notation
@@ -40,7 +41,7 @@ tests:
           value: 3141592653
           digits: 4
 
-  - id: conf-test:significant-digits-parsing-003
+  - id: conf-test:significant-digits-parse-003
     description: "Parse significant digits with exponential '271828E5S6'"
     requirements:
       - req:significant-digits-notation
@@ -56,7 +57,7 @@ tests:
           digits: 6
 
   # --- Significant digits in year (Clause 4.4.3) ---
-  - id: conf-test:significant-digits-year-parsing-001
+  - id: conf-test:significant-digits-year-parse-001
     description: "Parse year with significant digits '6633110S3Y'"
     requirements:
       - req:significant-digits-time-scale-component
@@ -72,7 +73,7 @@ tests:
             digits: 3
 
   # --- Four-digit year with significant digits (Clause 4.5.4) ---
-  - id: conf-test:significant-digits-four-digit-year-parsing-001
+  - id: conf-test:significant-digits-four-digit-year-parse-001
     description: "Parse four-digit year with significant digits '1950S2'"
     requirements:
       - req:significant-digits-four-digit-year
@@ -88,7 +89,7 @@ tests:
             digits: 2
 
   # --- Letter-prefixed year with significant digits (Clause 4.5.4) ---
-  - id: conf-test:significant-digits-letter-year-parsing-001
+  - id: conf-test:significant-digits-letter-year-parse-001
     description: "Parse letter-prefixed year with significant digits 'Y171010000S3'"
     requirements:
       - req:significant-digits-letter-prefixed-year
@@ -104,7 +105,7 @@ tests:
             digits: 3
 
   # --- Exponential year with significant digits (Clause 4.5.4) ---
-  - id: conf-test:significant-digits-exponential-year-parsing-001
+  - id: conf-test:significant-digits-exponential-year-parse-001
     description: "Parse exponential year with significant digits 'Y3388E2S3'"
     requirements:
       - req:significant-digits-exponential-year
@@ -122,7 +123,7 @@ tests:
             digits: 3
 
   # --- Generation tests ---
-  - id: conf-test:significant-digits-generation-001
+  - id: conf-test:significant-digits-gen-001
     description: "Generate four-digit year with significant digits"
     requirements:
       - req:significant-digits-four-digit-year
@@ -137,7 +138,7 @@ tests:
       expression: "1950S2"
 
   # --- Validity tests ---
-  - id: conf-test:significant-digits-validity-001
+  - id: conf-test:significant-digits-valid-001
     description: "Verify significant digits count must be positive"
     requirements:
       - req:significant-digits-notation
@@ -147,7 +148,7 @@ tests:
     expect:
       valid: false
 
-  - id: conf-test:significant-digits-validity-002
+  - id: conf-test:significant-digits-valid-002
     description: "Verify significant digits count cannot exceed value length"
     requirements:
       - req:significant-digits-notation

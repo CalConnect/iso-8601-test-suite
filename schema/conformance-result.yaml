@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=meta.yaml
 # YAML Schema for ISO 8601 Test Suite — Conformance Test Suite Result
 #
 # Records the results of running the test suite against a specific
@@ -80,6 +81,13 @@ properties:
       - automated: a test script executed the API calls
       - manual: a human ran the code and recorded results
       - inferred: results based on known behavior without execution
+
+  declared_conformance_classes:
+    type: array
+    items:
+      type: string
+      pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
+    description: "Conformance classes the implementation explicitly declares support for"
 
   profiles_tested:
     type: array

@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:conf-class:recurring-time-interval
 requirements_class: req-class:recurring-time-intervals-with-rules
-source: ISO 8601-2:2026 Clause 13
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:13
 tests:
   # --- Basic repeat rule representations (Clause 13.5) ---
-  - id: conf-test:recurring-start-end-parsing-001
+  - id: conf-test:recurring-start-end-parse-001
     description: "Parse recurring interval with start and end 'R12/20150929T140000/20150929T153000/F2W'"
     requirements:
       - req:recurring-rule-representation
@@ -42,7 +43,7 @@ tests:
             value: 2
             unit: week
 
-  - id: conf-test:recurring-start-duration-parsing-001
+  - id: conf-test:recurring-start-duration-parse-001
     description: "Parse recurring interval with start and duration 'R12/20150929T140000/P1H30M0S/F2W'"
     requirements:
       - req:recurring-rule-representation
@@ -69,7 +70,7 @@ tests:
             value: 2
             unit: week
 
-  - id: conf-test:recurring-duration-end-parsing-001
+  - id: conf-test:recurring-duration-end-parse-001
     description: "Parse recurring interval with duration and end 'R12/P2H30M0S/20150929T153000/F2W'"
     requirements:
       - req:recurring-rule-representation
@@ -97,7 +98,7 @@ tests:
             unit: week
 
   # --- Eligibility part (Clause 13.4.2) ---
-  - id: conf-test:recurring-eligibility-parsing-001
+  - id: conf-test:recurring-eligibility-parse-001
     description: "Parse eligibility with 2-year cycle 'F2Y'"
     requirements:
       - req:recurring-rule-eligibility
@@ -111,7 +112,7 @@ tests:
           value: 2
           unit: year
 
-  - id: conf-test:recurring-eligibility-parsing-002
+  - id: conf-test:recurring-eligibility-parse-002
     description: "Parse eligibility with 8-day cycle 'F8D'"
     requirements:
       - req:recurring-rule-eligibility
@@ -125,7 +126,7 @@ tests:
           value: 8
           unit: day
 
-  - id: conf-test:recurring-eligibility-parsing-003
+  - id: conf-test:recurring-eligibility-parse-003
     description: "Parse eligibility with yearly cycle 'F1Y'"
     requirements:
       - req:recurring-rule-eligibility
@@ -140,7 +141,7 @@ tests:
           unit: year
 
   # --- Selection with repeat rules ---
-  - id: conf-test:recurring-selection-parsing-001
+  - id: conf-test:recurring-selection-parse-001
     description: "Parse recurring interval with selection 'R/2018-08-08/P1D/F1YL{3,8}M8DN'"
     requirements:
       - req:recurring-rule-representation
@@ -170,7 +171,7 @@ tests:
               - type: day_of_month
                 value: 8
 
-  - id: conf-test:recurring-selection-parsing-002
+  - id: conf-test:recurring-selection-parse-002
     description: "Parse recurring interval with monthly selection 'R/2018-08-01T10:20:00/PT10M/F1ML{1,10}DT10H20M0SN'"
     requirements:
       - req:recurring-rule-representation
@@ -208,7 +209,7 @@ tests:
                 value: 0
 
   # --- Precision (Clause 13.6.2) ---
-  - id: conf-test:recurring-precision-parsing-001
+  - id: conf-test:recurring-precision-parse-001
     description: "Parse recurring with month precision 'R/2018Y1M/P1M/F3M'"
     requirements:
       - req:recurring-rule-precision
@@ -229,7 +230,7 @@ tests:
             value: 3
             unit: month
 
-  - id: conf-test:recurring-precision-parsing-002
+  - id: conf-test:recurring-precision-parse-002
     description: "Parse recurring with day precision 'R/2018Y1M1D/P1D/F3M'"
     requirements:
       - req:recurring-rule-precision
@@ -251,7 +252,7 @@ tests:
             value: 3
             unit: month
 
-  - id: conf-test:recurring-precision-parsing-003
+  - id: conf-test:recurring-precision-parse-003
     description: "Parse recurring with minute precision 'R/2018Y1M1DT0M/PT10M/F1M'"
     requirements:
       - req:recurring-rule-precision
@@ -275,7 +276,7 @@ tests:
             unit: month
 
   # --- Selection with Wednesday in September ---
-  - id: conf-test:recurring-selection-september-parsing-001
+  - id: conf-test:recurring-selection-september-parse-001
     description: "Parse recurring first Wednesday in September 'R/2018-09-05/P1D/F1YL9M3K1IN'"
     requirements:
       - req:recurring-rule-representation
@@ -306,7 +307,7 @@ tests:
                 value: 1
 
   # --- Method structure (Clause 13.2) ---
-  - id: conf-test:recurring-method-parsing-001
+  - id: conf-test:recurring-method-parse-001
     description: "Parse recurring time interval with occurrences and repeat rule"
     requirements:
       - req:recurring-rule-method
@@ -329,7 +330,7 @@ tests:
             unit: month
 
   # --- Repeat rule structure (Clause 13.4.1) ---
-  - id: conf-test:recurring-repeat-rule-parsing-001
+  - id: conf-test:recurring-repeat-rule-parse-001
     description: "Parse repeat rule with eligibility only (no selection)"
     requirements:
       - req:recurring-rule-repeat-rule
@@ -351,7 +352,7 @@ tests:
             value: 1
             unit: month
 
-  - id: conf-test:recurring-repeat-rule-parsing-002
+  - id: conf-test:recurring-repeat-rule-parse-002
     description: "Parse repeat rule with eligibility and selection"
     requirements:
       - req:recurring-rule-repeat-rule
@@ -383,7 +384,7 @@ tests:
                 value: 1
 
   # --- Selection rules (Clause 13.4.3) ---
-  - id: conf-test:recurring-selection-month-parsing-001
+  - id: conf-test:recurring-selection-month-parse-001
     description: "Parse selection rules within repeat rule"
     requirements:
       - req:recurring-rule-selection
@@ -410,7 +411,7 @@ tests:
                 value: 6
 
   # --- Inheritance (Clause 13.6.3) ---
-  - id: conf-test:recurring-inheritance-parsing-001
+  - id: conf-test:recurring-inheritance-parse-001
     description: "Parse recurring interval where selection inherits day from start"
     requirements:
       - req:recurring-rule-inheritance
@@ -437,7 +438,7 @@ tests:
                 value: 5
 
   # --- Evaluation (Clause 13.6) ---
-  - id: conf-test:recurring-evaluation-parsing-001
+  - id: conf-test:recurring-evaluation-parse-001
     description: "Parse complete recurring interval with evaluation structure"
     requirements:
       - req:recurring-rule-evaluation

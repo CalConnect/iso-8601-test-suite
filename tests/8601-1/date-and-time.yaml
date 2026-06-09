@@ -11,7 +11,8 @@ dependencies:
   - conf-class:calendar-date
   - conf-class:time-of-day
 requirements_class: req-class:date-and-time
-source: ISO 8601-1:2026 Clause 5.4
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4
 tests:
   # Parsing tests: calendar date + time, basic format
   - id: conf-test:date-time-parse-001

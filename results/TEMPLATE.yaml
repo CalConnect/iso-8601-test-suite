@@ -34,6 +34,13 @@ date: "2026-01-01"
 tester: "Your Name"
 verification: manual  # or: automated, inferred
 
+# Conformance classes this implementation explicitly targets.
+# Tests in classes NOT listed here will be marked "not-supported" instead of "fail".
+# Omit or leave empty to target all classes.
+declared_conformance_classes:
+  - conf-class:calendar-date
+  - conf-class:time-of-day
+
 profiles_tested:
   - profile:rfc-3339
 
@@ -88,3 +95,19 @@ conformance_class_results:
     test_results:
       - test: conf-test:qual-uncertain-date-001
         result: not-supported
+
+# Profile-specific additional test results (for tests defined in profiles/).
+profile_results:
+  - profile: profile:rfc-3339
+    status: partial
+    notes: "Partially supports RFC 3339 additional requirements"
+    test_results:
+      - test: conf-test:rfc-3339-invalid-001
+        result: pass
+        method:
+          code: 'Date.strptime("2025-13-01", "%Y-%m-%d")'
+          language: ruby
+          api: Date.strptime
+        actual:
+          valid: false
+

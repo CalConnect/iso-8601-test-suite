@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=meta.yaml
+# YAML Schema Meta-Schema for ISO 8601 Test Suite
+#
+# Describes the structure of YAML Schema definition files used in this test suite.
+# Each schema file validates a specific data file type (requirements class,
+# conformance class, profile, result, suite manifest).
+---
+type: object
+required:
+  - type
+  - required
+  - properties
+properties:
+  type:
+    type: string
+    enum: [object, array, string, integer, number, boolean]
+  required:
+    type: array
+    items:
+      type: string
+  properties:
+    type: object
+  items:
+    type: object
+  oneOf:
+    type: array
+    items:
+      type: object
+  pattern:
+    type: string
+  enum:
+    type: array
+  description:
+    type: string

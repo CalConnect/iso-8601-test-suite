@@ -9,63 +9,64 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:time-interval
-source: ISO 8601-2:2026 Clause 10
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:10
 requirements:
   - id: req:extended-interval-open-end
-    clause: "iso:8601:-2:ed-1:en:clause:10.2.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.1"
     statement: >
       A time interval with an open (continuing) end encodes the start followed
       by a solidus and double-dot: [intexpr]["/"][".."].
     format: any
     pattern: '[intexpr]["/"][".."]'
   - id: req:extended-interval-open-start
-    clause: "iso:8601:-2:ed-1:en:clause:10.2.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.2"
     statement: >
       A time interval with an open (unbounded earlier) start encodes a double-dot
       followed by a solidus and the end: [".."]["/"][intexpr].
     format: any
     pattern: '[".."]["/"][intexpr]'
   - id: req:extended-interval-unknown-end
-    clause: "iso:8601:-2:ed-1:en:clause:10.2.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.3"
     statement: >
       A time interval with an unknown end encodes the start followed by a
       trailing solidus: [intexpr]["/"].
     format: any
     pattern: '[intexpr]["/"]'
   - id: req:extended-interval-unknown-start
-    clause: "iso:8601:-2:ed-1:en:clause:10.2.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.4"
     statement: >
       A time interval with an unknown start encodes a leading solidus followed
       by the end: ["/"][intexpr].
     format: any
     pattern: '["/"][intexpr]'
   - id: req:extended-interval-qualification-complete
-    clause: "iso:8601:-2:ed-1:en:clause:10.3.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.3.2"
     statement: >
       Start and end dates within a time interval may carry uncertainty and
       approximation qualification symbols.
     format: any
   - id: req:extended-interval-qualification-partial
-    clause: "iso:8601:-2:ed-1:en:clause:10.3.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.3.3"
     statement: >
       Individual portions of the start and/or end dates in a time interval may
       be independently qualified.
     format: any
   - id: req:extended-interval-unspecified
-    clause: "iso:8601:-2:ed-1:en:clause:10.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.4"
     statement: >
       Portions of the start or end date in a time interval may use the "X"
       unspecified-digit notation.
     format: any
   - id: req:extended-interval-qualified-open
-    clause: "iso:8601:-2:ed-1:en:clause:10.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.5"
     statement: >
       Start and end dates may combine uncertainty/approximation qualification,
       unspecified digits, and open or unknown boundary notations within a single
       time interval.
     format: any
   - id: req:extended-interval-before-after
-    clause: "iso:8601:-2:ed-1:en:clause:10.6"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.6"
     statement: >
       "Before" and "after" boundaries with qualified time scale components use
       double-dot notation within time interval expressions.

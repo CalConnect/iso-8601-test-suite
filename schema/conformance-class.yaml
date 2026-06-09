@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=meta.yaml
 # YAML Schema for ISO 8601 Test Suite — Conformance Class
 ---
 type: object
@@ -33,8 +34,11 @@ properties:
     pattern: "^(8601-[12]:)?req-class:[a-z0-9-]+$"
     description: "Reference to the corresponding requirements class"
   source:
-    type: string
-    description: "Source reference in the ISO 8601 standard"
+    type: array
+    items:
+      type: string
+      pattern: "^urn:iso:std:iso:8601:-[12]:ed-1:en(:clause:[0-9A-Za-z.,]+)?$"
+    description: "RFC 5141 URN references to source clauses in the ISO 8601 standard"
   tests:
     type: array
     items:
@@ -62,8 +66,16 @@ properties:
           description: "Requirements verified by this test"
         test_type:
           type: string
-          enum: [parsing, generation, validity, equivalence, arithmetic]
+          enum: [parsing, generation, validity, equivalence, arithmetic, round_trip]
           description: "Type of conformance test"
+        parse_mode:
+          type: string
+          enum: [dedicated, undifferentiated]
+          description: >-
+            For parsing/validity tests: which parser mode to use.
+            - dedicated: format-specific parser (e.g. strptime with explicit format string)
+            - undifferentiated: general/lenient parser (e.g. Date.parse, Date.iso8601)
+            Defaults to "dedicated" if omitted.
         given:
           oneOf:
             - type: object

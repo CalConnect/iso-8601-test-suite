@@ -7,16 +7,61 @@ description: >-
   (Library of Congress EDTF specification). EDTF Level 1 extends Level 0
   with uncertain/approximate qualification, unspecified digits, and season
   representations drawn from ISO 8601-2.
-source: ISO 8601-2:2019 Annex A (EDTF Level 1)
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:A
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
-  - 8601-1:conf-class:time-interval
-  - 8601-2:conf-class:qualification
-  - 8601-2:conf-class:unspecified-digits
-  - 8601-2:conf-class:seasons
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-extended-full
+      - req:time-extended-hm
+      - req:time-fraction-second
+      - req:time-beginning-of-day
+      - req:time-utc
+      - req:time-offset-extended
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:time-interval
+    requirements:
+      - req:interval-start-end-extended
+      - req:interval-start-dur-extended
+      - req:interval-dur-end-extended
+      - req:interval-abbreviated-end
+      - req:interval-time-shift-inheritance
+  - conformance_class: 8601-2:conf-class:qualification
+    requirements:
+      - req:qualification-implicit-form
+      - req:qualification-explicit-form
+      - req:qualification-complete
+      - req:qualification-year-implicit
+      - req:qualification-year-explicit
+      - req:qualification-month-implicit
+      - req:qualification-month-explicit
+      - req:qualification-day-implicit
+      - req:qualification-day-explicit
+      - req:qualification-calendar-date-complete
+      - req:qualification-calendar-date-individual
+  - conformance_class: 8601-2:conf-class:unspecified-digits
+    requirements:
+      - req:unspecified-explicit-forms-x-star
+      - req:unspecified-explicit-forms-single-x
+      - req:unspecified-right-day-implicit
+      - req:unspecified-right-day-explicit
+      - req:unspecified-right-month-day-implicit
+      - req:unspecified-right-month-day-explicit
+  - conformance_class: 8601-2:conf-class:seasons
+    requirements:
+      - req:season-basic-values
+      - req:season-implicit-basic
 additional_requirements:
   - id: req:edtf-level-1-extended-format-only
     statement: >-

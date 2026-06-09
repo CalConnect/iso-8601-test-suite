@@ -5,17 +5,126 @@ name: ISO 8601-1 Complete
 description: >-
   Profile covering all conformance classes defined in ISO 8601-1 (Date and time
   — Representations for information interchange — Part 1: Basic rules).
-source: ISO 8601-1:2019
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:fundamentals
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:ordinal-date
-  - 8601-1:conf-class:week-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
-  - 8601-1:conf-class:duration
-  - 8601-1:conf-class:time-interval
-  - 8601-1:conf-class:recurring-time-interval
+traceability:
+  - conformance_class: 8601-1:conf-class:fundamentals
+    requirements:
+      - req:character-set
+      - req:decreasing-order
+      - req:gregorian-calendar
+      - req:leap-year-rules
+      - req:days-per-month
+      - req:week-calendar
+      - req:24-hour-clock
+      - req:year-representation
+      - req:month-representation
+      - req:week-number-representation
+      - req:day-of-week-representation
+      - req:day-of-year-representation
+      - req:decade-representation
+      - req:century-representation
+      - req:time-shift
+      - req:expansion
+      - req:leading-zeros
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-basic-full
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+      - req:cal-date-reduced-decade
+      - req:cal-date-reduced-century
+      - req:cal-date-expanded-basic-full
+      - req:cal-date-expanded-extended-full
+      - req:cal-date-expanded-extended-month
+      - req:cal-date-expanded-basic-year
+      - req:cal-date-expanded-basic-decade
+      - req:cal-date-expanded-basic-century
+  - conformance_class: 8601-1:conf-class:ordinal-date
+    requirements:
+      - req:ord-date-basic-full
+      - req:ord-date-extended-full
+      - req:ord-date-expanded-basic
+      - req:ord-date-expanded-extended
+  - conformance_class: 8601-1:conf-class:week-date
+    requirements:
+      - req:week-date-basic-full
+      - req:week-date-extended-full
+      - req:week-date-basic-week-only
+      - req:week-date-extended-week-only
+      - req:week-date-expanded-basic-full
+      - req:week-date-expanded-extended-full
+      - req:week-date-expanded-basic-week-only
+      - req:week-date-expanded-extended-week-only
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-basic-full
+      - req:time-extended-full
+      - req:time-basic-hm
+      - req:time-extended-hm
+      - req:time-basic-h
+      - req:time-fraction-second
+      - req:time-fraction-minute
+      - req:time-fraction-hour
+      - req:time-beginning-of-day
+      - req:time-ending-of-day
+      - req:time-utc
+      - req:time-offset-basic
+      - req:time-offset-extended
+      - req:time-designator-omission
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-basic-local
+      - req:date-time-cal-basic-utc
+      - req:date-time-cal-basic-offset
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-ord-basic-local
+      - req:date-time-ord-basic-utc
+      - req:date-time-ord-basic-offset
+      - req:date-time-ord-extended-local
+      - req:date-time-ord-extended-utc
+      - req:date-time-ord-extended-offset
+      - req:date-time-week-basic-local
+      - req:date-time-week-basic-utc
+      - req:date-time-week-basic-offset
+      - req:date-time-week-extended-local
+      - req:date-time-week-extended-utc
+      - req:date-time-week-extended-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:duration
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-complete-week
+      - req:dur-reduced
+      - req:dur-fraction
+      - req:dur-time-designator
+      - req:dur-alt-calendar-basic
+      - req:dur-alt-calendar-extended
+      - req:dur-alt-ordinal-basic
+      - req:dur-alt-ordinal-extended
+  - conformance_class: 8601-1:conf-class:time-interval
+    requirements:
+      - req:interval-start-end-basic
+      - req:interval-start-end-extended
+      - req:interval-start-dur-basic
+      - req:interval-start-dur-extended
+      - req:interval-dur-end-basic
+      - req:interval-dur-end-extended
+      - req:interval-abbreviated-end
+      - req:interval-time-shift-inheritance
+  - conformance_class: 8601-1:conf-class:recurring-time-interval
+    requirements:
+      - req:recur-start-end-basic
+      - req:recur-start-end-extended
+      - req:recur-start-dur-basic
+      - req:recur-start-dur-extended
+      - req:recur-dur-end-basic
+      - req:recur-dur-end-extended
+      - req:recur-unbounded
+      - req:recur-designator
 additional_requirements: []
 additional_tests: []

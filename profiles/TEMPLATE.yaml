@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+#
+# Profile Template
+# Copy this file to profiles/{name}.yaml and fill in the fields.
+#
+# Step 1: Choose a unique ID (profile:{kebab-case-name})
+# Step 2: Set name, description, source references
+# Step 3: Define traceability — which requirements from which conformance classes
+# Step 4: Add profile-specific requirements/tests if needed
+# Step 5: Validate: ruby scripts/validate
+# Step 6: Run tests: ruby scripts/run-tests --profile {name}
+#
+# Available requirement IDs are in:
+#   requirements/8601-1/*.yaml  (Part 1 — 9 files, 99 requirements)
+#   requirements/8601-2/*.yaml  (Part 2 — 13 files, 158 requirements)
+#
+# Available conformance class IDs are in:
+#   tests/8601-1/*.yaml  (Part 1 — 9 classes)
+#   tests/8601-2/*.yaml  (Part 2 — 13 classes)
+#
+---
+id: profile:my-profile
+name: "My Profile Name"
+description: >-
+  A description of what this profile covers, which use cases it serves,
+  and how it differs from other profiles.
+source:
+  - "https://example.org/my-specification"
+standardization_target_type: iso-8601-date-time-processor
+
+# Traceability: explicit per-class requirement selection.
+# Each entry selects specific requirements from a conformance class.
+# This replaces the legacy conformance_classes field.
+traceability:
+  # Example: select only extended-format parsing requirements from calendar-date
+  - conformance_class: conf-class:calendar-date
+    requirements:
+      - req:cal-date-parse-ext-001
+      - req:cal-date-gen-ext-001
+
+  # Example: select all time-of-day requirements
+  - conformance_class: conf-class:time-of-day
+    requirements:
+      - req:tod-parse-001
+
+# Additional profile-specific requirements not found in any base class.
+# Optional — remove if not needed.
+additional_requirements:
+  - id: req:my-profile-specific-001
+    statement: "The implementation SHALL support ..."
+
+# Additional profile-specific conformance tests.
+# Optional — remove if not needed.
+# Test types: parsing, generation, validity, equivalence, arithmetic, round_trip
+# Parse modes: dedicated (format-specific), undifferentiated (general parser)
+additional_tests:
+  - id: conf-test:my-profile-test-001
+    description: "Verify that the implementation handles my-profile-specific behavior"
+    requirements:
+      - req:my-profile-specific-001
+    test_type: parsing
+    given:
+      expression: "2024-01-15"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 2024
+          month: 1
+          day: 15

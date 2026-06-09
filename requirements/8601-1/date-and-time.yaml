@@ -10,31 +10,32 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:calendar-date
   - req-class:time-of-day
-source: ISO 8601-1:2026 Clause 5.4
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4
 requirements:
   - id: req:date-time-cal-basic-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-basic-local"
     statement: >
       A calendar date combined with local time in basic format concatenates
       the date and time fields with a time designator: [date]["T"][time].
     format: basic
     pattern: "[YYYY][MM][DD][\"T\"][hh][mm][ss]"
   - id: req:date-time-cal-basic-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-basic-utc"
     statement: >
       A calendar date combined with UTC time in basic format appends the UTC
       designator after the time: [date]["T"][time]["Z"].
     format: basic
     pattern: "[YYYY][MM][DD][\"T\"][hh][mm][ss][\"Z\"]"
   - id: req:date-time-cal-basic-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-basic-offset"
     statement: >
       A calendar date combined with time and UTC offset in basic format appends
       the offset after the time: [date]["T"][time][shift] or [date]["T"][time][shiftH].
     format: basic
     pattern: "[YYYY][MM][DD][\"T\"][hh][mm][ss][±][hh][mm]"
   - id: req:date-time-cal-extended-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-local"
     statement: >
       A calendar date combined with local time in extended format uses hyphen
       separators in the date and colon separators in the time:
@@ -42,105 +43,105 @@ requirements:
     format: extended
     pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss]"
   - id: req:date-time-cal-extended-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-utc"
     statement: >
       A calendar date combined with UTC time in extended format appends the UTC
       designator: [dateX]["T"][timeX]["Z"].
     format: extended
     pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss][\"Z\"]"
   - id: req:date-time-cal-extended-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-offset"
     statement: >
       A calendar date combined with time and UTC offset in extended format appends
       the offset: [dateX]["T"][timeX][shiftX] or [dateX]["T"][timeX][shiftH].
     format: extended
     pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
   - id: req:date-time-ord-basic-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-local"
     statement: >
       An ordinal date combined with local time in basic format concatenates
       the date and time with a time designator: [odate]["T"][time].
     format: basic
     pattern: "[YYYY][OOO][\"T\"][hh][mm][ss]"
   - id: req:date-time-ord-basic-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-utc"
     statement: >
       An ordinal date combined with UTC time in basic format appends the UTC
       designator: [odate]["T"][time]["Z"].
     format: basic
     pattern: "[YYYY][OOO][\"T\"][hh][mm][ss][\"Z\"]"
   - id: req:date-time-ord-basic-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-offset"
     statement: >
       An ordinal date combined with time and UTC offset in basic format appends
       the offset: [odate]["T"][time][shift] or [odate]["T"][time][shiftH].
     format: basic
     pattern: "[YYYY][OOO][\"T\"][hh][mm][ss][±][hh][mm]"
   - id: req:date-time-ord-extended-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-local"
     statement: >
       An ordinal date combined with local time in extended format uses hyphen
       and colon separators: [odateX]["T"][timeX].
     format: extended
     pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss]"
   - id: req:date-time-ord-extended-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-utc"
     statement: >
       An ordinal date combined with UTC time in extended format appends the UTC
       designator: [odateX]["T"][timeX]["Z"].
     format: extended
     pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss][\"Z\"]"
   - id: req:date-time-ord-extended-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-offset"
     statement: >
       An ordinal date combined with time and UTC offset in extended format appends
       the offset: [odateX]["T"][timeX][shiftX] or [odateX]["T"][timeX][shiftH].
     format: extended
     pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
   - id: req:date-time-week-basic-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-local"
     statement: >
       A week date combined with local time in basic format concatenates the date
       and time with a time designator: [wdate]["T"][time].
     format: basic
     pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm][ss]"
   - id: req:date-time-week-basic-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-utc"
     statement: >
       A week date combined with UTC time in basic format appends the UTC
       designator: [wdate]["T"][time]["Z"].
     format: basic
     pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm][ss][\"Z\"]"
   - id: req:date-time-week-basic-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-offset"
     statement: >
       A week date combined with time and UTC offset in basic format appends the
       offset: [wdate]["T"][time][shift] or [wdate]["T"][time][shiftH].
     format: basic
     pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm][ss][±][hh][mm]"
   - id: req:date-time-week-extended-local
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-local"
     statement: >
       A week date combined with local time in extended format uses hyphen and
       colon separators: [wdateX]["T"][timeX].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm][\":\"][ss]"
   - id: req:date-time-week-extended-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-utc"
     statement: >
       A week date combined with UTC time in extended format appends the UTC
       designator: [wdateX]["T"][timeX]["Z"].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm][\":\"][ss][\"Z\"]"
   - id: req:date-time-week-extended-offset
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.2.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-offset"
     statement: >
       A week date combined with time and UTC offset in extended format appends
       the offset: [wdateX]["T"][timeX][shiftX] or [wdateX]["T"][timeX][shiftH].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
   - id: req:date-time-reduced-precision
-    clause: "iso:8601:-1:ed-1:en:clause:5.4.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3"
     statement: >
       A date expression followed by ["T"] may include a time component with reduced
       precision (omitting seconds or minutes). The entire expression must use

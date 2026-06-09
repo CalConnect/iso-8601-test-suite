@@ -9,10 +9,11 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:explicit-representation
-source: ISO 8601-2:2026 Clause 4.4.2
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.2
 requirements:
   - id: req:exponential-notation
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.2:tech:exponential-notation"
     statement: >
       An exponential value encodes a significand and exponent:
       [significand]["E"][exponent], where the significand is a positive or negative
@@ -20,7 +21,7 @@ requirements:
     format: any
     pattern: '[significand]["E"][exponent]'
   - id: req:exponential-time-scale-component
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.2:tech:exponential-time-scale-component"
     statement: >
       Any time scale component that accepts unbounded integers or describes a
       duration may substitute the integer placeholder [i] with an exponential
@@ -28,7 +29,7 @@ requirements:
     format: any
     pattern: '[exp]'
   - id: req:exponential-calendar-year
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.2:tech:exponential-calendar-year"
     statement: >
       An exponential calendar year in explicit form replaces the integer
       placeholder with an exponential value, producing the year designator:
@@ -36,7 +37,7 @@ requirements:
     format: any
     pattern: '[significand]["E"][exponent]["Y"]'
   - id: req:exponential-letter-prefixed-year
-    clause: "iso:8601:-2:ed-1:en:clause:4.7.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.7.3"
     statement: >
       An exponential calendar year with letter prefix combines the Y designator
       with a signed integer and exponent: ["Y"][negi]["E"][i].
