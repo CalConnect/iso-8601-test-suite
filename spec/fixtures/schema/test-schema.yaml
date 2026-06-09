@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=meta.yaml
+type: object
+required:
+  - id
+  - name
+properties:
+  id:
+    type: string
+  name:
+    type: string
