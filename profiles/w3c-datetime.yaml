@@ -5,14 +5,22 @@ name: W3C Date and Time Formats
 description: >-
   Profile of ISO 8601-1 for date and time formats as defined in the W3C
   NOTE-datetime. This profile defines six permitted granularity levels
-  using extended format only, with either uppercase or lowercase "T" as
-  the time designator.
-source: W3C NOTE-datetime (https://www.w3.org/TR/NOTE-datetime)
+  using extended format only. Year is always four digits, hour is 00–23,
+  and time zone designator is required when time is present.
+source:
+  - https://www.w3.org/TR/NOTE-datetime
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-reduced-precision
 additional_requirements:
   - id: req:w3c-datetime-extended-format-only
     statement: >-
@@ -38,6 +46,15 @@ additional_requirements:
     statement: >-
       Fractional seconds, when present, shall consist of a decimal
       point followed by one or more digits.
+  - id: req:w3c-datetime-four-digit-year
+    statement: >-
+      Year shall be represented as exactly four digits. Two-digit year
+      representations are not permitted. This avoids the ambiguity of
+      two-digit century representations.
+  - id: req:w3c-datetime-hour-range-00-23
+    statement: >-
+      Hour values shall be in the range 00 through 23. The 12-hour
+      notation with am/pm is not permitted.
 additional_tests:
   - id: conf-test:w3c-datetime-valid-001
     description: "Valid year-only representation"
@@ -165,3 +182,43 @@ additional_tests:
       expression: "1997-07-16t19:20:30Z"
     expect:
       valid: true
+  - id: conf-test:w3c-datetime-invalid-005
+    description: >-
+      Two-digit year is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-four-digit-year
+    test_type: validity
+    given:
+      expression: "97"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-006
+    description: >-
+      Two-digit year with month is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-four-digit-year
+    test_type: validity
+    given:
+      expression: "97-07"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-007
+    description: >-
+      Two-digit year with full date is invalid in W3C datetime
+    requirements:
+      - req:w3c-datetime-four-digit-year
+    test_type: validity
+    given:
+      expression: "97-07-16"
+    expect:
+      valid: false
+  - id: conf-test:w3c-datetime-invalid-008
+    description: >-
+      Hour value 24 is invalid in W3C datetime (00-23 range only)
+    requirements:
+      - req:w3c-datetime-hour-range-00-23
+    test_type: validity
+    given:
+      expression: "1997-07-16T24:00:00Z"
+    expect:
+      valid: false

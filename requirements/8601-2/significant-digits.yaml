@@ -9,10 +9,11 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:explicit-representation
-source: ISO 8601-2:2026 Clause 4.4.3
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.3
 requirements:
   - id: req:significant-digits-notation
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.3:tech:significant-digits-notation"
     statement: >
       Significant digits are encoded as [value]["S"][precision], where [value]
       is an estimated integer and [precision] is the count of significant digits
@@ -20,25 +21,25 @@ requirements:
     format: any
     pattern: '[value]["S"][precision]'
   - id: req:significant-digits-time-scale-component
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.3:tech:significant-digits-time-scale-component"
     statement: >
       Any time scale component that accepts unbounded integers or describes a
       duration may substitute the integer placeholder [i] with a significant-digits
       value [sig].
     format: any
   - id: req:significant-digits-four-digit-year
-    clause: "iso:8601:-2:ed-1:en:clause:4.7.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.7.4:tech:significant-digits-four-digit-year"
     statement: >
       A four-digit year with significant digits is denoted as [year(s)].
     format: any
   - id: req:significant-digits-letter-prefixed-year
-    clause: "iso:8601:-2:ed-1:en:clause:4.7.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.7.4:tech:significant-digits-letter-prefixed-year"
     statement: >
       A year longer than four digits, expressed with a letter prefix and accepting
       significant digits, is denoted as [year(p, s)].
     format: any
   - id: req:significant-digits-exponential-year
-    clause: "iso:8601:-2:ed-1:en:clause:4.7.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.7.4:tech:significant-digits-exponential-year"
     statement: >
       A year in exponential form that also accepts significant digits is denoted
       as [year(p, e, s)].

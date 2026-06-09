@@ -10,63 +10,64 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:date-and-time
   - 8601-1:req-class:duration
-source: ISO 8601-2:2026 Clause 14
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:14
 requirements:
   - id: req:arithmetic-addition-duration
-    clause: "iso:8601:-2:ed-1:en:clause:14.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.2:tech:arithmetic-addition-duration"
     statement: >
       Adding two durations produces a new duration whose time scale components
       are the arithmetic sums of the corresponding input components.
     format: any
   - id: req:arithmetic-subtraction-duration
-    clause: "iso:8601:-2:ed-1:en:clause:14.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.2:tech:arithmetic-subtraction-duration"
     statement: >
       Subtracting a duration is equivalent to adding the negation of that
       duration.
     format: any
   - id: req:arithmetic-composite-addition
-    clause: "iso:8601:-2:ed-1:en:clause:14.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.2:tech:arithmetic-composite-addition"
     statement: >
       In composite duration arithmetic, adding two durations yields a new
       duration with component-wise sums of the corresponding fields.
     format: any
   - id: req:arithmetic-precedence-addition
-    clause: "iso:8601:-2:ed-1:en:clause:14.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.2:tech:arithmetic-precedence-addition"
     statement: >
       In precedence duration arithmetic, adding two durations concatenates the
       durational units without computing component-level sums.
     format: any
   - id: req:arithmetic-multiplication
-    clause: "iso:8601:-2:ed-1:en:clause:14.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.3"
     statement: >
       A duration may be scaled by a scalar multiplier, producing a new duration.
     format: any
   - id: req:arithmetic-date-duration
-    clause: "iso:8601:-2:ed-1:en:clause:14.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.4:tech:arithmetic-date-duration"
     statement: >
       A date and time expression may be shifted by a duration through addition:
       date = dateA + durationB.
     format: any
   - id: req:arithmetic-date-precedence
-    clause: "iso:8601:-2:ed-1:en:clause:14.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.4:tech:arithmetic-date-precedence"
     statement: >
       When the duration is in precedence representation, evaluation proceeds
       from the leftmost durational unit to the rightmost.
     format: any
   - id: req:arithmetic-overflow-underflow
-    clause: "iso:8601:-2:ed-1:en:clause:14.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.5"
     statement: >
       Component values exceeding their valid range indicate overflow (positive
       excess) or underflow (negative excess).
     format: any
   - id: req:arithmetic-conversion-boundaries
-    clause: "iso:8601:-2:ed-1:en:clause:14.6"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6"
     statement: >
       Some pairs of time scale components convert unambiguously while others do
       not, establishing conversion boundaries between units.
     format: any
   - id: req:arithmetic-canonical-form
-    clause: "iso:8601:-2:ed-1:en:clause:14.7"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.7"
     statement: >
       A date and time expression can be reduced to canonical form with no
       overflow and minimal underflow.

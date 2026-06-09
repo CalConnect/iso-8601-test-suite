@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:conf-class:date-and-time
 requirements_class: req-class:date-time-selection
-source: ISO 8601-2:2026 Clause 12
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:12
 tests:
   # --- Selection rule set (Clause 12.2) ---
-  - id: conf-test:selection-set-parsing-001
+  - id: conf-test:selection-set-parse-001
     description: "Parse selection rule set 'L{1,3,5}KN' (Mon, Wed, Fri)"
     requirements:
       - req:selection-rule-set
@@ -29,7 +30,7 @@ tests:
                 type: enumeration
                 members: [1, 3, 5]
 
-  - id: conf-test:selection-set-parsing-002
+  - id: conf-test:selection-set-parse-002
     description: "Parse selection rule set 'L{1,2}MN' (Jan, Feb)"
     requirements:
       - req:selection-rule-set
@@ -47,7 +48,7 @@ tests:
                 members: [1, 2]
 
   # --- Selection of position (Clause 12.3.9) ---
-  - id: conf-test:selection-position-parsing-001
+  - id: conf-test:selection-position-parse-001
     description: "Parse position selection 'L1K1IN' (first Monday)"
     requirements:
       - req:selection-position
@@ -64,7 +65,7 @@ tests:
             - type: position
               value: 1
 
-  - id: conf-test:selection-position-parsing-002
+  - id: conf-test:selection-position-parse-002
     description: "Parse position selection with set 'L1K{1,2}IN'"
     requirements:
       - req:selection-position
@@ -84,7 +85,7 @@ tests:
                 members: [1, 2]
 
   # --- Last work day of month ---
-  - id: conf-test:selection-position-parsing-003
+  - id: conf-test:selection-position-parse-003
     description: "Parse last work day of month 'L{1..31}D{1..5}K-1IN'"
     requirements:
       - req:selection-position
@@ -110,7 +111,7 @@ tests:
               value: -1
 
   # --- Selection with time interval (Clause 12.3.10) ---
-  - id: conf-test:selection-time-interval-parsing-001
+  - id: conf-test:selection-time-interval-parse-001
     description: "Parse selection with time interval 'LL3K4IN/P5DN'"
     requirements:
       - req:selection-time-interval
@@ -130,7 +131,7 @@ tests:
             day: 5
 
   # --- Application in date expressions (Clause 12.4.1) ---
-  - id: conf-test:selection-application-parsing-001
+  - id: conf-test:selection-application-parse-001
     description: "Parse date with selection '2018Y3ML1K1IN' (first Monday of March 2018)"
     requirements:
       - req:selection-application
@@ -149,7 +150,7 @@ tests:
             - type: position
               value: 1
 
-  - id: conf-test:selection-application-parsing-002
+  - id: conf-test:selection-application-parse-002
     description: "Parse datetime with selection '2018Y9MTLT8H20MN3I'"
     requirements:
       - req:selection-application
@@ -170,7 +171,7 @@ tests:
               value: 3
 
   # --- Election Day example ---
-  - id: conf-test:selection-election-day-parsing-001
+  - id: conf-test:selection-election-day-parse-001
     description: "Parse Election Day expression 'XXX{0,2,4,6,8}Y11MLLL1K1IN/P9DN2K1IN'"
     requirements:
       - req:selection-application
@@ -203,7 +204,7 @@ tests:
                 value: 1
 
   # --- Context set by selection (Clause 12.4.2) ---
-  - id: conf-test:selection-context-parsing-001
+  - id: conf-test:selection-context-parse-001
     description: "Parse selection with trailing time '2018YL1K1INT10H0M0S'"
     requirements:
       - req:selection-context-set
@@ -225,7 +226,7 @@ tests:
         second: 0
 
   # --- Within time intervals (Clause 12.4.3) ---
-  - id: conf-test:selection-within-interval-parsing-001
+  - id: conf-test:selection-within-interval-parse-001
     description: "Parse time interval with selection '2018Y9ML1K1IN/P5D'"
     requirements:
       - req:selection-within-interval
@@ -247,7 +248,7 @@ tests:
         duration:
           day: 5
 
-  - id: conf-test:selection-within-interval-parsing-002
+  - id: conf-test:selection-within-interval-parse-002
     description: "Parse time interval with multiple selection '2018Y9ML{1,3}K1IN/P5D'"
     requirements:
       - req:selection-within-interval
@@ -272,7 +273,7 @@ tests:
           day: 5
 
   # --- Mothers Day example ---
-  - id: conf-test:selection-mothers-day-parsing-001
+  - id: conf-test:selection-mothers-day-parse-001
     description: "Parse Mother's Day expression 'X*YL5M7K2IN'"
     requirements:
       - req:selection-application
@@ -294,7 +295,7 @@ tests:
               value: 2
 
   # --- Thanksgiving example ---
-  - id: conf-test:selection-thanksgiving-parsing-001
+  - id: conf-test:selection-thanksgiving-parse-001
     description: "Parse Thanksgiving expression 'X*YL11M4K4INT17HZ-5H'"
     requirements:
       - req:selection-application
@@ -321,7 +322,7 @@ tests:
             hours: 5
 
   # --- Month selection (Clause 12.2.1) ---
-  - id: conf-test:selection-month-parsing-001
+  - id: conf-test:selection-month-parse-001
     description: "Parse selection of calendar month 'L6N'"
     requirements:
       - req:selection-month
@@ -336,7 +337,7 @@ tests:
             - type: month
               value: 6
 
-  - id: conf-test:selection-month-validity-001
+  - id: conf-test:selection-month-valid-001
     description: "Verify month selection value 13 is invalid"
     requirements:
       - req:selection-month
@@ -347,7 +348,7 @@ tests:
       valid: false
 
   # --- Week selection (Clause 12.2.2) ---
-  - id: conf-test:selection-week-parsing-001
+  - id: conf-test:selection-week-parse-001
     description: "Parse selection of calendar week 'LW20N'"
     requirements:
       - req:selection-week
@@ -362,7 +363,7 @@ tests:
             - type: week
               value: 20
 
-  - id: conf-test:selection-week-parsing-002
+  - id: conf-test:selection-week-parse-002
     description: "Parse selection of negative week 'LW-5N'"
     requirements:
       - req:selection-week
@@ -378,7 +379,7 @@ tests:
               value: -5
 
   # --- Day of month selection (Clause 12.3) ---
-  - id: conf-test:selection-day-of-month-parsing-001
+  - id: conf-test:selection-day-of-month-parse-001
     description: "Parse selection of calendar day of month 'LD15N'"
     requirements:
       - req:selection-day-of-month
@@ -393,7 +394,7 @@ tests:
             - type: day_of_month
               value: 15
 
-  - id: conf-test:selection-day-of-month-parsing-002
+  - id: conf-test:selection-day-of-month-parse-002
     description: "Parse selection of negative day of month 'LD-1N'"
     requirements:
       - req:selection-day-of-month
@@ -409,7 +410,7 @@ tests:
               value: -1
 
   # --- Week day selection (Clause 12.4) ---
-  - id: conf-test:selection-week-day-parsing-001
+  - id: conf-test:selection-week-day-parse-001
     description: "Parse selection of week day (Monday) 'LK1N'"
     requirements:
       - req:selection-week-day
@@ -424,7 +425,7 @@ tests:
             - type: week_day
               value: 1
 
-  - id: conf-test:selection-week-day-validity-001
+  - id: conf-test:selection-week-day-valid-001
     description: "Verify week day selection value 8 is invalid"
     requirements:
       - req:selection-week-day
@@ -435,7 +436,7 @@ tests:
       valid: false
 
   # --- Ordinal day selection (Clause 12.5) ---
-  - id: conf-test:selection-ordinal-day-parsing-001
+  - id: conf-test:selection-ordinal-day-parse-001
     description: "Parse selection of ordinal day 'LO100N'"
     requirements:
       - req:selection-ordinal-day
@@ -450,7 +451,7 @@ tests:
             - type: ordinal_day
               value: 100
 
-  - id: conf-test:selection-ordinal-day-parsing-002
+  - id: conf-test:selection-ordinal-day-parse-002
     description: "Parse selection of negative ordinal day 'LO-10N'"
     requirements:
       - req:selection-ordinal-day
@@ -466,7 +467,7 @@ tests:
               value: -10
 
   # --- Hour selection (Clause 12.6) ---
-  - id: conf-test:selection-hour-parsing-001
+  - id: conf-test:selection-hour-parse-001
     description: "Parse selection of hour 'LH14N'"
     requirements:
       - req:selection-hour
@@ -481,7 +482,7 @@ tests:
             - type: hour
               value: 14
 
-  - id: conf-test:selection-hour-validity-001
+  - id: conf-test:selection-hour-valid-001
     description: "Verify hour selection value 24 is invalid"
     requirements:
       - req:selection-hour
@@ -492,7 +493,7 @@ tests:
       valid: false
 
   # --- Minute selection (Clause 12.7) ---
-  - id: conf-test:selection-minute-parsing-001
+  - id: conf-test:selection-minute-parse-001
     description: "Parse selection of minute 'LM30N'"
     requirements:
       - req:selection-minute
@@ -507,7 +508,7 @@ tests:
             - type: minute
               value: 30
 
-  - id: conf-test:selection-minute-validity-001
+  - id: conf-test:selection-minute-valid-001
     description: "Verify minute selection value 60 is invalid"
     requirements:
       - req:selection-minute
@@ -518,7 +519,7 @@ tests:
       valid: false
 
   # --- Second selection (Clause 12.8) ---
-  - id: conf-test:selection-second-parsing-001
+  - id: conf-test:selection-second-parse-001
     description: "Parse selection of second 'LS45N'"
     requirements:
       - req:selection-second
@@ -533,7 +534,7 @@ tests:
             - type: second
               value: 45
 
-  - id: conf-test:selection-second-parsing-002
+  - id: conf-test:selection-second-parse-002
     description: "Parse selection of second value 60 (leap second)"
     requirements:
       - req:selection-second

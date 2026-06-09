@@ -1,0 +1,365 @@
+# yaml-language-server: $schema=meta.yaml
+# YAML Schema for ISO 8601 Test Suite — Component Vocabulary
+#
+# Defines the complete component model for expect.components in conformance tests.
+# Components use a nested structure with top-level keys for each date/time type.
+# Duration, interval, and recurring have their own nested structures.
+# Part 2 extensions add qualification, unspecified, exponential, etc.
+#
+# This vocabulary is data-driven — ComponentVocabulary reads this file at startup
+# and builds the set of valid top-level keys and their valid sub-keys.
+# Adding a new key here automatically makes it known to validation.
+---
+description: |
+  Component vocabulary for test expectations. Tests use a nested component model
+  where date types (calendar, ordinal, week) and time are separate top-level keys.
+  Duration, interval, and recurring have their own nested structures.
+  Part 2 extensions add qualification, unspecified, exponential, etc.
+
+# Container: date component types (calendar, ordinal, week)
+date_components:
+  calendar:
+    description: "Calendar date components"
+    keys:
+      year: { type: integer, description: "4-digit year" }
+      month: { type: integer, description: "Month (1-12)" }
+      day: { type: integer, description: "Day of month (1-31)" }
+      century: { type: integer, description: "Century value (e.g. 19 for 1900s)" }
+      decade: { type: integer, description: "Decade value (e.g. 198 for 1980s)" }
+
+  ordinal:
+    description: "Ordinal date components"
+    keys:
+      year: { type: integer, description: "4-digit year" }
+      day_of_year: { type: integer, description: "Day of year (1-366)" }
+
+  week:
+    description: "Week date components"
+    keys:
+      week_year: { type: integer, description: "Week-numbering year" }
+      week: { type: integer, description: "Week number (1-53)" }
+      day_of_week: { type: integer, description: "Day of week (1=Monday, 7=Sunday)" }
+
+time:
+  description: "Time-of-day components"
+  keys:
+    hour: { type: integer, description: "Hour (0-24)" }
+    minute: { type: integer, description: "Minute (0-59)" }
+    second: { type: integer, description: "Second (0-60)" }
+    fractional_second:
+      type: object
+      description: "Fractional seconds with precision"
+      keys:
+        value: { type: number, description: "Fractional second value" }
+        precision: { type: integer, description: "Number of decimal digits" }
+    fractional_minute:
+      type: object
+      description: "Fractional minute with precision"
+      keys:
+        value: { type: number, description: "Fractional minute value" }
+        precision: { type: integer, description: "Number of decimal digits" }
+    fractional_hour:
+      type: object
+      description: "Fractional hour with precision"
+      keys:
+        value: { type: number, description: "Fractional hour value" }
+        precision: { type: integer, description: "Number of decimal digits" }
+    utc_offset:
+      type: object
+      description: "UTC offset"
+      keys:
+        sign: { type: string, enum: ["+", "-"], description: "Offset sign" }
+        hours: { type: integer, description: "Offset hours" }
+        minutes: { type: integer, description: "Offset minutes" }
+
+duration:
+  description: "Duration components (supports both plural and singular forms)"
+  keys:
+    years: { type: integer }
+    months: { type: integer }
+    weeks: { type: integer }
+    days: { type: integer }
+    hours: { type: integer }
+    minutes: { type: integer }
+    seconds: { type: [integer, number] }
+    year: { type: integer, description: "Year component (arithmetic result, singular)" }
+    month: { type: integer, description: "Month component (arithmetic result, singular)" }
+    day: { type: integer, description: "Day component (arithmetic result, singular)" }
+    hour: { type: integer, description: "Hour component (arithmetic result, singular)" }
+    minute: { type: integer, description: "Minute component (arithmetic result, singular)" }
+    second: { type: integer, description: "Second component (arithmetic result, singular)" }
+    sign: { type: string, enum: ["+", "-"] }
+    type: { type: string, description: "Duration type hint (e.g. 'precedence')" }
+    units: { type: array, description: "Ordered unit list for precedence arithmetic" }
+
+interval:
+  description: "Time interval components"
+  keys:
+    start: { type: object, description: "Start date-time" }
+    end: { type: [object, "null"], description: "End date-time" }
+    duration: { type: object, description: "Duration between start and end" }
+
+recurring:
+  description: "Recurring time interval components"
+  keys:
+    repetitions: { type: [integer, "null"], description: "Number of recurrences (null for unbounded)" }
+    interval: { type: object, description: "Underlying interval" }
+
+# Part 2 extensions
+qualification:
+  description: "Uncertain/approximate qualification (Part 2)"
+  keys:
+    uncertain: { type: boolean, description: "Value is uncertain" }
+    approximate: { type: boolean, description: "Value is approximate" }
+    uncertain_and_approximate: { type: boolean, description: "Value is both uncertain and approximate" }
+    year: { type: object, description: "Year qualification" }
+    month: { type: object, description: "Month qualification" }
+    day: { type: object, description: "Day qualification" }
+    hour: { type: object, description: "Hour qualification" }
+    minute: { type: object, description: "Minute qualification" }
+    second: { type: object, description: "Second qualification" }
+    week: { type: object, description: "Week qualification" }
+    day_of_week: { type: object, description: "Day-of-week qualification" }
+    day_of_year: { type: object, description: "Day-of-year qualification" }
+    decade: { type: object, description: "Decade qualification" }
+    century: { type: object, description: "Century qualification" }
+    complete: { type: object, description: "Complete date qualification" }
+
+unspecified:
+  description: "Unspecified digit positions (Part 2)"
+  type: array
+  items: { type: string, description: "Field name with unspecified digits (e.g. 'month', 'day')" }
+
+exponential:
+  description: "Exponential year notation (Part 2)"
+  keys:
+    mantissa: { type: integer }
+    exponent: { type: integer }
+
+significant_digits:
+  description: "Significant digits notation (Part 2)"
+  keys:
+    value: { type: integer }
+    digits: { type: integer }
+    exponent: { type: integer }
+
+season:
+  description: "Season value (21=Spring, 22=Summer, 23=Autumn, 24=Winter)"
+  type: integer
+
+ydivision:
+  description: "Sub-year grouping value (25-41)"
+  type: integer
+
+grouping:
+  description: "Grouped time-scale unit (Part 2)"
+  keys:
+    count: { type: integer, description: "Number of grouped units" }
+    coefficient: { type: integer, description: "Group coefficient (e.g. 5th group)" }
+    designator: { type: string, description: "Group designator (e.g. 'G')" }
+    duration_units: { type: object, description: "Duration units defining the group size" }
+    suffix: { type: string, description: "Group suffix (e.g. 'U')" }
+
+set:
+  description: "Set or range representation (Part 2)"
+  keys:
+    type: { type: string, enum: [enumerated, range, open_range], description: "Set type" }
+    members: { type: array, description: "Set members" }
+
+range:
+  description: "Range representation (Part 2)"
+  keys:
+    type: { type: string, description: "Range type (on_or_before, on_or_after, between)" }
+    start: { type: object, description: "Range start" }
+    end: { type: object, description: "Range end" }
+
+# Interval boundary components (used in extended intervals and recurring)
+start:
+  description: "Interval start boundary"
+  keys:
+    year: { type: integer }
+    month: { type: integer }
+    day: { type: integer }
+    hour: { type: integer }
+    minute: { type: integer }
+    second: { type: integer }
+    open: { type: boolean, description: "Open-ended start (unknown)" }
+    unknown: { type: boolean, description: "Unknown start value" }
+    on_or_before: { type: boolean, description: "Start is on or before this date" }
+    qualification: { type: object, description: "Qualification applied to start" }
+    selection: { type: object, description: "Selection rules applied to start" }
+    shift: { type: object, description: "Time shift applied to start" }
+
+end:
+  description: "Interval end boundary"
+  keys:
+    year: { type: integer }
+    month: { type: integer }
+    day: { type: integer }
+    hour: { type: integer }
+    minute: { type: integer }
+    second: { type: integer }
+    open: { type: boolean, description: "Open-ended end (unknown)" }
+    unknown: { type: boolean, description: "Unknown end value" }
+    on_or_after: { type: boolean, description: "End is on or after this date" }
+    qualification: { type: object, description: "Qualification applied to end" }
+    selection: { type: object, description: "Selection rules applied to end" }
+    shift: { type: object, description: "Time shift applied to end" }
+
+shift:
+  description: "Time shift / UTC offset (Part 2 explicit representation)"
+  keys:
+    sign: { type: string, enum: ["+", "-"] }
+    hour: { type: integer }
+    minute: { type: integer }
+    second: { type: integer }
+
+selection:
+  description: "Date/time selection expression (Part 2)"
+  keys:
+    rules: { type: array, description: "Selection rules" }
+    duration: { type: object, description: "Duration constraint in selection" }
+
+eligibility:
+  description: "Calendar eligibility for recurring rules (Part 2)"
+  keys:
+    unit: { type: string, description: "Eligibility cycle unit (e.g. 'week', 'year')" }
+    value: { type: integer, description: "Eligibility cycle value" }
+
+repeat_rule:
+  description: "Repeat rule for recurring intervals with rules (Part 2)"
+  keys:
+    eligibility: { type: object, description: "Recurrence eligibility constraint" }
+    selection: { type: object, description: "Recurrence selection rules" }
+
+canonical:
+  description: "Canonical form components (Part 2 arithmetic)"
+  keys:
+    year_before_one: { type: boolean, description: "Year zero / year before one handling" }
+    year: { type: integer, description: "Canonical year" }
+    month: { type: integer, description: "Canonical month" }
+    day: { type: integer, description: "Canonical day" }
+    hour: { type: integer, description: "Canonical hour" }
+    minute: { type: integer, description: "Canonical minute" }
+    week: { type: integer, description: "Canonical week" }
+
+# Standalone scalar components used in various Part 2 tests
+recurrence:
+  description: "Number of recurrences (standalone in explicit recurring)"
+  type: [integer, "null"]
+
+century:
+  description: "Century value (standalone)"
+  type: integer
+
+decade:
+  description: "Decade value (standalone)"
+  type: integer
+
+year:
+  description: "Year value (standalone, or with unspecified/exponential sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual year value (may be string with X placeholders)" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+    exponential: { type: object, description: "Exponential year notation" }
+    significant_digits: { type: object, description: "Significant digits notation" }
+    last_digit: { type: integer, description: "Last digit value for reduced precision" }
+
+month:
+  description: "Month value (standalone, or with unspecified sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual month value" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+
+day:
+  description: "Day value (standalone, or with unspecified sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual day value" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+
+hour:
+  description: "Hour value (standalone, or with unspecified sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual hour value" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+
+minute:
+  description: "Minute value (standalone, or with unspecified sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual minute value" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+
+second:
+  description: "Second value (standalone, or with unspecified sub-fields)"
+  keys:
+    value: { type: [integer, string], description: "Actual second value" }
+    unspecified: { type: [boolean, array], description: "Unspecified digit positions" }
+
+week:
+  description: "Week value (standalone)"
+  type: integer
+
+day_of_week:
+  description: "Day of week value (standalone)"
+  type: integer
+
+day_of_year:
+  description: "Day of year value (standalone)"
+  type: integer
+
+year_before_one:
+  description: "Year before one count (negative values, Part 2)"
+  type: integer
+
+negative_zero:
+  description: "Flag for negative zero representation"
+  type: boolean
+
+equivalent_year:
+  description: "Equivalent year in conversion (Part 2 arithmetic)"
+  type: integer
+
+equivalent_decade:
+  description: "Equivalent decade in conversion (Part 2 arithmetic)"
+  type: integer
+
+overflow:
+  description: "Overflow flag (Part 2 arithmetic)"
+  type: boolean
+
+underflow:
+  description: "Underflow flag (Part 2 arithmetic)"
+  type: boolean
+
+# Canonical nested structure patterns
+canonical_patterns:
+  calendar_date:
+    calendar: { year, month, day }
+
+  calendar_date_time:
+    calendar: { year, month, day }
+    time: { hour, minute, second, utc_offset }
+
+  ordinal_date:
+    ordinal: { year, day_of_year }
+
+  week_date:
+    week: { week_year, week, day_of_week }
+
+  duration:
+    duration: { years, months, days, hours, minutes, seconds }
+
+  interval_start_end:
+    interval:
+      start: { calendar, time }
+      end: { calendar, time }
+
+  interval_start_duration:
+    interval:
+      start: { calendar, time }
+      duration: { years, months, days, ... }
+
+  recurring_interval:
+    recurring:
+      repetitions: integer | null
+      interval: { start, end, duration }

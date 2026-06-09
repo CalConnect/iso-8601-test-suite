@@ -16,11 +16,16 @@
 #
 #   Test type    Adapter method used
 #   ---------    ------------------------------------------------
-#   validity     try_parse(expression)
-#   parsing      try_parse(expression) + extract_components(parsed)
+#   validity     try_parse(expression, options)
+#   parsing      try_parse(expression, options) + extract_components(parsed)
 #   generation   generate(components)
 #   equivalence  try_parse(a) + try_parse(b) + equivalent?(obj_a, obj_b)
+#   round_trip   try_parse(expr) + extract_components + generate + compare
 #   arithmetic   (no adapter method — returns not-supported unless overridden)
+#
+# Parsing modes (options[:parse_mode]):
+#   "dedicated"       — format-specific parser (e.g. strptime with explicit format)
+#   "undifferentiated" — general/lenient parser (e.g. Date.parse, Date.iso8601)
 #
 # =============================================================================
 
@@ -42,11 +47,27 @@ class TemplateAdapter
     "0.0.0"
   end
 
+  # ── Optional: declare which conformance classes this implementation targets ─
+  #
+  # Return an Array of conformance class IDs (e.g. "conf-class:calendar-date")
+  # that this implementation intends to conform to. Tests belonging to classes
+  # NOT in this list will be marked "not-supported" instead of "fail".
+  #
+  # Return nil or an empty Array to indicate "all classes" (default behavior).
+  #
+  def declared_conformance_classes
+    nil
+  end
+
   # ── Required: parse an expression ──────────────────────────────────────
   #
-  # The harness calls this for validity and parsing tests.
+  # The harness calls this for validity, parsing, and round_trip tests.
   #
   # Input:  expression (String) — the ISO 8601 expression to parse
+  #         options (Hash) — optional:
+  #           :parse_mode — "dedicated" or "undifferentiated" (default: "dedicated")
+  #             "dedicated" — use format-specific parsing (e.g. strptime)
+  #             "undifferentiated" — use general/lenient parsing (e.g. Date.parse)
   # Return: a Hash with one of two shapes:
   #
   #   Parse succeeded:
@@ -58,7 +79,7 @@ class TemplateAdapter
   # The `parsed` object is passed back to `extract_components` and
   # `equivalent?` — it can be any type your adapter uses internally.
   #
-  def try_parse(expression)
+  def try_parse(expression, options = {})
     # Example:
     #   begin
     #     result = MyDate.parse(expression)

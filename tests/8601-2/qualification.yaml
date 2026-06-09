@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:conf-class:date-and-time
 requirements_class: req-class:qualification
-source: ISO 8601-2:2026 Clause 8
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:8
 tests:
   # --- Individual qualification: Calendar year ---
-  - id: conf-test:qualification-year-implicit-parsing-001
+  - id: conf-test:qualification-year-implicit-parse-001
     description: "Parse uncertain calendar year implicit '?1985'"
     requirements:
       - req:qualification-year-implicit
@@ -27,7 +28,7 @@ tests:
           year:
             uncertain: true
 
-  - id: conf-test:qualification-year-explicit-parsing-001
+  - id: conf-test:qualification-year-explicit-parse-001
     description: "Parse uncertain calendar year explicit '2018?Y'"
     requirements:
       - req:qualification-year-explicit
@@ -43,7 +44,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Calendar month ---
-  - id: conf-test:qualification-month-implicit-parsing-001
+  - id: conf-test:qualification-month-implicit-parse-001
     description: "Parse uncertain calendar month implicit '?03'"
     requirements:
       - req:qualification-month-implicit
@@ -58,7 +59,7 @@ tests:
           month:
             uncertain: true
 
-  - id: conf-test:qualification-month-explicit-parsing-001
+  - id: conf-test:qualification-month-explicit-parse-001
     description: "Parse uncertain calendar month explicit '8?M'"
     requirements:
       - req:qualification-month-explicit
@@ -74,7 +75,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Calendar week ---
-  - id: conf-test:qualification-week-implicit-parsing-001
+  - id: conf-test:qualification-week-implicit-parse-001
     description: "Parse uncertain calendar week implicit '?W53'"
     requirements:
       - req:qualification-week-implicit
@@ -89,7 +90,7 @@ tests:
           week:
             uncertain: true
 
-  - id: conf-test:qualification-week-explicit-parsing-001
+  - id: conf-test:qualification-week-explicit-parse-001
     description: "Parse uncertain calendar week explicit '20?W'"
     requirements:
       - req:qualification-week-explicit
@@ -105,7 +106,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Calendar day ---
-  - id: conf-test:qualification-day-implicit-parsing-001
+  - id: conf-test:qualification-day-implicit-parse-001
     description: "Parse uncertain calendar day implicit '?31'"
     requirements:
       - req:qualification-day-implicit
@@ -120,7 +121,7 @@ tests:
           day:
             uncertain: true
 
-  - id: conf-test:qualification-day-explicit-parsing-001
+  - id: conf-test:qualification-day-explicit-parse-001
     description: "Parse uncertain calendar day explicit '11?D'"
     requirements:
       - req:qualification-day-explicit
@@ -136,7 +137,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Day of week ---
-  - id: conf-test:qualification-day-of-week-implicit-parsing-001
+  - id: conf-test:qualification-day-of-week-implicit-parse-001
     description: "Parse uncertain day of week implicit '?5'"
     requirements:
       - req:qualification-day-of-week-implicit
@@ -151,7 +152,7 @@ tests:
           day_of_week:
             uncertain: true
 
-  - id: conf-test:qualification-day-of-week-explicit-parsing-001
+  - id: conf-test:qualification-day-of-week-explicit-parse-001
     description: "Parse uncertain day of week explicit '3?K'"
     requirements:
       - req:qualification-day-of-week-explicit
@@ -167,7 +168,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Day of year ---
-  - id: conf-test:qualification-day-of-year-implicit-parsing-001
+  - id: conf-test:qualification-day-of-year-implicit-parse-001
     description: "Parse uncertain day of year implicit '?306'"
     requirements:
       - req:qualification-day-of-year-implicit
@@ -182,7 +183,7 @@ tests:
           day_of_year:
             uncertain: true
 
-  - id: conf-test:qualification-day-of-year-explicit-parsing-001
+  - id: conf-test:qualification-day-of-year-explicit-parse-001
     description: "Parse uncertain day of year explicit '88?O'"
     requirements:
       - req:qualification-day-of-year-explicit
@@ -198,7 +199,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Clock hour ---
-  - id: conf-test:qualification-hour-implicit-parsing-001
+  - id: conf-test:qualification-hour-implicit-parse-001
     description: "Parse approximate clock hour implicit '~12'"
     requirements:
       - req:qualification-hour-implicit
@@ -213,7 +214,7 @@ tests:
           hour:
             approximate: true
 
-  - id: conf-test:qualification-hour-explicit-parsing-001
+  - id: conf-test:qualification-hour-explicit-parse-001
     description: "Parse approximate clock hour explicit '6~H'"
     requirements:
       - req:qualification-hour-explicit
@@ -229,7 +230,7 @@ tests:
             approximate: true
 
   # --- Individual qualification: Clock minute ---
-  - id: conf-test:qualification-minute-implicit-parsing-001
+  - id: conf-test:qualification-minute-implicit-parse-001
     description: "Parse approximate clock minute implicit '~30'"
     requirements:
       - req:qualification-minute-implicit
@@ -244,7 +245,7 @@ tests:
           minute:
             approximate: true
 
-  - id: conf-test:qualification-minute-explicit-parsing-001
+  - id: conf-test:qualification-minute-explicit-parse-001
     description: "Parse approximate clock minute explicit '30~M'"
     requirements:
       - req:qualification-minute-explicit
@@ -260,7 +261,7 @@ tests:
             approximate: true
 
   # --- Individual qualification: Clock second ---
-  - id: conf-test:qualification-second-implicit-parsing-001
+  - id: conf-test:qualification-second-implicit-parse-001
     description: "Parse uncertain and approximate clock second implicit '%40'"
     requirements:
       - req:qualification-second-implicit
@@ -276,7 +277,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-second-explicit-parsing-001
+  - id: conf-test:qualification-second-explicit-parse-001
     description: "Parse uncertain and approximate clock second explicit '30%S'"
     requirements:
       - req:qualification-second-explicit
@@ -293,7 +294,7 @@ tests:
             approximate: true
 
   # --- Individual qualification: Decade ---
-  - id: conf-test:qualification-decade-implicit-parsing-001
+  - id: conf-test:qualification-decade-implicit-parse-001
     description: "Parse uncertain decade implicit '?196'"
     requirements:
       - req:qualification-decade-implicit
@@ -308,7 +309,7 @@ tests:
           decade:
             uncertain: true
 
-  - id: conf-test:qualification-decade-explicit-parsing-001
+  - id: conf-test:qualification-decade-explicit-parse-001
     description: "Parse uncertain decade explicit '133?J'"
     requirements:
       - req:qualification-decade-explicit
@@ -324,7 +325,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification: Century ---
-  - id: conf-test:qualification-century-implicit-parsing-001
+  - id: conf-test:qualification-century-implicit-parse-001
     description: "Parse uncertain century implicit '?16'"
     requirements:
       - req:qualification-century-implicit
@@ -339,7 +340,7 @@ tests:
           century:
             uncertain: true
 
-  - id: conf-test:qualification-century-explicit-parsing-001
+  - id: conf-test:qualification-century-explicit-parse-001
     description: "Parse uncertain century explicit '22?C'"
     requirements:
       - req:qualification-century-explicit
@@ -355,7 +356,7 @@ tests:
             uncertain: true
 
   # --- Complete qualification of calendar date (Clause 8.4.1) ---
-  - id: conf-test:qualification-complete-date-implicit-parsing-001
+  - id: conf-test:qualification-complete-date-implicit-parse-001
     description: "Parse completely uncertain date implicit '1985-04-12?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -372,7 +373,7 @@ tests:
           complete:
             uncertain: true
 
-  - id: conf-test:qualification-complete-date-explicit-parsing-001
+  - id: conf-test:qualification-complete-date-explicit-parse-001
     description: "Parse completely uncertain date explicit '1985Y04M12D?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -390,7 +391,7 @@ tests:
             uncertain: true
 
   # --- Reduced precision with qualification (Clause 8.4.2) ---
-  - id: conf-test:qualification-reduced-month-implicit-parsing-001
+  - id: conf-test:qualification-reduced-month-implicit-parse-001
     description: "Parse uncertain month precision implicit '1985-04?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -406,7 +407,7 @@ tests:
           complete:
             uncertain: true
 
-  - id: conf-test:qualification-reduced-month-explicit-parsing-001
+  - id: conf-test:qualification-reduced-month-explicit-parse-001
     description: "Parse uncertain month precision explicit '1985Y04M?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -422,7 +423,7 @@ tests:
           complete:
             uncertain: true
 
-  - id: conf-test:qualification-reduced-year-implicit-parsing-001
+  - id: conf-test:qualification-reduced-year-implicit-parse-001
     description: "Parse approximate year implicit '1985~'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -437,7 +438,7 @@ tests:
           complete:
             approximate: true
 
-  - id: conf-test:qualification-reduced-year-explicit-parsing-001
+  - id: conf-test:qualification-reduced-year-explicit-parse-001
     description: "Parse uncertain year explicit '1985Y?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -452,7 +453,7 @@ tests:
           complete:
             uncertain: true
 
-  - id: conf-test:qualification-reduced-decade-implicit-parsing-001
+  - id: conf-test:qualification-reduced-decade-implicit-parse-001
     description: "Parse uncertain and approximate decade implicit '198%'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -468,7 +469,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-reduced-decade-explicit-parsing-001
+  - id: conf-test:qualification-reduced-decade-explicit-parse-001
     description: "Parse uncertain decade explicit '198J?'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -483,7 +484,7 @@ tests:
           complete:
             uncertain: true
 
-  - id: conf-test:qualification-reduced-century-implicit-parsing-001
+  - id: conf-test:qualification-reduced-century-implicit-parse-001
     description: "Parse uncertain and approximate century implicit '19%'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -499,7 +500,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-reduced-century-explicit-parsing-001
+  - id: conf-test:qualification-reduced-century-explicit-parse-001
     description: "Parse approximate century explicit '19C~'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -515,7 +516,7 @@ tests:
             approximate: true
 
   # --- Expanded representations with qualification (Clause 8.4.2) ---
-  - id: conf-test:qualification-expanded-day-implicit-parsing-001
+  - id: conf-test:qualification-expanded-day-implicit-parse-001
     description: "Parse expanded uncertain approximate date '+001985-04-12%'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -533,7 +534,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-expanded-month-implicit-parsing-001
+  - id: conf-test:qualification-expanded-month-implicit-parse-001
     description: "Parse expanded uncertain approximate month '+001985-04%'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -550,7 +551,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-expanded-year-implicit-parsing-001
+  - id: conf-test:qualification-expanded-year-implicit-parse-001
     description: "Parse expanded uncertain approximate year '+001985%'"
     requirements:
       - req:qualification-calendar-date-complete
@@ -567,7 +568,7 @@ tests:
             approximate: true
 
   # --- Group qualification: all components (Clause 8.4.3) ---
-  - id: conf-test:qualification-group-all-implicit-parsing-001
+  - id: conf-test:qualification-group-all-implicit-parse-001
     description: "Parse group qualification all components implicit '2004-06-11%'"
     requirements:
       - req:qualification-calendar-date-group-all
@@ -591,7 +592,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-group-all-explicit-parsing-001
+  - id: conf-test:qualification-group-all-explicit-parse-001
     description: "Parse group qualification all components explicit '2004Y06M11D%'"
     requirements:
       - req:qualification-calendar-date-group-all
@@ -616,7 +617,7 @@ tests:
             approximate: true
 
   # --- Group qualification: month and year (Clause 8.4.3) ---
-  - id: conf-test:qualification-group-month-year-implicit-parsing-001
+  - id: conf-test:qualification-group-month-year-implicit-parse-001
     description: "Parse group qualification month+year implicit '2004-06~-11'"
     requirements:
       - req:qualification-calendar-date-group-month-year
@@ -635,7 +636,7 @@ tests:
           month:
             approximate: true
 
-  - id: conf-test:qualification-group-month-year-explicit-parsing-001
+  - id: conf-test:qualification-group-month-year-explicit-parse-001
     description: "Parse group qualification month+year explicit '2004Y06M~11D'"
     requirements:
       - req:qualification-calendar-date-group-month-year
@@ -655,7 +656,7 @@ tests:
             approximate: true
 
   # --- Group qualification: year only (Clause 8.4.3) ---
-  - id: conf-test:qualification-group-year-implicit-parsing-001
+  - id: conf-test:qualification-group-year-implicit-parse-001
     description: "Parse group qualification year only implicit '2004?-06-11'"
     requirements:
       - req:qualification-calendar-date-group-year
@@ -672,7 +673,7 @@ tests:
           year:
             uncertain: true
 
-  - id: conf-test:qualification-group-year-explicit-parsing-001
+  - id: conf-test:qualification-group-year-explicit-parse-001
     description: "Parse group qualification year only explicit '2004Y?06M11D'"
     requirements:
       - req:qualification-calendar-date-group-year
@@ -690,7 +691,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification (Clause 8.4.4) ---
-  - id: conf-test:qualification-individual-parsing-001
+  - id: conf-test:qualification-individual-parse-001
     description: "Parse individual: year known, month and day uncertain+approximate '2004-%06-%11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -711,7 +712,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-individual-parsing-002
+  - id: conf-test:qualification-individual-parse-002
     description: "Parse individual: uncertain year and month, known day '?2004-?06-11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -730,7 +731,7 @@ tests:
           month:
             uncertain: true
 
-  - id: conf-test:qualification-individual-parsing-003
+  - id: conf-test:qualification-individual-parse-003
     description: "Parse individual: uncertain month only '2004-?06-11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -747,7 +748,7 @@ tests:
           month:
             uncertain: true
 
-  - id: conf-test:qualification-individual-parsing-004
+  - id: conf-test:qualification-individual-parse-004
     description: "Parse individual: approximate month '2004-~06-11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -764,7 +765,7 @@ tests:
           month:
             approximate: true
 
-  - id: conf-test:qualification-individual-parsing-005
+  - id: conf-test:qualification-individual-parse-005
     description: "Parse individual: uncertain+approximate month '2004-%06-11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -782,7 +783,7 @@ tests:
             uncertain: true
             approximate: true
 
-  - id: conf-test:qualification-individual-parsing-006
+  - id: conf-test:qualification-individual-parse-006
     description: "Parse individual: uncertain year and day '?2004-06-?11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -801,7 +802,7 @@ tests:
           day:
             uncertain: true
 
-  - id: conf-test:qualification-individual-parsing-007
+  - id: conf-test:qualification-individual-parse-007
     description: "Parse individual: uncertain year, approximate day '?2004-06-~11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -821,7 +822,7 @@ tests:
             approximate: true
 
   # --- Group + individual qualification (Clause 8.4.5) ---
-  - id: conf-test:qualification-group-individual-parsing-001
+  - id: conf-test:qualification-group-individual-parse-001
     description: "Parse group+individual: uncertain month+year, approximate day '2004-06?-~11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -842,7 +843,7 @@ tests:
           day:
             approximate: true
 
-  - id: conf-test:qualification-group-individual-parsing-002
+  - id: conf-test:qualification-group-individual-parse-002
     description: "Parse group+individual: uncertain+approximate month+year, uncertain day '2004-06%-?11'"
     requirements:
       - req:qualification-calendar-date-individual
@@ -866,7 +867,7 @@ tests:
             uncertain: true
 
   # --- Date and time with qualification (Clause 8.5) ---
-  - id: conf-test:qualification-datetime-parsing-001
+  - id: conf-test:qualification-datetime-parse-001
     description: "Parse datetime with complete qualification '2018Y6M15DT19H20M30S~'"
     requirements:
       - req:qualification-datetime
@@ -886,7 +887,7 @@ tests:
           complete:
             approximate: true
 
-  - id: conf-test:qualification-datetime-parsing-002
+  - id: conf-test:qualification-datetime-parse-002
     description: "Parse datetime with group qualification on date '2018Y6M15D?T19H20M30S'"
     requirements:
       - req:qualification-datetime
@@ -910,7 +911,7 @@ tests:
           day:
             uncertain: true
 
-  - id: conf-test:qualification-datetime-parsing-003
+  - id: conf-test:qualification-datetime-parse-003
     description: "Parse datetime with group and individual qualification"
     requirements:
       - req:qualification-datetime
@@ -935,7 +936,7 @@ tests:
             approximate: true
 
   # --- Implicit form (Clause 4.5) ---
-  - id: conf-test:qualification-implicit-parsing-001
+  - id: conf-test:qualification-implicit-parse-001
     description: "Parse implicit form qualification with uncertain symbol '?2004'"
     requirements:
       - req:qualification-implicit-form
@@ -950,7 +951,7 @@ tests:
           year:
             uncertain: true
 
-  - id: conf-test:qualification-implicit-parsing-002
+  - id: conf-test:qualification-implicit-parse-002
     description: "Parse implicit form qualification with approximate symbol '~2004'"
     requirements:
       - req:qualification-implicit-form
@@ -966,7 +967,7 @@ tests:
             approximate: true
 
   # --- Explicit form (Clause 4.5) ---
-  - id: conf-test:qualification-explicit-parsing-001
+  - id: conf-test:qualification-explicit-parse-001
     description: "Parse explicit form qualification '2004?Y'"
     requirements:
       - req:qualification-explicit-form
@@ -981,7 +982,7 @@ tests:
           year:
             uncertain: true
 
-  - id: conf-test:qualification-explicit-parsing-002
+  - id: conf-test:qualification-explicit-parse-002
     description: "Parse explicit form qualification with approximate '6~M'"
     requirements:
       - req:qualification-explicit-form
@@ -997,7 +998,7 @@ tests:
             approximate: true
 
   # --- Complete qualification (Clause 8.2.1) ---
-  - id: conf-test:qualification-complete-parsing-001
+  - id: conf-test:qualification-complete-parse-001
     description: "Parse complete qualification of entire expression '2004-06-?'"
     requirements:
       - req:qualification-complete
@@ -1015,7 +1016,7 @@ tests:
           month:
             uncertain: true
 
-  - id: conf-test:qualification-complete-parsing-002
+  - id: conf-test:qualification-complete-parse-002
     description: "Parse complete qualification with approximate '~' on entire expression"
     requirements:
       - req:qualification-complete
@@ -1034,7 +1035,7 @@ tests:
             approximate: true
 
   # --- Group qualification (Clause 8.2.2) ---
-  - id: conf-test:qualification-group-parsing-001
+  - id: conf-test:qualification-group-parse-001
     description: "Parse group qualification applying to date components '2004-?06-11'"
     requirements:
       - req:qualification-group
@@ -1054,7 +1055,7 @@ tests:
             uncertain: true
 
   # --- Individual qualification (Clause 8.2.3) ---
-  - id: conf-test:qualification-individual-year-parsing-001
+  - id: conf-test:qualification-individual-year-parse-001
     description: "Parse individual qualification on year only '2004?-06-11'"
     requirements:
       - req:qualification-individual
@@ -1071,7 +1072,7 @@ tests:
           year:
             uncertain: true
 
-  - id: conf-test:qualification-individual-month-parsing-001
+  - id: conf-test:qualification-individual-month-parse-001
     description: "Parse individual qualification on month only '2004-?06-11'"
     requirements:
       - req:qualification-individual

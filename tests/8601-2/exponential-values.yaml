@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - conf-class:explicit-representation
 requirements_class: req-class:exponential-values
-source: ISO 8601-2:2026 Clause 4.4.2
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.2
 tests:
   # --- Exponential notation (Clause 4.4.2) ---
-  - id: conf-test:exponential-notation-parsing-001
+  - id: conf-test:exponential-notation-parse-001
     description: "Parse exponential value '3E3' (3000)"
     requirements:
       - req:exponential-notation
@@ -26,7 +27,7 @@ tests:
           mantissa: 3
           exponent: 3
 
-  - id: conf-test:exponential-notation-parsing-002
+  - id: conf-test:exponential-notation-parse-002
     description: "Parse negative exponential value '-82E9' (-82000000000)"
     requirements:
       - req:exponential-notation
@@ -41,7 +42,7 @@ tests:
           exponent: 9
 
   # --- Exponential calendar year (Clause 4.4.2) ---
-  - id: conf-test:exponential-year-parsing-001
+  - id: conf-test:exponential-year-parse-001
     description: "Parse exponential year '3E8Y'"
     requirements:
       - req:exponential-calendar-year
@@ -56,7 +57,7 @@ tests:
             mantissa: 3
             exponent: 8
 
-  - id: conf-test:exponential-year-generation-001
+  - id: conf-test:exponential-year-gen-001
     description: "Generate exponential year from components"
     requirements:
       - req:exponential-calendar-year
@@ -71,7 +72,7 @@ tests:
       expression: "3E8Y"
 
   # --- Exponential letter-prefixed calendar year (Clause 4.5.3) ---
-  - id: conf-test:exponential-letter-year-parsing-001
+  - id: conf-test:exponential-letter-year-parse-001
     description: "Parse exponential letter-prefixed year 'Y17E7'"
     requirements:
       - req:exponential-letter-prefixed-year
@@ -86,7 +87,7 @@ tests:
             mantissa: 17
             exponent: 7
 
-  - id: conf-test:exponential-letter-year-parsing-002
+  - id: conf-test:exponential-letter-year-parse-002
     description: "Parse negative exponential letter-prefixed year 'Y-17E7'"
     requirements:
       - req:exponential-letter-prefixed-year
@@ -102,7 +103,7 @@ tests:
             exponent: 7
 
   # --- Letter-prefixed calendar year (Clause 4.5.2) ---
-  - id: conf-test:exponential-letter-year-basic-parsing-001
+  - id: conf-test:exponential-letter-year-basic-parse-001
     description: "Parse letter-prefixed year 'Y1700000002'"
     requirements:
       - req:exponential-letter-prefixed-year
@@ -114,7 +115,7 @@ tests:
       components:
         year: 1700000002
 
-  - id: conf-test:exponential-letter-year-basic-parsing-002
+  - id: conf-test:exponential-letter-year-basic-parse-002
     description: "Parse negative letter-prefixed year 'Y-1700000002'"
     requirements:
       - req:exponential-letter-prefixed-year
@@ -127,7 +128,7 @@ tests:
         year: -1700000002
 
   # --- Validity tests ---
-  - id: conf-test:exponential-validity-001
+  - id: conf-test:exponential-valid-001
     description: "Verify that exponent must be a positive integer"
     requirements:
       - req:exponential-notation
@@ -137,7 +138,7 @@ tests:
     expect:
       valid: false
 
-  - id: conf-test:exponential-validity-002
+  - id: conf-test:exponential-valid-002
     description: "Verify that mantissa is required"
     requirements:
       - req:exponential-notation
@@ -148,7 +149,7 @@ tests:
       valid: false
 
   # --- Exponential time scale component (Clause 4.4.2) ---
-  - id: conf-test:exponential-time-scale-parsing-001
+  - id: conf-test:exponential-time-scale-parse-001
     description: "Parse exponential value used as time scale component '3E3Y'"
     requirements:
       - req:exponential-time-scale-component
@@ -163,7 +164,7 @@ tests:
             mantissa: 3
             exponent: 3
 
-  - id: conf-test:exponential-time-scale-validity-001
+  - id: conf-test:exponential-time-scale-valid-001
     description: "Verify exponential value is accepted in duration component"
     requirements:
       - req:exponential-time-scale-component

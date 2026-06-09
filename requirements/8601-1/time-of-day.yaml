@@ -9,45 +9,46 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:fundamentals
-source: ISO 8601-1:2026 Clause 5.3
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3
 requirements:
   - id: req:time-basic-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.2:tech:time-basic-full"
     statement: >
       Local time of day in basic format encodes the time designator followed by
       hour, minute, and second as contiguous fields: ["T"][hour][min][sec].
     format: basic
     pattern: "[\"T\"][hh][mm][ss]"
   - id: req:time-extended-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.2:tech:time-extended-full"
     statement: >
       Local time of day in extended format encodes the time designator followed by
       hour, minute, and second with colon separators: ["T"][hour][":"][min][":"][sec].
     format: extended
     pattern: "[\"T\"][hh][\":\"][mm][\":\"][ss]"
   - id: req:time-basic-hm
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.3:tech:time-basic-hm"
     statement: >
       A specific hour and minute in basic format encodes the time designator
       followed by hour and minute: ["T"][hour][min].
     format: basic
     pattern: "[\"T\"][hh][mm]"
   - id: req:time-extended-hm
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.3:tech:time-extended-hm"
     statement: >
       A specific hour and minute in extended format encodes hour and minute
       with a colon separator: [hour][":"][min].
     format: extended
     pattern: "[hh][\":\"][mm]"
   - id: req:time-basic-h
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.3:tech:time-basic-h"
     statement: >
       A specific hour in basic format encodes the time designator followed by
       the hour value: ["T"][hour].
     format: basic
     pattern: "[\"T\"][hh]"
   - id: req:time-fraction-second
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.4"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-second"
     statement: >
       A decimal fraction may be appended to the second component, separated by
       a decimal sign (period or comma) with at least one digit. When a fraction
@@ -55,7 +56,7 @@ requirements:
     format: any
     pattern: "[hh][mm][ss][,/.][f]"
   - id: req:time-fraction-minute
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.4"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-minute"
     statement: >
       A decimal fraction may be appended to the minute component, separated by
       a decimal sign (period or comma) with at least one digit. When a fraction
@@ -63,7 +64,7 @@ requirements:
     format: any
     pattern: "[hh][mm][,/.][f]"
   - id: req:time-fraction-hour
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.1.4"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-hour"
     statement: >
       A decimal fraction may be appended to the hour component, separated by
       a decimal sign (period or comma) with at least one digit. When a fraction
@@ -72,7 +73,7 @@ requirements:
     format: basic
     pattern: "[\"T\"][hh][,/.][f]"
   - id: req:time-beginning-of-day
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-beginning-of-day"
     statement: >
       The beginning of a calendar day (midnight, start of day) is encoded as
       T000000 in basic format or 00:00:00 in extended format, denoting the
@@ -80,7 +81,7 @@ requirements:
     format: any
     pattern: "[\"T\"]000000|00:00:00"
   - id: req:time-ending-of-day
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-ending-of-day"
     statement: >
       The ending of a calendar day (midnight, end of day) is encoded as T240000
       in basic format or 24:00:00 in extended format. The hour value 24 is valid
@@ -88,14 +89,14 @@ requirements:
     format: any
     pattern: "[\"T\"]240000|24:00:00"
   - id: req:time-utc
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3"
     statement: >
       UTC time is indicated by appending the UTC designator ["Z"] directly after
       the time expression, with no intervening space.
     format: any
     pattern: "[time][\"Z\"]"
   - id: req:time-offset-basic
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.4.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-basic"
     statement: >
       Local time with UTC offset in basic format appends the shift after the
       time: [time][shift] or [time][shiftH], where shift is [±][hour][min] and
@@ -103,7 +104,7 @@ requirements:
     format: basic
     pattern: "[time][±][hh][mm]|[time][±][hh]"
   - id: req:time-offset-extended
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.4.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-extended"
     statement: >
       Local time with UTC offset in extended format appends the shift after the
       time: [timeX][shiftX] or [timeX][shiftH], where shiftX is [±][hour][":"][min]
@@ -111,7 +112,7 @@ requirements:
     format: extended
     pattern: "[timeX][±][hh][\":\"][mm]|[timeX][±][hh]"
   - id: req:time-designator-omission
-    clause: "iso:8601:-1:ed-1:en:clause:5.3.5"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.5"
     statement: >
       In expressions containing only time of day (including UTC and offset
       variants), the time designator ["T"] may be omitted where no ambiguity

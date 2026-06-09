@@ -5,29 +5,43 @@ name: RFC 3339
 description: >-
   Profile of ISO 8601-1 for Internet date/time formats as defined in
   RFC 3339. This profile restricts ISO 8601 to extended format only,
-  requires a time designator and UTC offset, mandates seconds in time
-  representations, and disallows hour value 24.
-source: RFC 3339 (https://www.rfc-editor.org/rfc/rfc3339)
+  requires full date (YYYY-MM-DD), mandates seconds in time representations,
+  requires UTC offset, disallows hour 24, permits lowercase t/z, and
+  accommodates leap seconds (second value 60).
+source:
+  - https://www.rfc-editor.org/rfc/rfc3339
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-extended-full
+      - req:time-fraction-second
+      - req:time-utc
+      - req:time-offset-extended
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
 additional_requirements:
   - id: req:rfc-3339-extended-format-only
     statement: >-
       Only extended format representations shall be used. Basic format
       representations (without hyphens or colons as delimiters) are not
       permitted.
-  - id: req:rfc-3339-mandatory-uppercase-t
+  - id: req:rfc-3339-time-designator
     statement: >-
       The time designator between the date and time components shall be
-      the uppercase character "T". Lowercase "t" is not permitted.
+      "T" or "t". Applications that generate this format SHOULD use
+      uppercase "T". Parsers SHALL accept both uppercase "T" and
+      lowercase "t".
   - id: req:rfc-3339-utc-offset-required
     statement: >-
       Every date-time representation shall include either the UTC
-      designator "Z" or a numeric UTC offset (±hh:mm). Representations
-      without a UTC offset are not permitted.
+      designator "Z" (or "z") or a numeric UTC offset (±hh:mm).
+      Representations without a UTC offset are not permitted.
   - id: req:rfc-3339-no-hour-24
     statement: >-
       The hour value 24 is not allowed. Midnight shall be represented
@@ -48,12 +62,28 @@ additional_requirements:
       Numeric UTC offsets shall include both hours and minutes
       (±hh:mm). Offset representations without minutes (±hh) are not
       permitted.
+  - id: req:rfc-3339-leap-second
+    statement: >-
+      The second value 60 is permitted to represent a positive leap
+      second. When a leap second occurs, the second field may contain
+      the value "60" in place of the normal maximum of "59".
+  - id: req:rfc-3339-unknown-local-offset
+    statement: >-
+      The UTC offset "-00:00" indicates that the date-time is in UTC
+      but the local time zone relationship is unknown. This differs
+      from "+00:00" which indicates UTC with a known zero offset.
+      Both "-00:00" and "+00:00" are valid representations.
+  - id: req:rfc-3339-lowercase-z
+    statement: >-
+      The UTC designator "Z" may alternatively be lowercase "z".
+      Applications that generate this format SHOULD use uppercase "Z".
+      Parsers SHALL accept both uppercase "Z" and lowercase "z".
 additional_tests:
   - id: conf-test:rfc-3339-valid-001
     description: "Valid date-time with fractional seconds and UTC Z"
     requirements:
       - req:rfc-3339-extended-format-only
-      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-time-designator
       - req:rfc-3339-utc-offset-required
     test_type: validity
     given:
@@ -64,7 +94,7 @@ additional_tests:
     description: "Valid date-time with positive UTC offset"
     requirements:
       - req:rfc-3339-extended-format-only
-      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-time-designator
       - req:rfc-3339-utc-offset-required
       - req:rfc-3339-offset-minutes-required
     test_type: validity
@@ -76,7 +106,7 @@ additional_tests:
     description: "Valid date-time with negative UTC offset"
     requirements:
       - req:rfc-3339-extended-format-only
-      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-time-designator
       - req:rfc-3339-utc-offset-required
       - req:rfc-3339-offset-minutes-required
     test_type: validity
@@ -94,17 +124,25 @@ additional_tests:
       expression: "19850412T232050Z"
     expect:
       valid: false
-  - id: conf-test:rfc-3339-invalid-002
-    description: >-
-      Lowercase time designator is invalid in RFC 3339
+  - id: conf-test:rfc-3339-valid-004
+    description: "Valid date-time with lowercase t designator"
     requirements:
-      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-time-designator
     test_type: validity
     given:
       expression: "1985-04-12t23:20:50Z"
     expect:
-      valid: false
-  - id: conf-test:rfc-3339-invalid-003
+      valid: true
+  - id: conf-test:rfc-3339-valid-005
+    description: "Valid date-time with lowercase z UTC designator"
+    requirements:
+      - req:rfc-3339-lowercase-z
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50z"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-invalid-002
     description: >-
       Time without seconds is invalid in RFC 3339
     requirements:
@@ -114,7 +152,7 @@ additional_tests:
       expression: "1985-04-12T23:20Z"
     expect:
       valid: false
-  - id: conf-test:rfc-3339-invalid-004
+  - id: conf-test:rfc-3339-invalid-003
     description: >-
       Hour value 24 is invalid in RFC 3339
     requirements:
@@ -124,19 +162,19 @@ additional_tests:
       expression: "1985-04-12T24:00:00Z"
     expect:
       valid: false
-  - id: conf-test:rfc-3339-invalid-005
+  - id: conf-test:rfc-3339-invalid-004
     description: >-
       Date-only representation (no time component) is invalid in
       RFC 3339
     requirements:
-      - req:rfc-3339-mandatory-uppercase-t
+      - req:rfc-3339-time-designator
       - req:rfc-3339-utc-offset-required
     test_type: validity
     given:
       expression: "1985-04-12"
     expect:
       valid: false
-  - id: conf-test:rfc-3339-invalid-006
+  - id: conf-test:rfc-3339-invalid-005
     description: >-
       Reduced precision date (year-month only) is invalid in RFC 3339
     requirements:
@@ -144,5 +182,53 @@ additional_tests:
     test_type: validity
     given:
       expression: "1985-04"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-invalid-006
+    description: >-
+      Space separator instead of T designator is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-time-designator
+    test_type: validity
+    given:
+      expression: "1985-04-12 23:20:50Z"
+    expect:
+      valid: false
+  - id: conf-test:rfc-3339-valid-006
+    description: "Valid leap second representation"
+    requirements:
+      - req:rfc-3339-leap-second
+    test_type: validity
+    given:
+      expression: "1990-12-31T23:59:60Z"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-valid-007
+    description: "Valid leap second with UTC offset"
+    requirements:
+      - req:rfc-3339-leap-second
+      - req:rfc-3339-offset-minutes-required
+    test_type: validity
+    given:
+      expression: "1990-12-31T15:59:60-08:00"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-valid-008
+    description: "Valid unknown local offset (-00:00)"
+    requirements:
+      - req:rfc-3339-unknown-local-offset
+    test_type: validity
+    given:
+      expression: "1990-12-31T23:59:59-00:00"
+    expect:
+      valid: true
+  - id: conf-test:rfc-3339-invalid-007
+    description: >-
+      Date-time without UTC offset is invalid in RFC 3339
+    requirements:
+      - req:rfc-3339-utc-offset-required
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50"
     expect:
       valid: false

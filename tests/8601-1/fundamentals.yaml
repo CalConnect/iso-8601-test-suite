@@ -8,7 +8,9 @@ description: >
   representation, and leading zero requirements.
 standardization_target_type: iso-8601-date-time-processor
 requirements_class: req-class:fundamentals
-source: ISO 8601-1:2026 Clauses 4, 5.1
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:4
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.1
 tests:
   # Validity tests: valid character usage
   - id: conf-test:fundamentals-valid-001

@@ -9,7 +9,8 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - conf-class:fundamentals
 requirements_class: req-class:time-of-day
-source: ISO 8601-1:2026 Clause 5.3
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3
 tests:
   # Parsing tests: complete local time representations
   - id: conf-test:time-parse-001

@@ -9,7 +9,8 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - conf-class:fundamentals
 requirements_class: req-class:week-date
-source: ISO 8601-1:2026 Clause 5.2.4
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4
 tests:
   # Parsing tests: complete representations
   - id: conf-test:week-date-parse-001

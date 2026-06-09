@@ -9,10 +9,11 @@ standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:conf-class:time-interval
 requirements_class: req-class:extended-time-intervals
-source: ISO 8601-2:2026 Clause 10
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:10
 tests:
   # --- Open end time interval (Clause 10.2.1) ---
-  - id: conf-test:extended-interval-open-end-parsing-001
+  - id: conf-test:extended-interval-open-end-parse-001
     description: "Parse open end interval implicit '1985-04-12/..'"
     requirements:
       - req:extended-interval-open-end
@@ -29,7 +30,7 @@ tests:
         end:
           open: true
 
-  - id: conf-test:extended-interval-open-end-parsing-002
+  - id: conf-test:extended-interval-open-end-parse-002
     description: "Parse open end interval with month precision '1985-04/..'"
     requirements:
       - req:extended-interval-open-end
@@ -45,7 +46,7 @@ tests:
         end:
           open: true
 
-  - id: conf-test:extended-interval-open-end-parsing-003
+  - id: conf-test:extended-interval-open-end-parse-003
     description: "Parse open end interval with year precision '1985/..'"
     requirements:
       - req:extended-interval-open-end
@@ -60,7 +61,7 @@ tests:
         end:
           open: true
 
-  - id: conf-test:extended-interval-open-end-explicit-parsing-001
+  - id: conf-test:extended-interval-open-end-explicit-parse-001
     description: "Parse open end interval explicit '1985Y4M12D/..'"
     requirements:
       - req:extended-interval-open-end
@@ -78,7 +79,7 @@ tests:
           open: true
 
   # --- Open start time interval (Clause 10.2.2) ---
-  - id: conf-test:extended-interval-open-start-parsing-001
+  - id: conf-test:extended-interval-open-start-parse-001
     description: "Parse open start interval implicit '../1985-04-12'"
     requirements:
       - req:extended-interval-open-start
@@ -95,7 +96,7 @@ tests:
           month: 4
           day: 12
 
-  - id: conf-test:extended-interval-open-start-parsing-002
+  - id: conf-test:extended-interval-open-start-parse-002
     description: "Parse open start interval month precision '../1985-04'"
     requirements:
       - req:extended-interval-open-start
@@ -111,7 +112,7 @@ tests:
           year: 1985
           month: 4
 
-  - id: conf-test:extended-interval-open-start-parsing-003
+  - id: conf-test:extended-interval-open-start-parse-003
     description: "Parse open start interval year precision '../1985'"
     requirements:
       - req:extended-interval-open-start
@@ -127,7 +128,7 @@ tests:
           year: 1985
 
   # --- Unknown end time interval (Clause 10.2.3) ---
-  - id: conf-test:extended-interval-unknown-end-parsing-001
+  - id: conf-test:extended-interval-unknown-end-parse-001
     description: "Parse unknown end interval implicit '1985-04-12/'"
     requirements:
       - req:extended-interval-unknown-end
@@ -144,7 +145,7 @@ tests:
         end:
           unknown: true
 
-  - id: conf-test:extended-interval-unknown-end-parsing-002
+  - id: conf-test:extended-interval-unknown-end-parse-002
     description: "Parse unknown end interval month precision '1985-04/'"
     requirements:
       - req:extended-interval-unknown-end
@@ -160,7 +161,7 @@ tests:
         end:
           unknown: true
 
-  - id: conf-test:extended-interval-unknown-end-parsing-003
+  - id: conf-test:extended-interval-unknown-end-parse-003
     description: "Parse unknown end interval year precision '1985/'"
     requirements:
       - req:extended-interval-unknown-end
@@ -176,7 +177,7 @@ tests:
           unknown: true
 
   # --- Unknown start time interval (Clause 10.2.4) ---
-  - id: conf-test:extended-interval-unknown-start-parsing-001
+  - id: conf-test:extended-interval-unknown-start-parse-001
     description: "Parse unknown start interval implicit '/1985-04-12'"
     requirements:
       - req:extended-interval-unknown-start
@@ -193,7 +194,7 @@ tests:
           month: 4
           day: 12
 
-  - id: conf-test:extended-interval-unknown-start-parsing-002
+  - id: conf-test:extended-interval-unknown-start-parse-002
     description: "Parse unknown start interval month precision '/1985-04'"
     requirements:
       - req:extended-interval-unknown-start
@@ -209,7 +210,7 @@ tests:
           year: 1985
           month: 4
 
-  - id: conf-test:extended-interval-unknown-start-parsing-003
+  - id: conf-test:extended-interval-unknown-start-parse-003
     description: "Parse unknown start interval year precision '/1985'"
     requirements:
       - req:extended-interval-unknown-start
@@ -225,7 +226,7 @@ tests:
           year: 1985
 
   # --- Complete qualification of dates in intervals (Clause 10.3.1) ---
-  - id: conf-test:extended-interval-qualification-parsing-001
+  - id: conf-test:extended-interval-qualification-parse-001
     description: "Parse interval with approximate start '1984-01-02~/2004-06-04'"
     requirements:
       - req:extended-interval-qualification-complete
@@ -247,7 +248,7 @@ tests:
           month: 6
           day: 4
 
-  - id: conf-test:extended-interval-qualification-parsing-002
+  - id: conf-test:extended-interval-qualification-parse-002
     description: "Parse interval with approximate year start '1984~/2004-06'"
     requirements:
       - req:extended-interval-qualification-complete
@@ -266,7 +267,7 @@ tests:
           year: 2004
           month: 6
 
-  - id: conf-test:extended-interval-qualification-parsing-003
+  - id: conf-test:extended-interval-qualification-parse-003
     description: "Parse interval with approximate end month '1984/2004-06~'"
     requirements:
       - req:extended-interval-qualification-complete
@@ -285,7 +286,7 @@ tests:
             complete:
               approximate: true
 
-  - id: conf-test:extended-interval-qualification-parsing-004
+  - id: conf-test:extended-interval-qualification-parse-004
     description: "Parse interval with uncertain start and approximate end '1984?/2004%'"
     requirements:
       - req:extended-interval-qualification-complete
@@ -308,7 +309,7 @@ tests:
               approximate: true
 
   # --- Partial qualification (Clause 10.3.2) ---
-  - id: conf-test:extended-interval-partial-qualification-parsing-001
+  - id: conf-test:extended-interval-partial-qualification-parse-001
     description: "Parse interval with partial day qualification '2004-06-~01/2004-06-~20'"
     requirements:
       - req:extended-interval-qualification-partial
@@ -334,7 +335,7 @@ tests:
               approximate: true
 
   # --- Unspecified portions (Clause 10.4) ---
-  - id: conf-test:extended-interval-unspecified-parsing-001
+  - id: conf-test:extended-interval-unspecified-parse-001
     description: "Parse interval with unspecified start day '2004-06-XX/2004-07-03'"
     requirements:
       - req:extended-interval-unspecified
@@ -356,7 +357,7 @@ tests:
           day: 3
 
   # --- Qualified dates in unknown/open intervals (Clause 10.5) ---
-  - id: conf-test:extended-interval-qualified-unknown-end-parsing-001
+  - id: conf-test:extended-interval-qualified-unknown-end-parse-001
     description: "Parse interval with approximate start and unknown end '1984-01-02~/'"
     requirements:
       - req:extended-interval-qualified-open
@@ -376,7 +377,7 @@ tests:
         end:
           unknown: true
 
-  - id: conf-test:extended-interval-qualified-open-end-parsing-001
+  - id: conf-test:extended-interval-qualified-open-end-parse-001
     description: "Parse interval with approximate start and open end '1984-01-02~/..'"
     requirements:
       - req:extended-interval-qualified-open
@@ -396,7 +397,7 @@ tests:
         end:
           open: true
 
-  - id: conf-test:extended-interval-qualified-open-start-parsing-001
+  - id: conf-test:extended-interval-qualified-open-start-parse-001
     description: "Parse interval with open start and approximate end '../198X-01-02~'"
     requirements:
       - req:extended-interval-qualified-open
@@ -419,7 +420,7 @@ tests:
               approximate: true
 
   # --- Before/after with qualified components (Clause 10.6) ---
-  - id: conf-test:extended-interval-before-after-parsing-001
+  - id: conf-test:extended-interval-before-after-parse-001
     description: "Parse interval with before start '..2004-06-01/2004-06-~20'"
     requirements:
       - req:extended-interval-before-after
@@ -442,7 +443,7 @@ tests:
             day:
               approximate: true
 
-  - id: conf-test:extended-interval-before-after-parsing-002
+  - id: conf-test:extended-interval-before-after-parse-002
     description: "Parse interval with after end '2004-06-01~/2004-06-20..'"
     requirements:
       - req:extended-interval-before-after

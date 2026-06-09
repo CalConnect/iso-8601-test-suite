@@ -9,50 +9,51 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:fundamentals
-source: ISO 8601-2:2026 Clause 4.8
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8
 requirements:
   - id: req:season-basic-values
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.1:tech:season-basic-values"
     statement: >
       The basic season identifiers use numeric values 21 (Spring), 22 (Summer),
       23 (Autumn), and 24 (Winter), without location dependence.
     format: any
   - id: req:season-advanced-values
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.1:tech:season-advanced-values"
     statement: >
       Advanced sub-year grouping identifiers use values 25-28 (hemispheric
       seasons), 33-36 (quarters), 37-39 (quadrimesters), and 40-41 (semestrals).
     format: any
   - id: req:season-implicit-basic
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.2:tech:season-implicit-basic"
     statement: >
       An implicit basic sub-year grouping encodes the season value directly:
       [season], using values 21 through 24.
     format: any
     pattern: '[season]'
   - id: req:season-implicit-advanced
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.2:tech:season-implicit-advanced"
     statement: >
       An implicit advanced sub-year grouping encodes the division value directly:
       [ydivision], using values 25 through 41.
     format: any
     pattern: '[ydivision]'
   - id: req:season-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.2:tech:season-explicit"
     statement: >
       An explicit sub-year grouping encodes the value with the A designator:
       [i]["A"], where [i] ranges from 21 to 41.
     format: any
     pattern: '[i]["A"]'
   - id: req:season-as-month-basic
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.3:tech:season-as-month-basic"
     statement: >
       A basic season placed in the month position of a date:
       [year]["-"][season].
     format: any
     pattern: '[year]["-"][season]'
   - id: req:season-as-month-advanced
-    clause: "iso:8601:-2:ed-1:en:clause:4.8.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.8.3:tech:season-as-month-advanced"
     statement: >
       A hemispheric season or division placed in the month position of a date:
       [year]["-"][ydivision].

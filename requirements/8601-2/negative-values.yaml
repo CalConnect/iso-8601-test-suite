@@ -9,24 +9,25 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:explicit-representation
-source: ISO 8601-2:2026 Clause 4.4.1
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1
 requirements:
   - id: req:negative-year-implicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.2:tech:negative-year-implicit"
     statement: >
       The calendar year in implicit form permits negative values by prefixing
       a minus sign: [!]["-"][year].
     format: extended
     pattern: '[!]["-"][year]'
   - id: req:negative-year-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.2:tech:negative-year-explicit"
     statement: >
       The calendar year in explicit form permits negative values by prefixing
       a minus sign: [!]["-"][yearE].
     format: any
     pattern: '[!]["-"][yearE]'
   - id: req:negative-week-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.3"
     statement: >
       The calendar week of year in explicit form permits negative values:
       [!]["-"][weekE]. A negative week number counts in reverse from the end
@@ -34,7 +35,7 @@ requirements:
     format: any
     pattern: '[!]["-"][weekE]'
   - id: req:negative-day-of-month-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.4"
     statement: >
       The calendar day of month in explicit form permits negative values:
       [!]["-"][dayE]. A negative day number counts in reverse from the end
@@ -42,7 +43,7 @@ requirements:
     format: any
     pattern: '[!]["-"][dayE]'
   - id: req:negative-day-of-year-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.5"
     statement: >
       The calendar day of year in explicit form permits negative values:
       [!]["-"][dayoE]. A negative day-of-year counts in reverse from the end
@@ -50,42 +51,42 @@ requirements:
     format: any
     pattern: '[!]["-"][dayoE]'
   - id: req:negative-year-before-one-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.6"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.6"
     statement: >
       A calendar year preceding year one is represented in explicit form with
       a B suffix: [yearE]["B"].
     format: any
     pattern: '[yearE]["B"]'
   - id: req:negative-decade-implicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.7"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.7:tech:negative-decade-implicit"
     statement: >
       The calendar decade in implicit form permits negative values by prefixing
       a minus sign: [!]["-"][dec].
     format: extended
     pattern: '[!]["-"][dec]'
   - id: req:negative-decade-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.7"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.7:tech:negative-decade-explicit"
     statement: >
       The calendar decade in explicit form permits negative values by prefixing
       a minus sign: [!]["-"][decE].
     format: any
     pattern: '[!]["-"][decE]'
   - id: req:negative-century-implicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.8"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.8:tech:negative-century-implicit"
     statement: >
       The calendar century in implicit form permits negative values by prefixing
       a minus sign: [!]["-"][cent].
     format: extended
     pattern: '[!]["-"][cent]'
   - id: req:negative-century-explicit
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.8"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.8:tech:negative-century-explicit"
     statement: >
       The calendar century in explicit form permits negative values by prefixing
       a minus sign: [!]["-"][centE].
     format: any
     pattern: '[!]["-"][centE]'
   - id: req:negative-duration
-    clause: "iso:8601:-2:ed-1:en:clause:4.4.1.9"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.4.1.9"
     statement: >
       A negative duration prefixes the entire positive duration with a minus sign:
       [!]["-"][positiveDuration]. All individual time scale components within the

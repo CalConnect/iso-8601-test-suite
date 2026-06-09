@@ -9,45 +9,46 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - req-class:fundamentals
-source: ISO 8601-1:2026 Clause 5.2.4
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4
 requirements:
   - id: req:week-date-basic-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.1:tech:week-date-basic-full"
     statement: >
       A complete week date in basic format encodes the year, week number (prefixed
       by W), and day of week: [year]["W"][week][dayk].
     format: basic
     pattern: "[YYYY][\"W\"][WW][K]"
   - id: req:week-date-extended-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.1"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.1:tech:week-date-extended-full"
     statement: >
       A complete week date in extended format encodes the year, week number (prefixed
       by W), and day of week with hyphen separators: [year]["-"]["W"][week]["-"][dayk].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K]"
   - id: req:week-date-basic-week-only
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.2:tech:week-date-basic-week-only"
     statement: >
       A week date with reduced precision (day of week omitted) in basic format
       encodes only year and week number: [year]["W"][week].
     format: basic
     pattern: "[YYYY][\"W\"][WW]"
   - id: req:week-date-extended-week-only
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.2"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.2:tech:week-date-extended-week-only"
     statement: >
       A week date with reduced precision (day of week omitted) in extended format
       encodes year and week with hyphen separator: [year]["-"]["W"][week].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW]"
   - id: req:week-date-expanded-basic-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.3:tech:week-date-expanded-basic-full"
     statement: >
       An expanded week date in basic format encodes a signed expanded year, week
       number, and day of week: [±][year(expanded)]["W"][week][dayk].
     format: basic
     pattern: "[±][YYYYYY][\"W\"][WW][K]"
   - id: req:week-date-expanded-extended-full
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.3:tech:week-date-expanded-extended-full"
     statement: >
       An expanded week date in extended format encodes a signed expanded year, week
       number, and day of week with hyphen separators:
@@ -55,14 +56,14 @@ requirements:
     format: extended
     pattern: "[±][YYYYYY][\"-\"][\"W\"][WW][\"-\"][K]"
   - id: req:week-date-expanded-basic-week-only
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.3:tech:week-date-expanded-basic-week-only"
     statement: >
       An expanded week date with reduced precision in basic format encodes a signed
       expanded year and week number: [±][year(expanded)]["W"][week].
     format: basic
     pattern: "[±][YYYYYY][\"W\"][WW]"
   - id: req:week-date-expanded-extended-week-only
-    clause: "iso:8601:-1:ed-1:en:clause:5.2.4.3"
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.2.4.3:tech:week-date-expanded-extended-week-only"
     statement: >
       An expanded week date with reduced precision in extended format encodes a
       signed expanded year and week with hyphen separator:

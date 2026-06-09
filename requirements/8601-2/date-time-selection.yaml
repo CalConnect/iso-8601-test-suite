@@ -10,89 +10,90 @@ description: >
 standardization_target_type: iso-8601-date-time-processor
 dependencies:
   - 8601-1:req-class:date-and-time
-source: ISO 8601-2:2026 Clause 12
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:12
 requirements:
   - id: req:selection-rule-set
-    clause: "iso:8601:-2:ed-1:en:clause:12.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.1"
     statement: >
       A selection rule set is enclosed by L prefix and N suffix designators:
       ["L"][selection-rule-1]...[selection-rule-n]["N"].
     format: any
     pattern: '["L"][selection-rule-1]...[selection-rule-n]["N"]'
   - id: req:selection-month
-    clause: "iso:8601:-2:ed-1:en:clause:12.2.1"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.2.1"
     statement: >
       Selection by calendar month uses the explicit month expression [monthE]
       with values 1 through 12.
     format: any
   - id: req:selection-week
-    clause: "iso:8601:-2:ed-1:en:clause:12.2.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.2.2"
     statement: >
       Selection by calendar week uses the explicit week expression [weekE]
       with values 1 through 53 and -53 through -1.
     format: any
   - id: req:selection-day-of-month
-    clause: "iso:8601:-2:ed-1:en:clause:12.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.3"
     statement: >
       Selection by calendar day of month uses the explicit day expression
       [dayE] with values 1 through 31 and -31 through -1.
     format: any
   - id: req:selection-week-day
-    clause: "iso:8601:-2:ed-1:en:clause:12.4"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.4"
     statement: >
       Selection by day of week uses the explicit day-of-week expression
       [daykE] with values 1 through 7.
     format: any
   - id: req:selection-ordinal-day
-    clause: "iso:8601:-2:ed-1:en:clause:12.5"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.5"
     statement: >
       Selection by ordinal day of year uses [dayoE(m)] with values 1 through
       366 and -366 through -1.
     format: any
   - id: req:selection-hour
-    clause: "iso:8601:-2:ed-1:en:clause:12.6"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.6"
     statement: >
       Selection by hour uses the explicit hour expression [hourE] with values
       0 through 23.
     format: any
   - id: req:selection-minute
-    clause: "iso:8601:-2:ed-1:en:clause:12.7"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.7"
     statement: >
       Selection by minute uses the explicit minute expression [minE] with
       values 0 through 59.
     format: any
   - id: req:selection-second
-    clause: "iso:8601:-2:ed-1:en:clause:12.8"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.8"
     statement: >
       Selection by second uses the explicit second expression [secE] with
       values 0 through 60.
     format: any
   - id: req:selection-position
-    clause: "iso:8601:-2:ed-1:en:clause:12.9"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.9"
     statement: >
       Position selection identifies the i-th occurrence using an integer with
       the I designator: [position]["I"].
     format: any
   - id: req:selection-time-interval
-    clause: "iso:8601:-2:ed-1:en:clause:12.10"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.10"
     statement: >
       A selection combined with a time interval appends a duration to the
       selection expression: [selection]["/"][duration].
     format: any
   - id: req:selection-application
-    clause: "iso:8601:-2:ed-1:en:clause:12.11"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.11"
     statement: >
       Selection rules may be applied to any date and time expression in explicit
       form, substituting time scale components with selection expressions.
     format: any
   - id: req:selection-context-set
-    clause: "iso:8601:-2:ed-1:en:clause:12.11.2"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.11.2"
     statement: >
       Time scale components may follow a selection rule set to apply to every
       date and interval described by that selection.
     format: any
   - id: req:selection-within-interval
-    clause: "iso:8601:-2:ed-1:en:clause:12.11.3"
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.11.3"
     statement: >
       A selection expression may serve as the start or end of a time interval.
     format: any

@@ -1,0 +1,185 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:iso-8601-1-basic-format
+name: ISO 8601-1 Basic Format
+description: >-
+  Profile of ISO 8601-1 covering basic format representations only
+  (without hyphens, colons, or other delimiters between numeric
+  components). Basic format uses compact representations suitable for
+  systems with bandwidth or storage constraints. Only the time designator
+  "T", zone designator "Z", and sign characters may appear as
+  non-numeric separators.
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en
+standardization_target_type: iso-8601-date-time-processor
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-basic-full
+      - req:cal-date-reduced-year
+      - req:cal-date-reduced-decade
+      - req:cal-date-reduced-century
+      - req:cal-date-expanded-basic-full
+      - req:cal-date-expanded-basic-year
+      - req:cal-date-expanded-basic-decade
+      - req:cal-date-expanded-basic-century
+  - conformance_class: 8601-1:conf-class:ordinal-date
+    requirements:
+      - req:ord-date-basic-full
+      - req:ord-date-expanded-basic
+  - conformance_class: 8601-1:conf-class:week-date
+    requirements:
+      - req:week-date-basic-full
+      - req:week-date-basic-week-only
+      - req:week-date-expanded-basic-full
+      - req:week-date-expanded-basic-week-only
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-basic-full
+      - req:time-basic-hm
+      - req:time-basic-h
+      - req:time-fraction-second
+      - req:time-fraction-minute
+      - req:time-fraction-hour
+      - req:time-beginning-of-day
+      - req:time-ending-of-day
+      - req:time-utc
+      - req:time-offset-basic
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-basic-local
+      - req:date-time-cal-basic-utc
+      - req:date-time-cal-basic-offset
+      - req:date-time-ord-basic-local
+      - req:date-time-ord-basic-utc
+      - req:date-time-ord-basic-offset
+      - req:date-time-week-basic-local
+      - req:date-time-week-basic-utc
+      - req:date-time-week-basic-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:duration
+    requirements:
+      - req:dur-complete-datetime
+      - req:dur-complete-week
+      - req:dur-reduced
+      - req:dur-fraction
+      - req:dur-time-designator
+      - req:dur-alt-calendar-basic
+      - req:dur-alt-ordinal-basic
+additional_requirements:
+  - id: req:basic-format-no-delimiters
+    statement: >-
+      Date and time representations shall use basic format without
+      hyphens, colons, or other delimiter characters between numeric
+      components. Only the time designator "T", zone designator "Z",
+      and sign characters (±) may appear as non-numeric characters.
+  - id: req:basic-format-compact-calendar
+    statement: >-
+      Calendar date shall be represented as YYYYMMDD (e.g. 19850412).
+  - id: req:basic-format-compact-ordinal
+    statement: >-
+      Ordinal date shall be represented as YYYYDDD (e.g. 1985102).
+  - id: req:basic-format-compact-week
+    statement: >-
+      Week date shall be represented as YYYYWwwD (e.g. 1985W155).
+  - id: req:basic-format-compact-time
+    statement: >-
+      Time of day shall be represented as hhmmss or hhmm (e.g. 232050).
+  - id: req:basic-format-compact-offset
+    statement: >-
+      UTC offset in basic format shall use ±hhmm or Z (e.g. +0200).
+additional_tests:
+  - id: conf-test:basic-format-valid-001
+    description: "Valid basic format calendar date"
+    requirements:
+      - req:basic-format-compact-calendar
+    test_type: validity
+    given:
+      expression: "19850412"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-valid-002
+    description: "Valid basic format ordinal date"
+    requirements:
+      - req:basic-format-compact-ordinal
+    test_type: validity
+    given:
+      expression: "1985102"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-valid-003
+    description: "Valid basic format week date"
+    requirements:
+      - req:basic-format-compact-week
+    test_type: validity
+    given:
+      expression: "1985W155"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-valid-004
+    description: "Valid basic format date-time with offset"
+    requirements:
+      - req:basic-format-compact-calendar
+      - req:basic-format-compact-time
+      - req:basic-format-compact-offset
+    test_type: validity
+    given:
+      expression: "19850412T232050+0200"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-invalid-001
+    description: "Extended format date is invalid in basic format profile"
+    requirements:
+      - req:basic-format-no-delimiters
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: false
+  - id: conf-test:basic-format-valid-005
+    description: "Valid basic format date-time with Z"
+    requirements:
+      - req:basic-format-compact-calendar
+      - req:basic-format-compact-time
+    test_type: validity
+    given:
+      expression: "19850412T232050Z"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-valid-006
+    description: "Valid basic format duration"
+    requirements:
+      - req:basic-format-no-delimiters
+    test_type: validity
+    given:
+      expression: "P1Y2M3DT4H5M6S"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-valid-007
+    description: "Valid basic format time with reduced precision (hm only)"
+    requirements:
+      - req:basic-format-compact-time
+    test_type: validity
+    given:
+      expression: "T2320"
+    expect:
+      valid: true
+  - id: conf-test:basic-format-invalid-002
+    description: "Extended format time with colons is invalid in basic format profile"
+    requirements:
+      - req:basic-format-no-delimiters
+    test_type: validity
+    given:
+      expression: "23:20:50"
+    expect:
+      valid: false
+  - id: conf-test:basic-format-valid-008
+    description: "Valid basic format time interval start-end"
+    requirements:
+      - req:basic-format-compact-calendar
+      - req:basic-format-compact-time
+    test_type: validity
+    given:
+      expression: "19850412T232050/19850413T232050"
+    expect:
+      valid: true

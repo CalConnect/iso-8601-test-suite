@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=meta.yaml
 # YAML Schema for ISO 8601 Test Suite — Profile
 ---
 type: object
@@ -5,7 +6,6 @@ required:
   - id
   - name
   - standardization_target_type
-  - conformance_classes
 properties:
   id:
     type: string
@@ -18,8 +18,10 @@ properties:
     type: string
     description: "Description of the profile"
   source:
-    type: string
-    description: "Source reference for the profile specification"
+    type: array
+    items:
+      type: string
+    description: "RFC 5141 URN or URL references to source specifications"
   standardization_target_type:
     type: string
     description: "The type of implementation being tested"
@@ -28,7 +30,25 @@ properties:
     items:
       type: string
       pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
-    description: "Conformance classes required by this profile"
+    description: "Conformance classes referenced (legacy: prefer traceability)"
+  traceability:
+    type: array
+    items:
+      type: object
+      required: [conformance_class, requirements]
+      properties:
+        conformance_class:
+          type: string
+          pattern: "^(8601-[12]:)?conf-class:[a-z0-9-]+$"
+        requirements:
+          type: array
+          items:
+            type: string
+            pattern: "^req:[a-z0-9-]+$"
+    description: >-
+      Traceability matrix: specific requirements selected from each conformance
+      class. Replaces conformance_classes with explicit per-class requirement
+      selection for precise profile definition.
   additional_requirements:
     type: array
     items:
@@ -58,9 +78,59 @@ properties:
             type: string
         test_type:
           type: string
-          enum: [parsing, generation, validity, equivalence, arithmetic]
+          enum: [parsing, generation, validity, equivalence, arithmetic, round_trip]
+        parse_mode:
+          type: string
+          enum: [dedicated, undifferentiated]
+          description: >-
+            For parsing/validity tests: which parser mode to use.
+            Defaults to "dedicated" if omitted.
         given:
-          type: object
+          oneOf:
+            - type: object
+              required: [expression]
+              properties:
+                expression:
+                  type: string
+            - type: object
+              required: [components]
+              properties:
+                components:
+                  type: object
+            - type: object
+              required: [expression_a, expression_b]
+              properties:
+                expression_a:
+                  type: string
+                expression_b:
+                  type: string
+            - type: object
+              required: [expression, operation]
+              properties:
+                expression:
+                  type: string
+                operation:
+                  type: string
+                  enum: [add, subtract]
+                operand:
+                  type: object
         expect:
-          type: object
+          oneOf:
+            - type: object
+              required: [valid]
+              properties:
+                valid:
+                  type: boolean
+                components:
+                  type: object
+            - type: object
+              required: [expression]
+              properties:
+                expression:
+                  type: string
+            - type: object
+              required: [equivalent]
+              properties:
+                equivalent:
+                  type: boolean
     description: "Additional profile-specific conformance tests"

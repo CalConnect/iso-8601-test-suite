@@ -1,7 +1,8 @@
+# yaml-language-server: $schema=meta.yaml
 # YAML Schema for ISO 8601 Test Suite — Suite Manifest
 #
-# Describes the overall test suite: standards covered, statistics,
-# and metadata for machine consumption.
+# Describes the overall test suite: standards covered, identifier scheme,
+# directory layout, and metadata for machine consumption.
 ---
 type: object
 required:
@@ -12,7 +13,6 @@ required:
   - date
   - standardization_target_type
   - standards
-  - statistics
 properties:
   id:
     type: string
@@ -64,14 +64,6 @@ properties:
   identifier_scheme:
     type: object
     description: "Identifier scheme used in the test suite"
-
-  statistics:
-    type: object
-    description: "Counts of tests, requirements, classes"
-
-  file_counts:
-    type: object
-    description: "Counts of files in each directory"
 
   directory_layout:
     type: object

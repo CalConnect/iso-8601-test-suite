@@ -7,13 +7,36 @@ description: >-
   (Library of Congress EDTF specification). EDTF Level 0 is a subset of
   ISO 8601-1 supporting only extended format representations with
   restricted granularity options.
-source: ISO 8601-2:2019 Annex A (EDTF Level 0)
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:A
 standardization_target_type: iso-8601-date-time-processor
-conformance_classes:
-  - 8601-1:conf-class:calendar-date
-  - 8601-1:conf-class:time-of-day
-  - 8601-1:conf-class:date-and-time
-  - 8601-1:conf-class:time-interval
+traceability:
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-extended-full
+      - req:time-extended-hm
+      - req:time-fraction-second
+      - req:time-beginning-of-day
+      - req:time-utc
+      - req:time-offset-extended
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-reduced-precision
+  - conformance_class: 8601-1:conf-class:time-interval
+    requirements:
+      - req:interval-start-end-extended
+      - req:interval-start-dur-extended
+      - req:interval-dur-end-extended
+      - req:interval-abbreviated-end
+      - req:interval-time-shift-inheritance
 additional_requirements:
   - id: req:edtf-level-0-extended-format-only
     statement: >-

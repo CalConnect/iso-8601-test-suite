@@ -4,14 +4,16 @@
 Implements the newline-delimited JSON protocol for use with:
   ruby run-tests --adapter "exec:python3 adapters/python-datetime.py"
 
-Uses Python's standard library date/datetime for parsing. Limited ISO 8601
-coverage — serves as a working example of the adapter protocol.
+Uses Python's standard library date/datetime for parsing, with strptime
+for format-specific parsing (basic format, ordinal, week dates) that
+fromisoformat doesn't handle.
 
 See adapters/TEMPLATE.rb for the full adapter interface specification.
 """
 
 import sys
 import json
+import re
 from datetime import date, datetime, timezone, timedelta
 
 _cache = {}
@@ -30,6 +32,124 @@ def _lookup(handle):
     return _cache.get(handle)
 
 
+# ── strptime format registry ──────────────────────────────────────────────────
+# Each entry: (regex_pattern, strptime_format)
+# Z is normalized to +0000 before matching so %z handles it.
+
+STRPTIME_FORMATS = [
+    # Calendar date-time, basic format with fractional seconds
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[.,]\d+Z$'),          "%Y%m%dT%H%M%S.%f%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[.,]\d+[+-]\d{2}:?\d{2}$'), "%Y%m%dT%H%M%S.%f%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[.,]\d+$'),           "%Y%m%dT%H%M%S.%f"),
+
+    # Calendar date-time, basic format
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}Z$'),                 "%Y%m%dT%H%M%S%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}$'), "%Y%m%dT%H%M%S%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}$'),                  "%Y%m%dT%H%M%S"),
+
+    # Calendar date-time, basic format reduced precision
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}Z$'),                      "%Y%m%dT%H%M%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}[+-]\d{2}:?\d{2}$'),      "%Y%m%dT%H%M%z"),
+    (re.compile(r'^\d{4}\d{2}\d{2}T\d{2}\d{2}$'),                       "%Y%m%dT%H%M"),
+
+    # Calendar date-time, extended format with fractional seconds
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.,]\d+Z$'),     "%Y-%m-%dT%H:%M:%S.%f%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.,]\d+[+-]\d{2}:?\d{2}$'), "%Y-%m-%dT%H:%M:%S.%f%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.,]\d+$'),      "%Y-%m-%dT%H:%M:%S.%f"),
+
+    # Calendar date-time, extended format
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'),            "%Y-%m-%dT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:?\d{2}$'), "%Y-%m-%dT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$'),             "%Y-%m-%dT%H:%M:%S"),
+
+    # Calendar date-time, extended format reduced precision
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$'),                   "%Y-%m-%dT%H:%M%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),   "%Y-%m-%dT%H:%M%z"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$'),                    "%Y-%m-%dT%H:%M"),
+
+    # Ordinal date-time, basic format
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}\d{2}Z$'),                      "%Y%jT%H%M%S%z"),
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}$'),      "%Y%jT%H%M%S%z"),
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}\d{2}$'),                       "%Y%jT%H%M%S"),
+
+    # Ordinal date-time, extended format
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}:\d{2}Z$'),                   "%Y-%jT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),   "%Y-%jT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}:\d{2}$'),                    "%Y-%jT%H:%M:%S"),
+
+    # Ordinal date-time, reduced precision
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}Z$'),                           "%Y%jT%H%M%z"),
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}[+-]\d{2}:?\d{2}$'),           "%Y%jT%H%M%z"),
+    (re.compile(r'^\d{4}\d{3}T\d{2}\d{2}$'),                            "%Y%jT%H%M"),
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}Z$'),                         "%Y-%jT%H:%M%z"),
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),         "%Y-%jT%H:%M%z"),
+    (re.compile(r'^\d{4}-\d{3}T\d{2}:\d{2}$'),                          "%Y-%jT%H:%M"),
+
+    # Week date-time, basic format
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}\d{2}Z$'),                  "%GW%V%uT%H%M%S%z"),
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}$'),  "%GW%V%uT%H%M%S%z"),
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}\d{2}$'),                   "%GW%V%uT%H%M%S"),
+
+    # Week date-time, extended format
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}:\d{2}Z$'),              "%G-W%V-%uT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}:\d{2}[+-]\d{2}:?\d{2}$'), "%G-W%V-%uT%H:%M:%S%z"),
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}:\d{2}$'),               "%G-W%V-%uT%H:%M:%S"),
+
+    # Week date-time, reduced precision
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}Z$'),                       "%GW%V%uT%H%M%z"),
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}[+-]\d{2}:?\d{2}$'),       "%GW%V%uT%H%M%z"),
+    (re.compile(r'^\d{4}W\d{2}\d{T\d{2}\d{2}$'),                        "%GW%V%uT%H%M"),
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}Z$'),                    "%G-W%V-%uT%H:%M%z"),
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),    "%G-W%V-%uT%H:%M%z"),
+    (re.compile(r'^\d{4}-W\d{2}-\d{T\d{2}:\d{2}$'),                     "%G-W%V-%uT%H:%M"),
+
+    # Date-only formats
+    (re.compile(r'^\d{4}\d{2}\d{2}$'),                                   "%Y%m%d"),
+    (re.compile(r'^\d{4}-\d{2}-\d{2}$'),                                 "%Y-%m-%d"),
+    (re.compile(r'^\d{4}\d{3}$'),                                        "%Y%j"),
+    (re.compile(r'^\d{4}-\d{3}$'),                                       "%Y-%j"),
+    (re.compile(r'^\d{4}W\d{2}\d$'),                                     "%GW%V%u"),
+    (re.compile(r'^\d{4}-W\d{2}-\d$'),                                   "%G-W%V-%u"),
+
+    # Time-only, basic format with T prefix
+    (re.compile(r'^T\d{2}\d{2}\d{2}Z$'),                                 "T%H%M%S%z"),
+    (re.compile(r'^T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}$'),                 "T%H%M%S%z"),
+    (re.compile(r'^T\d{2}\d{2}\d{2}$'),                                  "T%H%M%S"),
+    (re.compile(r'^T\d{2}\d{2}Z$'),                                      "T%H%M%z"),
+    (re.compile(r'^T\d{2}\d{2}$'),                                       "T%H%M"),
+    (re.compile(r'^T\d{2}$'),                                            "T%H"),
+
+    # Time-only, extended format
+    (re.compile(r'^\d{2}:\d{2}:\d{2}[.,]\d+Z$'),                        "%H:%M:%S.%f%z"),
+    (re.compile(r'^\d{2}:\d{2}:\d{2}[.,]\d+[+-]\d{2}:?\d{2}$'),         "%H:%M:%S.%f%z"),
+    (re.compile(r'^\d{2}:\d{2}:\d{2}[.,]\d+$'),                         "%H:%M:%S.%f"),
+    (re.compile(r'^\d{2}:\d{2}:\d{2}Z$'),                                "%H:%M:%S%z"),
+    (re.compile(r'^\d{2}:\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),                "%H:%M:%S%z"),
+    (re.compile(r'^\d{2}:\d{2}:\d{2}$'),                                 "%H:%M:%S"),
+    (re.compile(r'^\d{2}:\d{2}Z$'),                                      "%H:%M%z"),
+    (re.compile(r'^\d{2}:\d{2}[+-]\d{2}:?\d{2}$'),                      "%H:%M%z"),
+    (re.compile(r'^\d{2}:\d{2}$'),                                       "%H:%M"),
+]
+
+
+def _try_strptime(expr):
+    """Try format-specific parsing with strptime."""
+    for pattern, fmt in STRPTIME_FORMATS:
+        if pattern.match(expr):
+            # Normalize Z to +0000 so %z handles it
+            normalized = expr[:-1] + "+0000" if expr.endswith("Z") else expr
+            try:
+                if "%j" in fmt or "%G" in fmt or "%V" in fmt:
+                    # date-only or datetime with ordinal/week formats
+                    parsed = datetime.strptime(normalized, fmt.replace("Z", "+0000"))
+                else:
+                    parsed = datetime.strptime(normalized, fmt.replace("Z", "+0000"))
+                return {"valid": True, "parsed": _store(parsed), "api": "datetime.strptime"}
+            except (ValueError, TypeError):
+                continue
+    return None
+
+
 # ── Protocol methods ─────────────────────────────────────────────────────────
 
 def info(params):
@@ -43,14 +163,27 @@ def info(params):
 
 def try_parse(params):
     expr = params["expression"]
+    options = params.get("options") or {}
+    parse_mode = options.get("parse_mode", "dedicated")
 
-    # Try datetime first (handles date+time, date-only, and time-only in 3.11+)
+    # 1. Format-specific parsing (strptime) — dedicated mode only
+    if parse_mode == "dedicated":
+        result = _try_strptime(expr)
+        if result is not None:
+            return result
+
+    # 2. General parser (fromisoformat) — always tried in undifferentiated mode,
+    #    or as fallback in dedicated mode
+    normalized = expr
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+
     for parser, api in [
         (datetime.fromisoformat, "datetime.fromisoformat"),
         (date.fromisoformat, "date.fromisoformat"),
     ]:
         try:
-            parsed = parser(expr)
+            parsed = parser(normalized)
             return {"valid": True, "parsed": _store(parsed), "api": api}
         except (ValueError, TypeError):
             continue
@@ -71,11 +204,10 @@ def extract_components(params):
     if isinstance(obj, datetime):
         result["time"] = {"hour": obj.hour, "minute": obj.minute, "second": obj.second}
 
-        # Handle ordinals (datetime always has date, so yday is available)
         result["ordinal"] = {"year": obj.year, "day_of_year": obj.timetuple().tm_yday}
 
         off = obj.utcoffset()
-        if off is not None and off.total_seconds() != 0:
+        if off is not None:
             total_sec = int(off.total_seconds())
             result["time"]["utc_offset"] = {
                 "sign": "+" if total_sec >= 0 else "-",
@@ -91,11 +223,146 @@ def extract_components(params):
 
 def generate(params):
     components = params.get("components", {})
+    fmt = components.get("format")
     cal = components.get("calendar")
-    if cal and cal.get("year") and cal.get("month") and cal.get("day"):
-        d = date(cal["year"], cal["month"], cal["day"])
-        return {"expression": d.isoformat()}
+    ordinal = components.get("ordinal")
+    week = components.get("week")
+    time_comp = components.get("time")
+
+    if cal and isinstance(cal, dict):
+        return _generate_calendar(cal, time_comp, fmt)
+    elif ordinal and isinstance(ordinal, dict):
+        return _generate_ordinal(ordinal, time_comp, fmt)
+    elif week and isinstance(week, dict):
+        return _generate_week(week, time_comp, fmt)
+    elif time_comp and isinstance(time_comp, dict):
+        return _generate_time_only(time_comp, fmt)
     return None
+
+
+def _generate_calendar(cal, time_comp, fmt):
+    year = cal.get("year")
+    month = cal.get("month")
+    day = cal.get("day")
+
+    if not (year and month and day):
+        return None
+
+    if time_comp:
+        return _generate_datetime(year, month, day, time_comp, fmt)
+
+    d = date(year, month, day)
+    if fmt == "basic":
+        return {"expression": d.strftime("%Y%m%d")}
+    return {"expression": d.isoformat()}
+
+
+def _generate_ordinal(ordinal, time_comp, fmt):
+    year = ordinal.get("year")
+    yday = ordinal.get("day_of_year")
+    if not (year and yday):
+        return None
+
+    d = date(year, 1, 1) + timedelta(days=yday - 1)
+    if time_comp:
+        return _generate_datetime(year, d.month, d.day, time_comp, fmt)
+
+    if fmt == "basic":
+        return {"expression": d.strftime("%Y%j")}
+    return {"expression": d.strftime("%Y-%j")}
+
+
+def _generate_week(week, time_comp, fmt):
+    week_year = week.get("week_year")
+    week_num = week.get("week")
+    dow = week.get("day_of_week")
+    if not (week_year and week_num):
+        return None
+
+    # Convert week date to calendar date using isocalendar inverse
+    jan4 = date(week_year, 1, 4)
+    week1_monday = jan4 - timedelta(days=jan4.isoweekday() - 1)
+    d = week1_monday + timedelta(weeks=week_num - 1, days=(dow or 1) - 1)
+
+    if time_comp:
+        return _generate_datetime(d.year, d.month, d.day, time_comp, fmt)
+
+    if fmt == "basic":
+        return {"expression": d.strftime("%GW%V%u")}
+    return {"expression": d.strftime("%G-W%V-%u")}
+
+
+def _generate_datetime(year, month, day, time_comp, fmt):
+    hour = time_comp.get("hour", 0)
+    minute = time_comp.get("minute", 0)
+    second = time_comp.get("second", 0)
+    offset = time_comp.get("utc_offset")
+
+    if offset:
+        sign = offset.get("sign", "+")
+        off_h = offset.get("hours", 0)
+        off_m = offset.get("minutes", 0)
+        td = timedelta(hours=off_h, minutes=off_m)
+        if sign == "-":
+            td = -td
+        tz = timezone(td)
+    else:
+        tz = None
+
+    if tz:
+        dt = datetime(year, month, day, hour, minute, second, tzinfo=tz)
+    else:
+        dt = datetime(year, month, day, hour, minute, second)
+
+    expr = dt.isoformat()
+    # Replace +00:00 with Z for UTC
+    if offset and offset.get("hours") == 0 and offset.get("minutes") == 0:
+        expr = expr.replace("+00:00", "Z")
+
+    if fmt == "basic":
+        expr = dt.strftime("%Y%m%dT%H%M%S")
+        if offset and offset.get("hours") == 0 and offset.get("minutes") == 0:
+            expr += "Z"
+        elif offset:
+            sign = offset.get("sign", "+")
+            expr += f"{sign}{offset['hours']:02d}{offset.get('minutes', 0):02d}"
+
+    return {"expression": expr}
+
+
+def _generate_time_only(time_comp, fmt):
+    hour = time_comp.get("hour")
+    minute = time_comp.get("minute")
+    second = time_comp.get("second")
+    if hour is None:
+        return None
+
+    if fmt == "basic":
+        expr = f"{hour:02d}"
+        if minute is not None:
+            expr += f"{minute:02d}"
+        if second is not None:
+            expr += f"{second:02d}"
+    else:
+        if second is not None:
+            expr = f"{hour:02d}:{minute or 0:02d}:{second:02d}"
+        elif minute is not None:
+            expr = f"{hour:02d}:{minute:02d}"
+        else:
+            expr = f"{hour:02d}"
+
+    offset = time_comp.get("utc_offset")
+    if offset:
+        if offset.get("hours") == 0 and offset.get("minutes") == 0:
+            expr += "Z"
+        else:
+            sign = offset.get("sign", "+")
+            if fmt == "basic":
+                expr += f"{sign}{offset['hours']:02d}{offset.get('minutes', 0):02d}"
+            else:
+                expr += f"{sign}{offset['hours']:02d}:{offset.get('minutes', 0):02d}"
+
+    return {"expression": expr}
 
 
 def equivalent(params):
@@ -103,7 +370,11 @@ def equivalent(params):
     b = _lookup(params.get("parsed_b"))
     if a is None or b is None:
         return None
-    return a == b
+
+    if isinstance(a, (date, datetime)) and isinstance(b, (date, datetime)):
+        return a == b
+
+    return None
 
 
 def run_arithmetic(params):
