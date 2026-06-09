@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/test_suite'
+
+require 'optparse'
+
+REPO_ROOT = File.expand_path(File.join(__dir__, ".."))
+Dir.chdir(REPO_ROOT)
+
+options = {}
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ruby scripts/capability-matrix [options]"
+  opts.on("-o", "--output FILE", "Output JSON file") { |f| options[:output] = f }
+  opts.on("-q", "--quiet", "Suppress progress") { options[:quiet] = true }
+  opts.on("-h", "--help", "Show help") { puts opts; exit 0 }
+end
+parser.parse!
+
+output_file = options[:output] || File.join(REPO_ROOT, "site", "public", "matrix.json")
+
+$stderr.puts "" unless options[:quiet]
+$stderr.puts Term.bold("  ISO 8601 Capability Matrix Generator") unless options[:quiet]
+$stderr.puts "" unless options[:quiet]
+
+store = YamlStore.new
+index = SuiteIndex.new(store)
+suite = TestSuiteLoader.new(store, index)
+matrix_gen = CapabilityMatrix.new(store, index, suite)
+
+matrix = matrix_gen.generate(quiet: options[:quiet])
+
+require 'fileutils'
+require 'json'
+FileUtils.mkdir_p(File.dirname(output_file))
+File.write(output_file, JSON.pretty_generate(matrix))
+
+unless options[:quiet]
+  total = matrix[:requirements].length
+  libs = matrix[:libraries].length
+  prof_count = matrix[:profiles].length
+  $stderr.puts ""
+  $stderr.puts "  #{Term.green("Done")} — #{Term.bold(total)} requirements × #{Term.bold(libs)} libraries × #{Term.bold(prof_count)} profiles"
+  $stderr.puts "  Output: #{Term.cyan(output_file)}"
+  $stderr.puts ""
+end
