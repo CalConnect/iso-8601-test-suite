@@ -136,6 +136,13 @@ const heroSubtitle = computed(() => {
             <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ libStatsMap[lib.id].pass }} passed</span>
             <span class="text-amber-600 dark:text-amber-400 font-medium">{{ libStatsMap[lib.id].partial }} partial</span>
             <span class="text-red-500 dark:text-red-400 font-medium">{{ libStatsMap[lib.id].fail }} failed</span>
+            <span v-if="libStatsMap[lib.id].notDeclared" class="text-gray-600 font-medium">{{ libStatsMap[lib.id].notDeclared }} not declared</span>
+          </div>
+          <div v-if="lib.target_profiles?.length" class="flex flex-wrap gap-1 mt-2">
+            <span v-for="tp in lib.target_profiles" :key="tp.id"
+              class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-gray-800 text-gray-400">
+              {{ tp.name }}
+            </span>
           </div>
         </div>
       </div>

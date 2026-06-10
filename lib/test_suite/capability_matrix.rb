@@ -2,6 +2,7 @@
 
 require 'json'
 require 'fileutils'
+require 'set'
 
 class CapabilityMatrix
   ADAPTER_DEFS = [
@@ -377,13 +378,37 @@ class CapabilityMatrix
 
   def build_library_output(adapters, profile_results)
     adapters.map do |a|
-      targeted = profile_results.select { |p|
-        ar = p[:adapter_results].find { |r| r[:id] == a[:id] }
-        ar && ar[:test_total] > 0
-      }.map { |p| { id: p[:id], name: p[:name] } }
+      declared = read_declared_classes(a[:id])
+      targeted = compute_target_profiles(declared, profile_results)
       { id: a[:id], name: a[:name], logo: a[:logo], language: a[:language], version: a[:version],
-        target_profiles: targeted }
+        declared_conformance_classes: declared, target_profiles: targeted }
     end
+  end
+
+  def read_declared_classes(adapter_id)
+    result_file = find_result_file(adapter_id)
+    return [] unless result_file
+    result = @store.load(result_file)
+    return [] if result.failure?
+    result.data["declared_conformance_classes"] || []
+  end
+
+  def find_result_file(adapter_id)
+    @store.files_in("results/**/*.yaml").each do |f|
+      next if File.basename(f) == "TEMPLATE.yaml"
+      return f if File.basename(f, ".yaml") == adapter_id
+    end
+    nil
+  end
+
+  def compute_target_profiles(declared, profile_results)
+    return profile_results.map { |p| { id: p[:id], name: p[:name] } } if declared.empty?
+
+    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
+    profile_results.select { |p|
+      tc = @index.profile_traceability(p[:id])
+      tc.all? { |t| declared_bare.include?(@index.bare_id(t[:conformance_class])) }
+    }.map { |p| { id: p[:id], name: p[:name] } }
   end
 
   def build_categories(requirements)

@@ -1,10 +1,14 @@
 // Shared stats computation functions.
 
 export function libStats(lib, reqs) {
-  let pass = 0, partial = 0, fail = 0, total = 0;
+  let pass = 0, partial = 0, fail = 0, total = 0, notDeclared = 0;
+  const targetIds = new Set((lib.target_profiles || []).map(p => p.id));
   reqs.forEach(r => {
     const caps = r.tests?.[lib.id];
     if (!caps) return;
+    const reqProfileIds = (r.profiles || []).map(p => p.id);
+    const applicable = reqProfileIds.length === 0 || reqProfileIds.some(id => targetIds.has(id));
+    if (!applicable) { notDeclared++; return; }
     Object.values(caps).forEach(c => {
       total++;
       if (c.status === "pass") pass++;
@@ -12,7 +16,7 @@ export function libStats(lib, reqs) {
       else fail++;
     });
   });
-  return { pass, partial, fail, total, pct: total ? Math.round(pass / total * 100) : 0 };
+  return { pass, partial, fail, total, notDeclared, pct: total ? Math.round(pass / total * 100) : 0 };
 }
 
 export function reqStats(req, libs) {
