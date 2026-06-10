@@ -105,7 +105,10 @@ function mergeDetail(d) {
     const dt = reqMap[req.id];
     if (dt) {
       Object.entries(dt).forEach(([libId, caps]) => {
-        if (req.tests[libId]) Object.assign(req.tests[libId], caps);
+        if (!req.tests[libId]) return;
+        Object.entries(caps).forEach(([capKey, capVal]) => {
+          if (req.tests[libId][capKey]) Object.assign(req.tests[libId][capKey], capVal);
+        });
       });
     }
   });
