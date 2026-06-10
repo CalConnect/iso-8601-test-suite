@@ -34,16 +34,22 @@ Clause references in requirements use RFC 5141 partial URNs: `iso:8601:-{part}:e
   - `exec_adapter.rb` — JSON protocol adapter for external processes
   - `graph_util.rb` — Directed cycle detection
   - `term.rb` — Terminal output (colors, icons, formatting)
-  - `capability_matrix.rb` — Cross-adapter comparison and JSON output
+  - `capability_matrix.rb` — Cross-adapter comparison, split JSON output (summary + detail)
+  - `suite_validations.rb` — Validation checks (source consistency, URN format, pattern coverage, component validity, test ID naming)
 - `adapters/` — Pluggable implementation adapters (TEMPLATE.rb + implementations)
 - `schema/` — YAML Schema definitions (7 files including components.yaml and meta.yaml)
 - `requirements/8601-1/` — Part 1 requirements classes (9 files)
 - `requirements/8601-2/` — Part 2 requirements classes (13 files)
 - `tests/8601-1/` — Part 1 conformance classes (9 files)
 - `tests/8601-2/` — Part 2 conformance classes (13 files)
-- `profiles/` — Profile definitions (7 files)
+- `profiles/` — Profile definitions (8 files + TEMPLATE.yaml)
 - `results/` — Conformance test results per implementation (TEMPLATE.yaml + result files)
 - `spec/` — RSpec test suite (`bundle exec rspec`)
+- `site/` — Vue 3 dashboard site (Vite + Tailwind)
+  - Loads `summary.json` first (274 KB, ~23 KB gzipped), then `detail.json` on demand (~1.6 MB, ~164 KB gzipped)
+  - All Vue views are lazy-loaded via `defineAsyncComponent`
+  - Gzip pre-compression via `vite-plugin-compression`
+  - `ruby scripts/capability-matrix` regenerates both JSON files
 
 ## Architecture
 

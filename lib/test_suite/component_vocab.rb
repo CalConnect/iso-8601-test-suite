@@ -4,7 +4,7 @@ class ComponentVocabulary
   METADATA_KEYS = %w[description canonical_patterns].freeze
 
   def initialize(store)
-    result = store.load(File.join(File.dirname(__dir__), "schema", "components.yaml"))
+    result = store.load(File.expand_path("../../schema/components.yaml", __dir__))
     @top_keys = Set.new
     @sub_keys = {}
 

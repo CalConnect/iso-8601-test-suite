@@ -1,23 +1,25 @@
 <script setup>
-import { ref, computed, watch } from "vue";
-import DashboardView from "./views/DashboardView.vue";
-import MatrixView from "./views/MatrixView.vue";
-import ProfilesView from "./views/ProfilesView.vue";
-import ProfileDetailView from "./views/ProfileDetailView.vue";
-import ImplementationsView from "./views/ImplementationsView.vue";
-import ImplementationDetailView from "./views/ImplementationDetailView.vue";
-import RequirementsView from "./views/RequirementsView.vue";
-import RequirementsPartView from "./views/RequirementsPartView.vue";
-import RequirementDetailView from "./views/RequirementDetailView.vue";
-import ReportsView from "./views/ReportsView.vue";
-import ImplementationReportView from "./views/ImplementationReportView.vue";
-import AboutView from "./views/AboutView.vue";
-import MethodologyView from "./views/MethodologyView.vue";
-import DeveloperGuideView from "./views/DeveloperGuideView.vue";
-import DetailModal from "./components/DetailModal.vue";
+import { ref, computed, watch, defineAsyncComponent } from "vue";
 
-const data = ref(null);
+const DashboardView = defineAsyncComponent(() => import("./views/DashboardView.vue"));
+const MatrixView = defineAsyncComponent(() => import("./views/MatrixView.vue"));
+const ProfilesView = defineAsyncComponent(() => import("./views/ProfilesView.vue"));
+const ProfileDetailView = defineAsyncComponent(() => import("./views/ProfileDetailView.vue"));
+const ImplementationsView = defineAsyncComponent(() => import("./views/ImplementationsView.vue"));
+const ImplementationDetailView = defineAsyncComponent(() => import("./views/ImplementationDetailView.vue"));
+const RequirementsView = defineAsyncComponent(() => import("./views/RequirementsView.vue"));
+const RequirementsPartView = defineAsyncComponent(() => import("./views/RequirementsPartView.vue"));
+const RequirementDetailView = defineAsyncComponent(() => import("./views/RequirementDetailView.vue"));
+const ReportsView = defineAsyncComponent(() => import("./views/ReportsView.vue"));
+const ImplementationReportView = defineAsyncComponent(() => import("./views/ImplementationReportView.vue"));
+const AboutView = defineAsyncComponent(() => import("./views/AboutView.vue"));
+const MethodologyView = defineAsyncComponent(() => import("./views/MethodologyView.vue"));
+const DeveloperGuideView = defineAsyncComponent(() => import("./views/DeveloperGuideView.vue"));
+const DetailModal = defineAsyncComponent(() => import("./components/DetailModal.vue"));
+
+const summary = ref(null);
 const detail = ref(null);
+const modalDetail = ref(null);
 const mobileMenuOpen = ref(false);
 const refDropdownOpen = ref(false);
 
@@ -37,6 +39,14 @@ const hash = ref(location.hash);
 window.addEventListener("hashchange", () => { hash.value = location.hash; });
 
 const route = computed(() => hash.value.replace("#", "") || "/");
+
+const needsDetail = computed(() => {
+  const r = route.value;
+  return r === "/matrix" ||
+    r.startsWith("/profile/") ||
+    r.startsWith("/requirement/") ||
+    r.startsWith("/implementation/");
+});
 
 const currentView = computed(() => {
   const r = route.value;
@@ -69,21 +79,53 @@ const implId = computed(() => {
   return null;
 });
 
-async function load() {
+async function loadSummary() {
   try {
-    const r = await fetch("/matrix.json");
+    const r = await fetch("/summary.json");
     if (!r.ok) throw 0;
-    data.value = await r.json();
+    summary.value = await r.json();
   } catch {}
 }
-load();
 
-const libs = computed(() => data.value?.libraries || []);
-const reqs = computed(() => data.value?.requirements || []);
-const profiles = computed(() => data.value?.profiles || []);
-const categories = computed(() => data.value?.categories || []);
+async function loadDetail() {
+  if (detail.value) return;
+  try {
+    const r = await fetch("/detail.json");
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    if (summary.value) mergeDetail(d);
+    detail.value = d;
+  } catch {}
+}
+
+function mergeDetail(d) {
+  const reqMap = {};
+  (d.requirements || []).forEach(r => { reqMap[r.id] = r.tests; });
+  summary.value.requirements.forEach(req => {
+    const dt = reqMap[req.id];
+    if (dt) {
+      Object.entries(dt).forEach(([libId, caps]) => {
+        if (req.tests[libId]) Object.assign(req.tests[libId], caps);
+      });
+    }
+  });
+  const profMap = {};
+  (d.profiles || []).forEach(p => { profMap[p.id] = p.traceability; });
+  summary.value.profiles.forEach(prof => {
+    if (profMap[prof.id]) prof.traceability = profMap[prof.id];
+  });
+}
+
+loadSummary();
+
+watch(needsDetail, (v) => { if (v) loadDetail(); }, { immediate: true });
+
+const libs = computed(() => summary.value?.libraries || []);
+const reqs = computed(() => summary.value?.requirements || []);
+const profiles = computed(() => summary.value?.profiles || []);
+const categories = computed(() => summary.value?.categories || []);
 const generatedAt = computed(() =>
-  data.value ? new Date(data.value.generated_at).toLocaleString() : ""
+  summary.value ? new Date(summary.value.generated_at).toLocaleString() : ""
 );
 
 const activeProfile = computed(() => {
@@ -125,7 +167,7 @@ const activeReqSection = computed(() => {
 
 function nav(path) {
   location.hash = path;
-  detail.value = null;
+  modalDetail.value = null;
   mobileMenuOpen.value = false;
   refDropdownOpen.value = false;
 }
@@ -249,10 +291,10 @@ watch(route, () => { window.scrollTo(0, 0); });
 
     <!-- Content -->
     <main class="flex-1">
-      <div v-if="!data" class="flex items-center justify-center py-32">
+      <div v-if="!summary" class="flex items-center justify-center py-32">
         <div class="text-center">
           <div class="inline-block w-6 h-6 border-2 border-gray-600 border-t-gray-100 rounded-full animate-spin mb-4"></div>
-          <p class="text-gray-500 text-sm">Loading test results…</p>
+          <p class="text-gray-500 text-sm">Loading test suite…</p>
         </div>
       </div>
       <template v-else>
@@ -270,7 +312,7 @@ watch(route, () => { window.scrollTo(0, 0); });
           :reqs="reqs"
           :categories="categories"
           :profiles="profiles"
-          @open-detail="detail = $event"
+          @open-detail="modalDetail = $event"
         />
         <ProfilesView
           v-if="currentView === 'profiles'"
@@ -282,7 +324,7 @@ watch(route, () => { window.scrollTo(0, 0); });
           v-if="currentView === 'profile-detail' && activeProfile"
           :profile="activeProfile"
           :libs="libs"
-          @open-detail="detail = $event"
+          @open-detail="modalDetail = $event"
           @navigate="nav"
         />
         <ImplementationsView
@@ -360,10 +402,10 @@ watch(route, () => { window.scrollTo(0, 0); });
 
     <!-- Detail modal -->
     <DetailModal
-      v-if="detail"
-      :detail="detail"
+      v-if="modalDetail"
+      :detail="modalDetail"
       :libs="libs"
-      @close="detail = null"
+      @close="modalDetail = null"
     />
   </div>
 </template>

@@ -2,8 +2,9 @@
 # frozen_string_literal: true
 
 require_relative '../lib/test_suite'
-
 require 'optparse'
+require 'fileutils'
+require 'json'
 
 REPO_ROOT = File.expand_path(File.join(__dir__, ".."))
 Dir.chdir(REPO_ROOT)
@@ -19,28 +20,65 @@ parser.parse!
 
 output_file = options[:output] || File.join(REPO_ROOT, "site", "public", "matrix.json")
 
-$stderr.puts "" unless options[:quiet]
-$stderr.puts Term.bold("  ISO 8601 Capability Matrix Generator") unless options[:quiet]
-$stderr.puts "" unless options[:quiet]
+unless options[:quiet]
+  $stderr.puts ""
+  $stderr.puts Term.bold("  ISO 8601 Capability Matrix Generator")
+  $stderr.puts ""
+end
 
 store = YamlStore.new
 index = SuiteIndex.new(store)
 suite = TestSuiteLoader.new(store, index)
 matrix_gen = CapabilityMatrix.new(store, index, suite)
 
-matrix = matrix_gen.generate(quiet: options[:quiet])
+on_progress = if options[:quiet]
+  nil
+else
+  lambda do |event, *args|
+    case event
+    when :adapter_failed
+      name, msg = args
+      $stderr.puts "  #{Term.red("FAILED")} to load #{name}: #{msg}"
+    when :requirement
+      req_id, req_info, adapters, req_entry = args
+      short_id = req_id.sub("req:", "")
+      section = req_info[:section] || "?"
+      adapter_summary = adapters.map do |adefn|
+        caps = req_entry[:tests][adefn[:id]] || {}
+        statuses = caps.values.map { |c| c[:status] }
+        if statuses.empty?
+          "  "
+        elsif statuses.all?("pass")
+          Term.green("✓")
+        elsif statuses.all?("fail")
+          Term.red("✗")
+        else
+          Term.byellow("~")
+        end
+      end
+      $stderr.puts "  #{section.ljust(12)} #{short_id.ljust(35)} #{adapter_summary.join("  ")}"
+    end
+  end
+end
 
-require 'fileutils'
-require 'json'
-FileUtils.mkdir_p(File.dirname(output_file))
-File.write(output_file, JSON.pretty_generate(matrix))
+matrix = matrix_gen.generate(on_progress: on_progress)
+
+base = options[:output] || File.join(REPO_ROOT, "site", "public")
+summary_path = File.join(base, "summary.json")
+detail_path = File.join(base, "detail.json")
+
+CapabilityMatrix.write_compact(CapabilityMatrix.strip_details(matrix), summary_path)
+CapabilityMatrix.write_compact(CapabilityMatrix.extract_details(matrix), detail_path)
 
 unless options[:quiet]
   total = matrix[:requirements].length
   libs = matrix[:libraries].length
   prof_count = matrix[:profiles].length
+  summary_kb = (File.size(summary_path) / 1024.0).round(1)
+  detail_kb = (File.size(detail_path) / 1024.0).round(1)
   $stderr.puts ""
   $stderr.puts "  #{Term.green("Done")} — #{Term.bold(total)} requirements × #{Term.bold(libs)} libraries × #{Term.bold(prof_count)} profiles"
-  $stderr.puts "  Output: #{Term.cyan(output_file)}"
+  $stderr.puts "  Summary: #{Term.cyan(summary_path)} (#{summary_kb} KB)"
+  $stderr.puts "  Detail:  #{Term.cyan(detail_path)} (#{detail_kb} KB)"
   $stderr.puts ""
 end
