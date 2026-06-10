@@ -155,6 +155,10 @@ iso-8601-test-suite/
 ├── results/                          # Conformance test results per implementation
 │   ├── TEMPLATE.yaml                 # Template for new result files
 │   └── ruby-date.yaml                # Ruby Date/DateTime/Time results
+├── site/                             # Vue 3 dashboard (Vite + Tailwind)
+│   ├── src/                          # Vue components, views, composables
+│   ├── public/                       # Static assets (logos, JSON data)
+│   └── dist/                         # Production build output
 ----
 
 === Requirements classes
@@ -470,6 +474,51 @@ YAML files.
 
 Each YAML file includes a `$schema` reference for validation in editors that
 support YAML Schema (e.g. VS Code with the YAML extension).
+
+== Dashboard site
+
+The `site/` directory contains a Vue 3 dashboard (Vite + Tailwind CSS) that
+visualizes conformance results across implementations and profiles.
+
+=== Prerequisites
+
+* Node.js 18+ and npm
+
+=== Generate data
+
+The site loads two JSON files produced by the capability-matrix script:
+
+* `site/public/summary.json` — libraries, profiles, categories, requirements with
+  pass/fail summaries (~24 KB gzipped)
+* `site/public/detail.json` — full test details and profile traceability (~164 KB gzipped)
+
+[source,bash]
+----
+ruby scripts/capability-matrix                    # regenerate both files
+ruby scripts/capability-matrix -o site/public     # explicit output directory
+----
+
+=== Run development server
+
+[source,bash]
+----
+cd site
+npm install
+npm run dev            # starts at http://localhost:3000
+----
+
+=== Build for production
+
+[source,bash]
+----
+cd site
+npm run build          # outputs to site/dist/
+npm run preview        # preview the production build locally
+----
+
+The build includes pre-compressed `.gz` files for all assets. The data loads
+progressively: the summary renders the dashboard and navigation instantly, and
+full test details load on demand when viewing the matrix or detail pages.
 
 == Conformance
 
