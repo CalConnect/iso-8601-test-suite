@@ -17,3 +17,7 @@ vendor/bundle/
 
 # Node
 node_modules/
+site/dist/
+
+# Source artwork (site logos derived from these)
+/*.svg

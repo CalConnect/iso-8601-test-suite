@@ -23,22 +23,14 @@ class TestSuiteLoader
 
     tests = []
 
-    if profile["traceability"] && !profile["traceability"].empty?
-      profile["traceability"].each do |tc|
-        cc_ref = tc["conformance_class"]
-        cc_tests = tests_for_class(cc_ref)
-        explicit_reqs = tc["requirements"]
-        if explicit_reqs && !explicit_reqs.empty?
-          cc_tests = cc_tests.select { |t|
-            (t["requirements"] || []).any? { |r| explicit_reqs.include?(r) }
-          }
-        end
-        tests.concat(cc_tests)
+    @index.profile_traceability(profile_id).each do |tc|
+      cc_tests = tests_for_class(tc[:conformance_class])
+      if tc[:requirements] && !tc[:requirements].empty?
+        cc_tests = cc_tests.select { |t|
+          (t["requirements"] || []).any? { |r| tc[:requirements].include?(r) }
+        }
       end
-    elsif profile["conformance_classes"]
-      (profile["conformance_classes"] || []).each do |cc_ref|
-        tests.concat(tests_for_class(cc_ref))
-      end
+      tests.concat(cc_tests)
     end
 
     (profile["additional_tests"] || []).each { |t| tests << t }

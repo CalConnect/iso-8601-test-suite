@@ -57,6 +57,29 @@ class SuiteIndex
     [file, bare]
   end
 
+  def part_for_file(path)
+    path.include?("8601-1") ? "8601-1" : "8601-2"
+  end
+
+  # Returns [{ conformance_class: "conf-class:x", requirements: ["req:a", ...] }]
+  # for a given profile. Handles traceability and legacy conformance_classes.
+  def profile_traceability(profile_id)
+    data = @profiles[profile_id]
+    return [] unless data
+
+    if data["traceability"] && !data["traceability"].empty?
+      data["traceability"].map { |tc|
+        { conformance_class: tc["conformance_class"], requirements: tc["requirements"] || [] }
+      }
+    elsif data["conformance_classes"]
+      (data["conformance_classes"] || []).map { |cc|
+        { conformance_class: cc, requirements: [] }
+      }
+    else
+      []
+    end
+  end
+
   private
 
   def index_requirements
@@ -85,7 +108,7 @@ class SuiteIndex
 
       data = result.data
       id = data["id"]
-      part = f.include?("8601-1") ? "8601-1" : "8601-2"
+      part = part_for_file(f)
       @conf_class_ids[id] = f
       @bare_conf_class_ids << id
       @source_map[f] = data["source"] if data["source"]

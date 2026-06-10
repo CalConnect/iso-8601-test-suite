@@ -37,9 +37,9 @@ class CapabilityMatrix
     @suite = suite
   end
 
-  def generate(adapter_defs: ADAPTER_DEFS, quiet: false)
+  def generate(adapter_defs: ADAPTER_DEFS, on_progress: nil)
     req_index = build_requirements_index
-    adapters = load_adapters(adapter_defs, quiet)
+    adapters = load_adapters(adapter_defs, on_progress)
     all_tests = @suite.all_tests
     test_reqs = @index.test_reqs
 
@@ -49,11 +49,11 @@ class CapabilityMatrix
     profile_req_map = build_profile_req_map(class_tests, test_reqs)
 
     requirements_output = build_requirements(
-      adapters, req_index, req_tests, profile_req_map, quiet
+      adapters, req_index, req_tests, profile_req_map, on_progress
     )
 
     profile_results = build_profile_results(
-      adapters, profile_tests, test_reqs, req_index, quiet
+      adapters, profile_tests, test_reqs, req_index
     )
 
     {
@@ -67,15 +67,17 @@ class CapabilityMatrix
 
   private
 
-  def load_adapters(adapter_defs, quiet)
-    adapter_defs.map do |defn|
-      $stderr.puts "  Loading adapter: #{Term.cyan(defn[:name])}" unless quiet
-      adapter = AdapterLoader.load(defn[:adapter])
-      { **defn, adapter: adapter, version: adapter.version, language: adapter.language }
-    rescue AdapterNotFoundError, RuntimeError => e
-      $stderr.puts "  #{Term.red("FAILED")} to load #{defn[:name]}: #{e.message}" unless quiet
-      nil
-    end.compact
+  def load_adapters(adapter_defs, on_progress)
+    loaded = []
+    adapter_defs.each do |defn|
+      begin
+        adapter = AdapterLoader.load(defn[:adapter])
+        loaded << { **defn, adapter: adapter, version: adapter.version, language: adapter.language }
+      rescue AdapterNotFoundError, RuntimeError => e
+        on_progress&.call(:adapter_failed, defn[:name], e.message)
+      end
+    end
+    loaded
   end
 
   def clause_section(clause)
@@ -99,7 +101,7 @@ class CapabilityMatrix
       next unless result.success?
       data = result.data
       class_name = data["name"] || data["id"]
-      part = f.include?("8601-1") ? "1" : "2"
+      part = @index.part_for_file(f).sub("8601-", "")
       (data["requirements"] || []).each do |r|
         reqs[r["id"]] = {
           category: class_name,
@@ -175,26 +177,14 @@ class CapabilityMatrix
       data = @index.profiles[pid]
       next unless data
 
-      traceability = data["traceability"]
-      if traceability && !traceability.empty?
-        traceability.each do |tc|
-          cc_id = tc["conformance_class"]
-          explicit_reqs = tc["requirements"]
-          if explicit_reqs && !explicit_reqs.empty?
-            explicit_reqs.each { |rid|
-              (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
-            }
-          else
-            bare = @index.bare_id(cc_id)
-            cc_tests = class_tests[bare] || []
-            cc_tests.each { |t| (test_reqs[t["id"]] || []).each { |rid|
-              (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
-            }}
-          end
-        end
-      elsif data["conformance_classes"]
-        (data["conformance_classes"] || []).each do |cc_ref|
-          bare = @index.bare_id(cc_ref)
+      @index.profile_traceability(pid).each do |tc|
+        explicit_reqs = tc[:requirements]
+        if explicit_reqs && !explicit_reqs.empty?
+          explicit_reqs.each { |rid|
+            (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
+          }
+        else
+          bare = @index.bare_id(tc[:conformance_class])
           cc_tests = class_tests[bare] || []
           cc_tests.each { |t| (test_reqs[t["id"]] || []).each { |rid|
             (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
@@ -210,7 +200,7 @@ class CapabilityMatrix
     profile_req_map
   end
 
-  def build_requirements(adapters, req_index, req_tests, profile_req_map, quiet)
+  def build_requirements(adapters, req_index, req_tests, profile_req_map, on_progress)
     all_req_ids = req_index.keys.sort
     (req_tests.keys - all_req_ids).sort.each { |rid| all_req_ids << rid }
 
@@ -242,7 +232,7 @@ class CapabilityMatrix
       end
 
       requirements_output << req_entry
-      print_requirement_progress(req_id, req_info, adapters, req_entry, quiet)
+      on_progress&.call(:requirement, req_id, req_info, adapters, req_entry)
     end
     requirements_output
   end
@@ -275,14 +265,14 @@ class CapabilityMatrix
     capabilities
   end
 
-  def build_profile_results(adapters, profile_tests, test_reqs, req_index, quiet)
+  def build_profile_results(adapters, profile_tests, test_reqs, req_index)
     @index.profile_ids.map do |pid|
       data = @index.profiles[pid]
       next unless data
 
       ptests = profile_tests[pid] || {}
 
-      conf_class_details = build_traceability_details(data, adapters, test_reqs, req_index)
+      conf_class_details = build_traceability_details(pid, adapters, test_reqs, req_index)
       req_ids_in_profile = collect_profile_req_ids(data, conf_class_details)
 
       adapter_results = adapters.map do |adefn|
@@ -295,7 +285,7 @@ class CapabilityMatrix
         description: data["description"]&.strip,
         source: data["source"],
         logo: PROFILE_ORG_LOGOS[pid],
-        traceability_class_count: (data["traceability"] || []).length,
+        traceability_class_count: @index.profile_traceability(pid).length,
         additional_requirements: (data["additional_requirements"] || []).map { |r|
           { id: r["id"], statement: r["statement"]&.strip }
         },
@@ -305,13 +295,10 @@ class CapabilityMatrix
     end.compact
   end
 
-  def build_traceability_details(data, adapters, test_reqs, req_index)
-    traceability = data["traceability"]
-    return [] unless traceability && !traceability.empty?
-
-    traceability.map do |tc|
-      cc_id = tc["conformance_class"]
-      explicit_reqs = tc["requirements"]
+  def build_traceability_details(profile_id, adapters, test_reqs, req_index)
+    @index.profile_traceability(profile_id).map do |tc|
+      cc_id = tc[:conformance_class]
+      explicit_reqs = tc[:requirements]
 
       bare = @index.bare_id(cc_id)
       cc_result = @store.load(@index.conf_class_ids[bare]) if @index.conf_class_ids.key?(bare)
@@ -411,23 +398,62 @@ class CapabilityMatrix
     { "result" => "error", "notes" => e.message }
   end
 
-  def print_requirement_progress(req_id, req_info, adapters, req_entry, quiet)
-    return if quiet
-    short_id = req_id.sub("req:", "")
-    section = req_info[:section] || "?"
-    adapter_summary = adapters.map do |adefn|
-      caps = req_entry[:tests][adefn[:id]] || {}
-      statuses = caps.values.map { |c| c[:status] }
-      if statuses.empty?
-        "  "
-      elsif statuses.all?("pass")
-        Term.green("✓")
-      elsif statuses.all?("fail")
-        Term.red("✗")
-      else
-        Term.byellow("~")
-      end
+  def self.strip_details(full_data)
+    {
+      generated_at: full_data[:generated_at],
+      libraries: full_data[:libraries],
+      categories: full_data[:categories],
+      profiles: full_data[:profiles].map { |prof|
+        p = {}
+        prof.each { |k, v| p[k] = v unless k == :traceability }
+        p
+      },
+      requirements: full_data[:requirements].map { |req|
+        r = {}
+        req.each { |k, v| r[k] = k == :tests ? self.strip_test_details(v) : v }
+        r
+      },
+    }
+  end
+
+  def self.extract_details(full_data)
+    {
+      requirements: full_data[:requirements].map { |req|
+        details = {}
+        req[:tests].each do |lib_id, caps|
+          lib_details = {}
+          caps.each { |cap_key, cap| lib_details[cap_key] = { details: cap[:details] } if cap[:details] }
+          details[lib_id] = lib_details unless lib_details.empty?
+        end
+        { id: req[:id], tests: details } unless details.empty?
+      }.compact,
+      profiles: full_data[:profiles].map { |prof|
+        { id: prof[:id], traceability: prof[:traceability] } if prof[:traceability]
+      }.compact,
+    }
+  end
+
+  def self.strip_test_details(tests)
+    tests.transform_values { |caps|
+      caps.transform_values { |cap|
+        { status: cap[:status], pass: cap[:pass], total: cap[:total] }
+      }
+    }
+  end
+
+  def self.clean_nils(obj)
+    case obj
+    when Hash
+      obj.each_with_object({}) { |(k, v), h| h[k] = clean_nils(v) unless v.nil? }
+    when Array
+      obj.map { |v| clean_nils(v) }
+    else
+      obj
     end
-    $stderr.puts "  #{section.ljust(12)} #{short_id.ljust(35)} #{adapter_summary.join("  ")}"
+  end
+
+  def self.write_compact(data, path)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, JSON.generate(clean_nils(data)))
   end
 end
