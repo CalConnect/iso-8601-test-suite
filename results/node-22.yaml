@@ -11,7 +11,10 @@ verification: automated
 declared_conformance_classes:
 - conf-class:fundamentals
 - conf-class:calendar-date
+- conf-class:time-of-day
 - conf-class:date-and-time
+profiles_tested:
+- profile:iso-8601-1-core
 conformance_class_results:
 - conformance_class: conf-class:calendar-date
   status: failed
@@ -574,164 +577,125 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
 - conformance_class: conf-class:time-of-day
-  status: not-supported
+  status: failed
   test_results:
   - test: conf-test:time-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-003
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-004
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-005
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-006
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-007
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-008
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-009
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-010
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-011
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-012
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-013
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-014
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-015
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-016
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-017
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-018
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-019
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-020
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-021
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-022
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-023
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-024
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-025
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-026
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-027
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-028
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-029
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-030
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-031
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-032
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-033
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-parse-034
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
   - test: conf-test:time-gen-001
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-002
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-003
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-004
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-005
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-006
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-007
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-008
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-009
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-gen-010
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Adapter cannot generate from given components
   - test: conf-test:time-valid-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: pass
   - test: conf-test:time-valid-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: pass
   - test: conf-test:time-valid-003
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: pass
   - test: conf-test:time-valid-004
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: pass
   - test: conf-test:time-valid-005
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: pass
   - test: conf-test:time-valid-006
-    result: not-supported
-    notes: Conformance class not declared by implementation
+    result: fail
+    notes: Expected true, got false
   - test: conf-test:time-equiv-001
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Cannot parse one or both expressions
   - test: conf-test:time-equiv-002
     result: not-supported
-    notes: Conformance class not declared by implementation
+    notes: Cannot parse one or both expressions
 - conformance_class: conf-class:week-date
   status: not-supported
   test_results:

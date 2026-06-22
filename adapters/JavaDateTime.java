@@ -563,8 +563,6 @@ public class JavaDateTime {
     static final String[] DECLARED_CLASSES = {
         "conf-class:fundamentals",
         "conf-class:calendar-date",
-        "conf-class:ordinal-date",
-        "conf-class:week-date",
         "conf-class:time-of-day",
         "conf-class:date-and-time",
     };
@@ -604,6 +602,9 @@ public class JavaDateTime {
                         }
                         ccs.append("]");
                         response = "{\"result\":" + ccs + "}";
+                        break;
+                    case "declared_profiles":
+                        response = "{\"result\":[\"profile:iso-8601-1-core\"]}";
                         break;
                     case "try_parse": {
                         String expr = parseString(line, "expression");

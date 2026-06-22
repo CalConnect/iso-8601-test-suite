@@ -404,11 +404,10 @@ fn handle_request(request: &Value) -> Value {
         "declared_conformance_classes" => json!([
             "conf-class:fundamentals",
             "conf-class:calendar-date",
-            "conf-class:ordinal-date",
-            "conf-class:week-date",
             "conf-class:time-of-day",
             "conf-class:date-and-time"
         ]),
+        "declared_profiles" => json!(["profile:iso-8601-1-core"]),
         _ => json!({ "error": format!("Unknown method: {}", method) }),
     }
 }

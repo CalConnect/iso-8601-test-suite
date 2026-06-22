@@ -11,10 +11,10 @@ verification: automated
 declared_conformance_classes:
 - conf-class:fundamentals
 - conf-class:calendar-date
-- conf-class:ordinal-date
-- conf-class:week-date
 - conf-class:time-of-day
 - conf-class:date-and-time
+profiles_tested:
+- profile:iso-8601-1-core
 conformance_class_results:
 - conformance_class: conf-class:calendar-date
   status: failed
@@ -378,41 +378,53 @@ conformance_class_results:
   - test: conf-test:fundamentals-parse-010
     result: fail
 - conformance_class: conf-class:ordinal-date
-  status: failed
+  status: not-supported
   test_results:
   - test: conf-test:ord-date-parse-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-003
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-004
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-005
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-006
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-007
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-003
-    result: fail
-    notes: Expected '+001985102'
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-004
-    result: fail
-    notes: Expected '+001985-102'
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-001
-    result: fail
-    notes: Expected false, got true
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-003
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-equiv-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:recurring-time-interval
   status: not-supported
   test_results:
@@ -656,45 +668,59 @@ conformance_class_results:
   - test: conf-test:time-equiv-002
     result: pass
 - conformance_class: conf-class:week-date
-  status: failed
+  status: not-supported
   test_results:
   - test: conf-test:week-date-parse-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-003
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-004
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-005
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-006
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-007
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-008
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-003
-    result: fail
-    notes: Expected '1985W15'
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-004
-    result: fail
-    notes: Expected '1985-W15'
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-001
-    result: fail
-    notes: Expected false, got true
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-003
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-004
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-equiv-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:arithmetic
   status: not-supported
   test_results:

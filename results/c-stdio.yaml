@@ -13,6 +13,8 @@ declared_conformance_classes:
 - conf-class:calendar-date
 - conf-class:time-of-day
 - conf-class:date-and-time
+profiles_tested:
+- profile:iso-8601-1-core
 conformance_class_results:
 - conformance_class: conf-class:calendar-date
   status: failed

@@ -22,6 +22,10 @@ class ExecAdapter
     @declared_ccs ||= safe_call("declared_conformance_classes")
   end
 
+  def declared_profiles
+    @declared_profiles ||= safe_call("declared_profiles")
+  end
+
   def try_parse(expression, options = {})
     result = call("try_parse", "expression" => expression, "options" => options)
     unless result

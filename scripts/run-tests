@@ -182,6 +182,7 @@ class Runner
       "tester" => "run-tests script",
       "verification" => "automated",
       "declared_conformance_classes" => adapter.respond_to?(:declared_conformance_classes) ? adapter.declared_conformance_classes : nil,
+      "profiles_tested" => adapter.respond_to?(:declared_profiles) ? adapter.declared_profiles : nil,
       "conformance_class_results" => cc_results,
       "profile_results" => profile_results.empty? ? nil : profile_results
     }.compact
