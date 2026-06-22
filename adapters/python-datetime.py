@@ -165,10 +165,12 @@ def _try_strptime(expr):
 DECLARED_CONFORMANCE_CLASSES = [
     "conf-class:fundamentals",
     "conf-class:calendar-date",
-    "conf-class:ordinal-date",
-    "conf-class:week-date",
     "conf-class:time-of-day",
     "conf-class:date-and-time",
+]
+
+DECLARED_PROFILES = [
+    "profile:iso-8601-1-core",
 ]
 
 
@@ -183,6 +185,10 @@ def info(params):
 
 def declared_conformance_classes(params):
     return DECLARED_CONFORMANCE_CLASSES
+
+
+def declared_profiles(params):
+    return DECLARED_PROFILES
 
 
 def try_parse(params):
@@ -417,6 +423,7 @@ def run_arithmetic(params):
 METHODS = {
     "info": info,
     "declared_conformance_classes": declared_conformance_classes,
+    "declared_profiles": declared_profiles,
     "try_parse": try_parse,
     "extract_components": extract_components,
     "generate": generate,

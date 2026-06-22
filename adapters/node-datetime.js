@@ -34,7 +34,12 @@ function lookup(handle) {
 const DECLARED_CONFORMANCE_CLASSES = [
   "conf-class:fundamentals",
   "conf-class:calendar-date",
+  "conf-class:time-of-day",
   "conf-class:date-and-time",
+];
+
+const DECLARED_PROFILES = [
+  "profile:iso-8601-1-core",
 ];
 
 function info() {
@@ -47,6 +52,10 @@ function info() {
 
 function declaredConformanceClasses() {
   return DECLARED_CONFORMANCE_CLASSES;
+}
+
+function declaredProfiles() {
+  return DECLARED_PROFILES;
 }
 
 function tryParse(params) {
@@ -248,6 +257,7 @@ function runArithmetic() {
 const METHODS = {
   info,
   declared_conformance_classes: declaredConformanceClasses,
+  declared_profiles: declaredProfiles,
   try_parse: tryParse,
   extract_components: extractComponents,
   generate,

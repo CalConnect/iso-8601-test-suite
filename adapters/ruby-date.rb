@@ -33,14 +33,13 @@ class RubyDateAdapter
     %w[
       conf-class:fundamentals
       conf-class:calendar-date
-      conf-class:ordinal-date
-      conf-class:week-date
       conf-class:time-of-day
       conf-class:date-and-time
-      conf-class:duration
-      conf-class:time-interval
-      conf-class:recurring-time-interval
     ]
+  end
+
+  def declared_profiles
+    %w[profile:iso-8601-1-core]
   end
 
   # ── Parse an expression ────────────────────────────────────────────────

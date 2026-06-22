@@ -602,8 +602,6 @@ static bool equivalent(const std::string& ha, const std::string& hb) {
 static const char* DECLARED_CLASSES[] = {
     "conf-class:fundamentals",
     "conf-class:calendar-date",
-    "conf-class:ordinal-date",
-    "conf-class:week-date",
     "conf-class:time-of-day",
     "conf-class:date-and-time",
 };
@@ -626,6 +624,8 @@ int main() {
                     response += std::string("\"") + DECLARED_CLASSES[i] + "\"";
                 }
                 response += "]}";
+            } else if (method == "declared_profiles") {
+                response = "{\"result\":[\"profile:iso-8601-1-core\"]}";
             } else if (method == "try_parse") {
                 std::string expr = parse_json_string(line, "expression");
                 ParseResult pr = try_parse(expr);

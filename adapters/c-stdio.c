@@ -502,6 +502,8 @@ int main(void) {
             printf("{\"result\":{\"result\":\"not-supported\",\"notes\":\"C has no ISO 8601 arithmetic\"}}\n");
         } else if (strcmp(method, "declared_conformance_classes") == 0) {
             printf("{\"result\":[\"conf-class:fundamentals\",\"conf-class:calendar-date\",\"conf-class:time-of-day\",\"conf-class:date-and-time\"]}\n");
+        } else if (strcmp(method, "declared_profiles") == 0) {
+            printf("{\"result\":[\"profile:iso-8601-1-core\"]}\n");
         } else {
             printf("{\"error\":\"Unknown method: %s\"}\n", method);
         }

@@ -46,6 +46,10 @@ methods = {
     adapter.declared_conformance_classes
   },
 
+  "declared_profiles" => ->(_params) {
+    adapter.declared_profiles
+  },
+
   "try_parse" => ->(params) {
     result = adapter.try_parse(params["expression"], params["options"] || {})
     if result["valid"]
