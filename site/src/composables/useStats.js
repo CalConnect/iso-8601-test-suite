@@ -1,7 +1,7 @@
 // Shared stats computation functions.
 
 export function libStats(lib, reqs) {
-  let pass = 0, partial = 0, fail = 0, total = 0, notDeclared = 0;
+  let pass = 0, partial = 0, fail = 0, notSupported = 0, total = 0, notDeclared = 0;
   const targetIds = new Set((lib.target_profiles || []).map(p => p.id));
   reqs.forEach(r => {
     const caps = r.tests?.[lib.id];
@@ -13,10 +13,11 @@ export function libStats(lib, reqs) {
       total++;
       if (c.status === "pass") pass++;
       else if (c.status === "partial") partial++;
+      else if (c.status === "not-supported") notSupported++;
       else fail++;
     });
   });
-  return { pass, partial, fail, total, notDeclared, pct: total ? Math.round(pass / total * 100) : 0 };
+  return { pass, partial, fail, notSupported, total, notDeclared, pct: total ? Math.round(pass / total * 100) : 0 };
 }
 
 export function reqStats(req, libs) {
@@ -64,25 +65,54 @@ export function profileAdapterPct(adapterResult) {
 }
 
 export function pctColor(pct) {
-  if (pct >= 60) return "text-emerald-600 dark:text-emerald-400";
-  if (pct >= 30) return "text-amber-600 dark:text-amber-400";
-  return "text-red-500 dark:text-red-400";
+  if (pct >= 60) return "text-jade";
+  if (pct >= 30) return "text-amber";
+  return "text-rust";
 }
 
 export function pctBarColor(pct) {
-  if (pct >= 60) return "bg-emerald-500";
-  if (pct >= 30) return "bg-amber-500";
-  return "bg-red-500";
+  if (pct >= 60) return "bg-jade";
+  if (pct >= 30) return "bg-amber";
+  return "bg-rust";
 }
 
 export function profileBarColor(pct) {
-  if (pct >= 40) return "bg-emerald-500";
-  if (pct >= 15) return "bg-amber-500";
-  return "bg-red-500";
+  if (pct >= 40) return "bg-jade";
+  if (pct >= 15) return "bg-amber";
+  return "bg-rust";
 }
 
-export function overallDetermination(perLibrary) {
-  const statuses = perLibrary.map(l => l.status);
+export function meanPassPct(libs, reqs) {
+  let totalPass = 0, total = 0;
+  libs.forEach(lib => {
+    const s = libStats(lib, reqs);
+    totalPass += s.pass;
+    total += s.total;
+  });
+  return total ? Math.round((totalPass / total) * 100) : 0;
+}
+
+export function familyStatsByName(familyStats, name) {
+  if (!familyStats || !name) return null;
+  return familyStats.find(fs => fs.family === name) || null;
+}
+
+export function stabilityTone(stability) {
+  if (stability === "stable" || stability === "single") return "jade";
+  if (stability === "minor") return "amber";
+  return "rust";
+}
+
+export function stabilityLabel(fs) {
+  if (!fs) return "";
+  if (fs.stability === "single") return "single version";
+  if (fs.delta_count === 0) return "stable across versions";
+  if (fs.delta_count === 1) return "1 test diverges";
+  return `${fs.delta_count} tests diverge`;
+}
+
+export function overallDetermination(statuses) {
+  if (!statuses.length) return "none";
   if (statuses.every(s => s === "pass")) return "full";
   if (statuses.some(s => s === "pass" || s === "partial")) return "partial";
   return "none";

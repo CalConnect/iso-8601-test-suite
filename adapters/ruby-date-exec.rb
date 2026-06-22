@@ -2,12 +2,13 @@
 # frozen_string_literal: true
 
 # =============================================================================
-# Ruby 4.0 stdlib Date/DateTime/Time Adapter (JSON protocol)
+# Ruby stdlib Date/DateTime/Time Adapter (JSON protocol)
 # =============================================================================
-# Wraps RubyDateAdapter for the exec: protocol. Runs under Ruby 4.0 to test
-# the latest stdlib behavior against the ISO 8601 conformance test suite.
+# Wraps RubyDateAdapter for the exec: protocol. Version-agnostic — the Ruby
+# runtime that executes this file determines which stdlib version is under
+# test. ADAPTER_DEFS specifies which ruby binary invokes this file per entry.
 #
-# Usage: invoked via exec:~/.local/share/mise/installs/ruby/4.0.5/bin/ruby adapters/ruby-date-40.rb
+# Usage: invoked via exec:<path-to-ruby> adapters/ruby-date-exec.rb
 # =============================================================================
 
 require "json"
@@ -37,7 +38,8 @@ end
 
 methods = {
   "info" => ->(_params) {
-    { "name" => "Ruby 4.0 Date/DateTime/Time", "language" => adapter.language, "version" => adapter.version }
+    ruby_major_minor = RUBY_VERSION.split('.')[0..1].join('.')
+    { "name" => "Ruby #{ruby_major_minor} Date", "language" => adapter.language, "version" => adapter.version }
   },
 
   "declared_conformance_classes" => ->(_params) {
@@ -46,10 +48,10 @@ methods = {
 
   "try_parse" => ->(params) {
     result = adapter.try_parse(params["expression"], params["options"] || {})
-    if result[:valid]
-      { "valid" => true, "parsed" => store(result[:parsed]), "api" => result[:api] }
+    if result["valid"]
+      { "valid" => true, "parsed" => store(result["parsed"]), "api" => result["api"] }
     else
-      { "valid" => false, "error" => result[:error], "api" => result[:api] }
+      { "valid" => false, "error" => result["error"], "api" => result["api"] }
     end
   },
 
@@ -61,7 +63,7 @@ methods = {
 
   "generate" => ->(params) {
     result = adapter.generate(params["components"])
-    result ? { "expression" => result[:expression] } : nil
+    result ? { "expression" => result["expression"] } : nil
   },
 
   "equivalent" => ->(params) {

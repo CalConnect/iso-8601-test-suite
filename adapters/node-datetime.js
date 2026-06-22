@@ -31,95 +31,118 @@ function lookup(handle) {
 
 // ── Protocol methods ─────────────────────────────────────────────────────────
 
+const DECLARED_CONFORMANCE_CLASSES = [
+  "conf-class:fundamentals",
+  "conf-class:calendar-date",
+  "conf-class:date-and-time",
+];
+
 function info() {
   return {
-    name: "JavaScript Date",
+    name: `Node.js ${process.version} Date`,
     language: "javascript",
     version: process.version,
   };
 }
 
+function declaredConformanceClasses() {
+  return DECLARED_CONFORMANCE_CLASSES;
+}
+
 function tryParse(params) {
   const expr = params.expression;
-  // options.parse_mode is accepted but JS Date.parse is inherently
-  // undifferentiated (no format-specific parser in stdlib)
 
   // JS Date.parse only handles a narrow subset of ISO 8601.
-  // We test what it ACTUALLY supports — no manual parsing hacks.
 
-  // Try Date.parse (returns ms timestamp or NaN)
   const ms = Date.parse(expr);
   if (!Number.isNaN(ms)) {
     const d = new Date(ms);
-    return { valid: true, parsed: store(d), api: "Date.parse" };
+    const tzInfo = detectTimezone(expr);
+    return { valid: true, parsed: store({ date: d, tzInfo }), api: "Date.parse" };
   }
 
-  // Try new Date(string)
   try {
     const d = new Date(expr);
     if (!Number.isNaN(d.getTime())) {
-      return { valid: true, parsed: store(d), api: "new Date(string)" };
+      const tzInfo = detectTimezone(expr);
+      return { valid: true, parsed: store({ date: d, tzInfo }), api: "new Date(string)" };
     }
   } catch {}
 
   return { valid: false, error: "parse error", api: "Date.parse" };
 }
 
+function detectTimezone(expr) {
+  if (/[Zz]$/.test(expr)) {
+    return { sign: "+", hours: 0, minutes: 0 };
+  }
+  const m = expr.match(/([+-])(\d{2}):?(\d{2})$/);
+  if (m) {
+    return { sign: m[1], hours: parseInt(m[2], 10), minutes: parseInt(m[3], 10) };
+  }
+  return null;
+}
+
 function extractComponents(params) {
-  const obj = lookup(params.parsed);
-  if (!obj || !(obj instanceof Date) || Number.isNaN(obj.getTime())) {
+  const entry = lookup(params.parsed);
+  if (!entry || !(entry.date instanceof Date) || Number.isNaN(entry.date.getTime())) {
     return {};
+  }
+
+  const obj = entry.date;
+  const tz = entry.tzInfo;
+
+  // For expressions with timezone, compute wall-clock components at the
+  // original offset (Date.parse converts to UTC, losing the original time).
+  // For expressions without timezone, use local time methods.
+  let year, month, day, hour, minute, second;
+  if (tz) {
+    const offsetMs = (tz.sign === "-" ? -1 : 1) * (tz.hours * 60 + tz.minutes) * 60000;
+    const adjusted = new Date(obj.getTime() + offsetMs);
+    year = adjusted.getUTCFullYear();
+    month = adjusted.getUTCMonth() + 1;
+    day = adjusted.getUTCDate();
+    hour = adjusted.getUTCHours();
+    minute = adjusted.getUTCMinutes();
+    second = adjusted.getUTCSeconds();
+  } else {
+    year = obj.getFullYear();
+    month = obj.getMonth() + 1;
+    day = obj.getDate();
+    hour = obj.getHours();
+    minute = obj.getMinutes();
+    second = obj.getSeconds();
   }
 
   const result = {};
 
-  // Date objects always represent a moment in time (UTC-based internally)
-  // Local timezone methods give us calendar/date/time components
-  result.calendar = {
-    year: obj.getFullYear(),
-    month: obj.getMonth() + 1, // JS months are 0-indexed
-    day: obj.getDate(),
-  };
+  result.calendar = { year, month, day };
 
   // Day of year (ordinal)
-  const startOfYear = new Date(obj.getFullYear(), 0, 0);
-  const diff = obj - startOfYear;
+  const startOfYear = new Date(Date.UTC(year, 0, 0));
+  const diff = new Date(Date.UTC(year, month - 1, day)) - startOfYear;
   const oneDay = 1000 * 60 * 60 * 24;
   const dayOfYear = Math.floor(diff / oneDay);
-  result.ordinal = { year: obj.getFullYear(), day_of_year: dayOfYear };
+  result.ordinal = { year, day_of_year: dayOfYear };
 
-  // Week date — JS doesn't natively provide ISO week number,
-  // but we can compute it
-  const d = new Date(Date.UTC(obj.getFullYear(), obj.getMonth(), obj.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNum = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  // Week date — compute from the calendar date
+  const wd = new Date(Date.UTC(year, month - 1, day));
+  const dayNum = wd.getUTCDay() || 7;
+  wd.setUTCDate(wd.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(wd.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil(((wd - yearStart) / 86400000 + 1) / 7);
   result.week = {
-    week_year: d.getUTCFullYear(),
+    week_year: wd.getUTCFullYear(),
     week: weekNum,
     day_of_week: dayNum,
   };
 
   // Time components
-  const time = {
-    hour: obj.getHours(),
-    minute: obj.getMinutes(),
-    second: obj.getSeconds(),
-  };
-
-  // UTC offset — getTimezoneOffset returns minutes WEST of UTC (negative for east)
-  const offsetMin = obj.getTimezoneOffset();
-  if (offsetMin !== 0) {
-    const absOffset = Math.abs(offsetMin);
-    time.utc_offset = {
-      sign: offsetMin > 0 ? "-" : "+",
-      hours: Math.floor(absOffset / 60),
-      minutes: absOffset % 60,
-    };
+  const timeEntry = { hour, minute, second };
+  if (tz) {
+    timeEntry.utc_offset = { sign: tz.sign, hours: tz.hours, minutes: tz.minutes };
   }
-
-  result.time = time;
+  result.time = timeEntry;
 
   return result;
 }
@@ -205,8 +228,10 @@ function equivalent(params) {
   const a = lookup(params.parsed_a);
   const b = lookup(params.parsed_b);
   if (!a || !b) return null;
-  if (a instanceof Date && b instanceof Date) {
-    return a.getTime() === b.getTime();
+  const da = a.date || a;
+  const db = b.date || b;
+  if (da instanceof Date && db instanceof Date) {
+    return da.getTime() === db.getTime();
   }
   return null;
 }
@@ -222,6 +247,7 @@ function runArithmetic() {
 
 const METHODS = {
   info,
+  declared_conformance_classes: declaredConformanceClasses,
   try_parse: tryParse,
   extract_components: extractComponents,
   generate,

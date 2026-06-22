@@ -1,5 +1,5 @@
 <script setup>
-import { statusColor } from "../composables/useStatus";
+import { statusColor, statusBg, statusIcon } from "../composables/useStatus";
 import { typeLabel, trunc, formatValue } from "../composables/useFormat";
 
 const props = defineProps({
@@ -11,62 +11,64 @@ const emit = defineEmits(["close"]);
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" @click.self="emit('close')">
-    <div class="bg-gray-900 border border-gray-800 rounded-xl w-[94%] max-w-[620px] max-h-[85vh] overflow-y-auto shadow-2xl">
-      <div class="sticky top-0 bg-gray-800 px-5 py-3 border-b border-gray-700 flex justify-between items-start z-10">
-        <h3 class="font-mono text-sm text-blue-600 dark:text-blue-400 font-semibold">{{ detail.rid.replace('req:', '') }}</h3>
-        <button @click="emit('close')" class="w-7 h-7 rounded-md border border-gray-700 text-gray-500 hover:text-gray-200 hover:border-gray-500 flex items-center justify-center text-base transition-colors">&times;</button>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 backdrop-blur-sm" @click.self="emit('close')">
+    <div class="bg-paper border border-rule w-[94%] max-w-[620px] max-h-[85vh] overflow-y-auto shadow-2xl">
+      <div class="sticky top-0 bg-surface px-5 py-3 border-b border-rule flex justify-between items-start z-10">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="font-mono text-xs text-accent">{{ detail.rid.replace('req:', '') }}</span>
+          <span class="clause-label">{{ detail.lid }}</span>
+        </div>
+        <button @click="emit('close')"
+          class="w-7 h-7 border border-rule text-ink-faint hover:text-ink hover:border-accent/50 flex items-center justify-center text-base transition-colors">&times;</button>
       </div>
       <div class="px-5 py-4">
-        <div class="flex flex-wrap gap-4 text-xs text-gray-500 mb-4">
-          <span>Library: <strong class="text-gray-400">{{ detail.lid }}</strong></span>
-          <span>Type: <strong class="text-gray-400">{{ typeLabel(detail.ctype) }}</strong></span>
-          <span v-if="detail.c">Result: <strong class="text-gray-400">{{ detail.c.pass }}/{{ detail.c.total }}</strong></span>
+        <div class="flex flex-wrap gap-4 mb-4">
+          <span class="clause-label">Type: <strong class="text-ink-muted">{{ typeLabel(detail.ctype) }}</strong></span>
+          <span v-if="detail.c" class="clause-label">Result: <strong class="text-ink-muted tabular-nums">{{ detail.c.pass }}/{{ detail.c.total }}</strong></span>
         </div>
 
-        <p v-if="!detail.c?.details?.length" class="text-gray-500 text-sm">No tests for this capability.</p>
+        <p v-if="!detail.c?.details?.length" class="clause-label py-6 text-center">No tests for this capability.</p>
 
-        <div v-else class="border-t border-gray-800">
-          <div v-for="d in detail.c.details" :key="d.test_id" class="py-3 border-b border-gray-800/50 last:border-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="font-mono text-[11px] text-gray-500">{{ d.test_id.replace('conf-test:', '') }}</span>
-              <span class="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded" :class="{
-                'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': d.result === 'pass',
-                'bg-red-500/10 text-red-500 dark:text-red-400': d.result === 'fail',
-                'bg-gray-700/30 text-gray-500': d.result === 'not-supported',
-              }">{{ d.result }}</span>
+        <div v-else class="border-t border-rule">
+          <div v-for="d in detail.c.details" :key="d.test_id" class="py-3 border-b border-rule-soft last:border-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="font-mono text-xs text-ink">{{ d.test_id.replace('conf-test:', '') }}</span>
+              <span :class="['pill', statusBg(d.result)]">
+                <span>{{ statusIcon(d.result) }}</span>
+                <span>{{ d.result }}</span>
+              </span>
             </div>
-            <div v-if="d.description" class="text-xs text-gray-500">{{ d.description }}</div>
+            <div v-if="d.description" class="text-sm text-ink-muted">{{ d.description }}</div>
 
-            <div v-if="d.given?.expression || d.given?.components || d.given?.expression_a || d.actual" class="mt-2 bg-gray-950 border border-gray-800 rounded-md p-3 font-mono text-xs">
+            <div v-if="d.given?.expression || d.given?.components || d.given?.expression_a || d.actual" class="mt-2 surface-2 p-3 font-mono text-xs space-y-2">
               <div v-if="d.given?.expression">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Input</div>
-                <div class="text-blue-600 dark:text-blue-300">{{ d.given.expression }}</div>
+                <div class="clause-label mb-0.5">Input</div>
+                <div class="text-steel">{{ d.given.expression }}</div>
               </div>
               <div v-if="d.given?.expression_a">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Input</div>
-                <div class="text-blue-600 dark:text-blue-300">{{ d.given.expression_a }} ≡ {{ d.given.expression_b }}</div>
+                <div class="clause-label mb-0.5">Input</div>
+                <div class="text-steel">{{ d.given.expression_a }} ≡ {{ d.given.expression_b }}</div>
               </div>
               <div v-if="d.given?.components">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Components</div>
-                <pre class="text-blue-600/80 dark:text-blue-300/80 text-[10px] whitespace-pre-wrap">{{ JSON.stringify(d.given.components, null, 2) }}</pre>
+                <div class="clause-label mb-0.5">Components</div>
+                <pre class="text-steel/80 text-[11px] whitespace-pre-wrap">{{ JSON.stringify(d.given.components, null, 2) }}</pre>
               </div>
-              <div v-if="d.expect?.expression" class="mt-2">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Expected</div>
-                <div class="text-emerald-600 dark:text-emerald-400">{{ d.expect.expression }}</div>
+              <div v-if="d.expect?.expression">
+                <div class="clause-label mb-0.5">Expected</div>
+                <div class="text-jade">{{ d.expect.expression }}</div>
               </div>
-              <div v-if="d.expect?.valid !== undefined && !d.expect?.expression" class="mt-2">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Expected</div>
-                <pre class="text-emerald-600/80 dark:text-emerald-400/80 text-[10px] whitespace-pre-wrap">{{ JSON.stringify(d.expect, null, 2) }}</pre>
+              <div v-if="d.expect?.valid !== undefined && !d.expect?.expression">
+                <div class="clause-label mb-0.5">Expected</div>
+                <pre class="text-jade/80 text-[11px] whitespace-pre-wrap">{{ JSON.stringify(d.expect, null, 2) }}</pre>
               </div>
-              <div v-if="d.actual" class="mt-2">
-                <div class="text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Actual</div>
-                <pre class="text-gray-400 text-[10px] whitespace-pre-wrap">{{ JSON.stringify(d.actual, null, 2) }}</pre>
+              <div v-if="d.actual">
+                <div class="clause-label mb-0.5">Actual</div>
+                <pre class="text-ink-muted text-[11px] whitespace-pre-wrap">{{ JSON.stringify(d.actual, null, 2) }}</pre>
               </div>
             </div>
 
-            <div v-if="d.api" class="font-mono text-[10px] text-gray-600 mt-1">{{ d.api }}</div>
-            <div v-if="d.notes" class="text-[11px] text-amber-600/80 dark:text-amber-500/80 mt-1">{{ d.notes }}</div>
+            <div v-if="d.api" class="font-mono text-xs text-ink-faint mt-2">{{ d.api }}</div>
+            <div v-if="d.notes" class="text-sm text-amber mt-1">{{ d.notes }}</div>
           </div>
         </div>
       </div>

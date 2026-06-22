@@ -5,7 +5,7 @@ implementation:
   name: Ruby Date/DateTime/Time
   language: ruby
   version: 3.4.8
-date: '2026-05-31'
+date: '2026-06-22'
 tester: run-tests script
 verification: automated
 declared_conformance_classes:
@@ -48,8 +48,7 @@ conformance_class_results:
   - test: conf-test:cal-date-parse-012
     result: fail
   - test: conf-test:cal-date-gen-001
-    result: fail
-    notes: Expected '19850412'
+    result: pass
   - test: conf-test:cal-date-gen-002
     result: pass
   - test: conf-test:cal-date-gen-003
@@ -161,16 +160,13 @@ conformance_class_results:
     result: fail
     notes: Component mismatch
   - test: conf-test:date-time-gen-001
-    result: fail
-    notes: Expected '19850412T232030'
+    result: pass
   - test: conf-test:date-time-gen-002
     result: pass
   - test: conf-test:date-time-gen-003
-    result: fail
-    notes: Expected '19850412T232030+0400'
+    result: pass
   - test: conf-test:date-time-gen-004
-    result: fail
-    notes: Expected '1985-04-12T23:20:30+04:00'
+    result: pass
   - test: conf-test:date-time-valid-001
     result: fail
     notes: Expected false, got true
@@ -394,8 +390,7 @@ conformance_class_results:
   - test: conf-test:ord-date-parse-007
     result: pass
   - test: conf-test:ord-date-gen-001
-    result: fail
-    notes: Expected '1985102'
+    result: pass
   - test: conf-test:ord-date-gen-002
     result: pass
   - test: conf-test:ord-date-gen-003
@@ -632,14 +627,12 @@ conformance_class_results:
     result: fail
     notes: Expected 'T152746+0100'
   - test: conf-test:time-gen-008
-    result: fail
-    notes: Expected '15:27:46+01:00'
+    result: pass
   - test: conf-test:time-gen-009
     result: fail
     notes: Expected 'T152746-0500'
   - test: conf-test:time-gen-010
-    result: fail
-    notes: Expected '15:27:46-05:00'
+    result: pass
   - test: conf-test:time-valid-001
     result: pass
   - test: conf-test:time-valid-002
@@ -678,8 +671,7 @@ conformance_class_results:
     result: fail
     notes: Component mismatch
   - test: conf-test:week-date-gen-001
-    result: fail
-    notes: Expected '1985W155'
+    result: pass
   - test: conf-test:week-date-gen-002
     result: pass
   - test: conf-test:week-date-gen-003

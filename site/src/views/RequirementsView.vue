@@ -23,10 +23,10 @@ function statsFor(filterFn) {
   return { count, pass, total, pct: total ? Math.round(pass / total * 100) : 0 };
 }
 
-function pctColor(pct) {
-  if (pct >= 60) return "text-emerald-400";
-  if (pct >= 30) return "text-amber-400";
-  return "text-red-400";
+function pctTone(pct) {
+  if (pct >= 60) return "text-jade";
+  if (pct >= 30) return "text-amber";
+  return "text-rust";
 }
 
 const standards = computed(() => [
@@ -36,8 +36,6 @@ const standards = computed(() => [
     title: "ISO 8601-1:2026",
     subtitle: "Representations",
     description: "Calendar dates, ordinal dates, week dates, time of day, date-time combinations, time intervals, durations, and recurring time intervals.",
-    dot: "bg-[#e3000f]",
-    accent: "from-[#e3000f]/5",
     ...statsFor(r => r.part === "1"),
   },
   {
@@ -46,8 +44,6 @@ const standards = computed(() => [
     title: "ISO 8601-2:2026",
     subtitle: "Extensions",
     description: "Extended time intervals, grouped time scale units, set representation, qualification of uncertainty, seasons, date-time selection, arithmetic, and more.",
-    dot: "bg-blue-500",
-    accent: "from-blue-500/5",
     ...statsFor(r => r.part === "2"),
   },
 ]);
@@ -62,82 +58,103 @@ const profileCards = computed(() => props.profiles.map(p => {
     subtitle: null,
     description: p.description,
     logo: p.logo,
-    dot: "bg-amber-500",
-    accent: "from-amber-500/5",
     ...s,
   };
 }));
 </script>
 
 <template>
-  <div class="max-w-[1400px] mx-auto px-4 md:px-8 py-8">
-    <div class="text-center pb-8 mb-8 border-b border-gray-800/60">
-      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
-        ISO 8601 <span class="text-[#e3000f]">Requirements</span>
-      </h1>
-      <p class="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
-        {{ reqs.length }} normative requirements from ISO 8601-1, ISO 8601-2, and registered profiles. Select a section to browse.
-      </p>
-    </div>
+  <div class="max-w-[1400px] mx-auto px-4 md:px-8 py-10 md:py-14">
+
+    <!-- Hero -->
+    <section class="relative mb-12">
+      <div class="iso-watermark hidden md:block">
+        <span style="top: 14%; left: 12%;">§ 5.2.2.1</span>
+        <span style="top: 58%; right: 16%;">iso:8601:-1:ed-1:en</span>
+        <span style="top: 78%; left: 38%;">req-class:date-cal</span>
+      </div>
+      <div class="relative">
+        <div class="flex items-baseline gap-3 mb-6">
+          <span class="clause-label clause-label-accent">§ 00</span>
+          <span class="clause-label">Normative reference</span>
+        </div>
+        <h1 class="display-hero text-4xl md:text-6xl mb-4">
+          ISO 8601 <em>requirements</em>.
+        </h1>
+        <p class="text-ink-soft text-base md:text-lg max-w-2xl leading-relaxed">
+          {{ reqs.length }} normative requirements from ISO 8601-1, ISO 8601-2, and registered profiles.
+          Select a section to browse.
+        </p>
+      </div>
+    </section>
 
     <!-- ISO Standards -->
-    <div class="mb-8">
-      <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pl-1">ISO Standards</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <section class="mb-12">
+      <div class="section-header">
+        <span class="section-number">§ 01</span>
+        <h2 class="section-title">ISO standards</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <button
           v-for="s in standards"
           :key="s.slug"
           @click="emit('navigate', '/requirements/' + s.slug)"
-          class="text-left bg-gradient-to-br border border-gray-800/60 rounded-xl p-5 transition-all hover:border-gray-600"
-          :class="s.accent"
+          class="surface surface-hover text-left p-6 cursor-pointer"
         >
-          <div class="flex items-center gap-2 mb-2">
-            <span class="w-2 h-2 rounded-full" :class="s.dot"></span>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">{{ s.label }}</span>
+          <div class="flex items-baseline gap-3 mb-3">
+            <span class="font-mono text-xs text-accent border border-accent/40 px-2 py-0.5">{{ s.label }}</span>
+            <span class="clause-label">{{ s.subtitle }}</span>
           </div>
-          <h3 class="text-lg font-extrabold text-gray-100">{{ s.title }}</h3>
-          <div v-if="s.subtitle" class="text-sm text-gray-400">{{ s.subtitle }}</div>
-          <p class="text-[11px] text-gray-500 leading-relaxed mt-2 mb-4">{{ s.description }}</p>
-          <div class="flex items-center gap-3">
-            <span class="text-lg font-extrabold tabular-nums text-gray-100">{{ s.count }}</span>
-            <span class="text-[11px] text-gray-500">requirements</span>
+          <h3 class="font-display text-3xl text-ink mb-2">{{ s.title }}</h3>
+          <p class="text-sm text-ink-muted leading-relaxed mt-2 mb-4">{{ s.description }}</p>
+          <div class="flex items-center gap-3 mb-2">
+            <span class="font-display text-2xl tabular-nums text-ink">{{ s.count }}</span>
+            <span class="clause-label">requirements</span>
           </div>
-          <div class="flex items-center gap-2 mt-2">
-            <div class="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full" :class="pctBarColor(s.pct)" :style="{ width: s.pct + '%' }"></div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 cap-bar">
+              <div class="cap-bar-fill"
+                :class="pctBarColor(s.pct).replace('bg-', '')"
+                :style="{ width: s.pct + '%' }"></div>
             </div>
-            <span :class="['text-sm font-bold tabular-nums', pctColor(s.pct)]">{{ s.pct }}%</span>
+            <span class="font-mono text-sm tabular-nums" :class="pctTone(s.pct)">{{ s.pct }}%</span>
           </div>
         </button>
       </div>
-    </div>
+    </section>
 
     <!-- Profiles -->
-    <div>
-      <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pl-1">Profiles</h2>
+    <section>
+      <div class="section-header">
+        <span class="section-number">§ 02</span>
+        <h2 class="section-title">Profiles</h2>
+        <span class="section-meta">{{ profileCards.length }} subsets</span>
+      </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <button
           v-for="p in profileCards"
           :key="p.slug"
           @click="emit('navigate', '/requirements/' + p.slug)"
-          class="text-left bg-gray-900/50 border border-gray-800/60 rounded-xl p-4 transition-all hover:border-gray-600"
+          class="surface surface-hover text-left p-4 cursor-pointer"
         >
-          <div class="flex items-center gap-2 mb-2">
-            <img v-if="p.logo" :src="p.logo" :alt="p.label" class="w-5 h-5 rounded opacity-80" />
-            <span class="text-[12px] font-bold text-gray-200 truncate">{{ p.label }}</span>
+          <div class="flex items-center gap-2 mb-3">
+            <img v-if="p.logo" :src="p.logo" :alt="p.label" class="w-5 h-5 opacity-90" />
+            <span class="font-display text-base text-ink truncate">{{ p.label }}</span>
           </div>
-          <p class="text-[10px] text-gray-500 leading-relaxed line-clamp-2 mb-3">{{ p.description }}</p>
+          <p class="text-xs text-ink-muted leading-relaxed line-clamp-2 mb-3">{{ p.description }}</p>
           <div class="flex items-center gap-2">
-            <span class="text-sm font-extrabold tabular-nums text-gray-200">{{ p.count }}</span>
-            <span class="text-[10px] text-gray-500">requirements</span>
+            <span class="font-mono text-base tabular-nums text-ink">{{ p.count }}</span>
+            <span class="clause-label">reqs</span>
             <div class="flex-1"></div>
-            <div class="w-12 h-1 bg-gray-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full" :class="pctBarColor(p.pct)" :style="{ width: p.pct + '%' }"></div>
+            <div class="w-12 cap-bar">
+              <div class="cap-bar-fill"
+                :class="pctBarColor(p.pct).replace('bg-', '')"
+                :style="{ width: p.pct + '%' }"></div>
             </div>
-            <span :class="['text-[10px] font-bold tabular-nums', pctColor(p.pct)]">{{ p.pct }}%</span>
+            <span class="font-mono text-xs tabular-nums" :class="pctTone(p.pct)">{{ p.pct }}%</span>
           </div>
         </button>
       </div>
-    </div>
+    </section>
   </div>
 </template>

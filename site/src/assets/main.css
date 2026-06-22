@@ -1,35 +1,568 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light mode: inverted gray scale so existing dark-mode classes auto-adapt.
-   gray-950 = white (page bg), gray-100 = near-black (text), etc. */
-:root {
-  color-scheme: light;
-  --color-gray-50: #030712;
-  --color-gray-100: #111827;
-  --color-gray-200: #1f2937;
-  --color-gray-300: #374151;
-  --color-gray-400: #4b5563;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #9ca3af;
-  --color-gray-700: #d1d5db;
-  --color-gray-800: #e5e7eb;
-  --color-gray-900: #f3f4f6;
-  --color-gray-950: #f9fafb;
+/* ─────────────────────────────────────────────────────────────────────────
+   ISO 8601 Test Suite — Design System
+   Aesthetic: Engineering instrument × standards document.
+   - Dark canvas with single sodium-amber accent (default mode)
+   - Saira Semi-Condensed (display), Saira (body), JetBrains Mono (data)
+   - Hairline rules, square corners, mono-forward labels
+   - Numerical section labels (§ 01) like standards documentation
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --font-display: "Saira Semi-Condensed", system-ui, sans-serif;
+  --font-sans: "Saira", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
 }
 
-/* Dark mode: standard Tailwind grays */
+/* ── Light mode: warm paper instrument ─────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* Paper */
+  --color-paper:        #F4EFE0;
+  --color-paper-2:      #EBE5D2;
+  --color-surface:      #FBF8EE;
+  --color-surface-2:    #EFE9D6;
+
+  /* Ink */
+  --color-ink:          #1A1812;
+  --color-ink-soft:     #3A352B;
+  --color-ink-muted:    #6C6557;
+  --color-ink-faint:    #9C9482;
+
+  /* Hairlines */
+  --color-rule:         #D8CFB8;
+  --color-rule-soft:    #E8E0CC;
+
+  /* Signals */
+  --color-accent:       #A86C00;  /* sodium amber, deepened for paper */
+  --color-accent-soft:  #6B4A00;
+  --color-jade:         #5A7826;  /* lime pass */
+  --color-jade-soft:    #8FA84A;
+  --color-steel:        #2A6A7A;  /* cyan info */
+  --color-rust:         #B83920;  /* fail */
+  --color-amber:        #A86C00;  /* partial = sodium amber */
+
+  /* Warm gray ramp (inverted under dark mode) */
+  --color-gray-50:  #FBF8EE;
+  --color-gray-100: #F4EFE0;
+  --color-gray-200: #EBE5D2;
+  --color-gray-300: #D8CFB8;
+  --color-gray-400: #B8B2A1;
+  --color-gray-500: #9C9482;
+  --color-gray-600: #6C6557;
+  --color-gray-700: #4A4538;
+  --color-gray-800: #2A251C;
+  --color-gray-900: #1A1812;
+  --color-gray-950: #0E0F0C;
+}
+
+/* ── Dark mode (default): engineering console ──────────────────────────── */
 .dark {
   color-scheme: dark;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-  --color-gray-950: #030712;
+
+  /* Canvas */
+  --color-paper:        #0E0F0C;
+  --color-paper-2:      #08090A;
+  --color-surface:      #161813;
+  --color-surface-2:    #1D1F18;
+
+  /* Ink (warm cream-white) */
+  --color-ink:          #F4EFE0;
+  --color-ink-soft:     #B8B2A1;
+  --color-ink-muted:    #7C7565;
+  --color-ink-faint:    #4A4538;
+
+  /* Hairlines */
+  --color-rule:         #2D3026;
+  --color-rule-soft:    #1F1E16;
+
+  /* Signals */
+  --color-accent:       #FFB000;  /* sodium amber */
+  --color-accent-soft:  #B07900;
+  --color-jade:         #C7E562;  /* lime pass */
+  --color-jade-soft:    #6B8A2A;
+  --color-steel:        #6FC8D8;
+  --color-rust:         #FF5A36;  /* red-orange fail */
+  --color-amber:        #FFB000;  /* partial = sodium amber */
+
+  --color-gray-50:  #0E0F0C;
+  --color-gray-100: #161813;
+  --color-gray-200: #1D1F18;
+  --color-gray-300: #2D3026;
+  --color-gray-400: #4A4538;
+  --color-gray-500: #7C7565;
+  --color-gray-600: #9C9482;
+  --color-gray-700: #B8B2A1;
+  --color-gray-800: #D8D2BF;
+  --color-gray-900: #EBE5D2;
+  --color-gray-950: #F4EFE0;
+}
+
+/* ── Map semantic tokens to Tailwind colors ────────────────────────────── */
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-2: var(--color-paper-2);
+  --color-surface: var(--color-surface);
+  --color-surface-2: var(--color-surface-2);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-rule: var(--color-rule);
+  --color-rule-soft: var(--color-rule-soft);
+  --color-accent: var(--color-accent);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-jade: var(--color-jade);
+  --color-steel: var(--color-steel);
+  --color-rust: var(--color-rust);
+  --color-amber: var(--color-amber);
+}
+
+/* ── Body defaults ─────────────────────────────────────────────────────── */
+html, body {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "kern", "liga";
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular figures everywhere they matter */
+.tabular-nums,
+table,
+.stat-figure,
+.live-clock,
+.mono-data {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Display utilities ─────────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--font-display);
+  font-feature-settings: "tnum", "kern";
+  letter-spacing: -0.005em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum", "zero";
+}
+
+/* ── Section labels — `§ 01 — Implementations` ────────────────────────── */
+.clause-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+
+.clause-label-accent {
+  color: var(--color-accent);
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-rule);
+  margin-bottom: 1.5rem;
+}
+
+.section-header .section-number {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-accent);
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.section-header .section-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  line-height: 1;
+}
+
+.section-header .section-meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-ink-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Surface card (hairline-only border, no radius) ───────────────────── */
+.surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 0;
+}
+
+.surface-2 {
+  background: var(--color-surface-2);
+}
+
+.surface-hover {
+  transition: border-color 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              background 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              box-shadow 320ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.surface-hover:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  background: var(--color-surface-2);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 14%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent),
+    0 12px 36px -14px color-mix(in srgb, var(--color-accent) 60%, transparent),
+    0 2px 8px -2px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+/* ── Stat figure ──────────────────────────────────────────────────────── */
+.stat-figure {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 3rem;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  color: var(--color-ink);
+}
+
+.stat-figure-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 2.5rem;
+  letter-spacing: -0.02em;
+}
+
+/* ── Hairline rules ───────────────────────────────────────────────────── */
+.rule-h {
+  border-top: 1px solid var(--color-rule);
+}
+
+.rule-v {
+  border-left: 1px solid var(--color-rule);
+}
+
+/* ── Display headline (hero) ──────────────────────────────────────────── */
+.display-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  font-feature-settings: "tnum", "kern";
+}
+
+.display-hero em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+/* ── Status pills (hairline border, square) ───────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.pill-pass { color: var(--color-jade); }
+.pill-fail { color: var(--color-rust); }
+.pill-partial { color: var(--color-amber); }
+.pill-info { color: var(--color-steel); }
+.pill-muted { color: var(--color-ink-faint); }
+
+/* ── Capability bar (2px hairline progress) ──────────────────────────── */
+.cap-bar {
+  position: relative;
+  height: 2px;
+  background: var(--color-rule);
+  overflow: hidden;
+}
+
+.cap-bar-fill {
+  height: 100%;
+  background: var(--color-ink);
+  transform-origin: left center;
+  animation: cap-bar-grow 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition: width 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes cap-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.cap-bar-fill.pass { background: var(--color-jade); }
+.cap-bar-fill.partial { background: var(--color-amber); }
+.cap-bar-fill.fail { background: var(--color-rust); }
+
+/* ── Stability indicator (family-level version divergence) ───────────── */
+.stability-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.625rem;
+  border: 1px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stability-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.stability-stable { color: var(--color-jade); }
+.stability-single { color: var(--color-ink-faint); }
+.stability-minor  { color: var(--color-amber); }
+.stability-divergent { color: var(--color-rust); }
+
+.delta-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  background: color-mix(in srgb, var(--color-amber) 16%, transparent);
+  color: var(--color-amber);
+  border: 1px solid color-mix(in srgb, var(--color-amber) 38%, transparent);
+  line-height: 1;
+}
+
+.version-divergent {
+  border-color: color-mix(in srgb, var(--color-amber) 35%, var(--color-rule));
+  background:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-amber) 6%, transparent) 0%,
+      transparent 30%
+    ),
+    var(--color-surface);
+}
+
+/* ── Micro-tag ────────────────────────────────────────────────────────── */
+.micro-tag {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-faint);
+  text-transform: uppercase;
+}
+
+/* ── Live clock (topbar) ──────────────────────────────────────────────── */
+.live-clock {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum", "zero";
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes clock-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+.clock-blink {
+  display: inline-block;
+  animation: clock-blink 1s steps(1, end) infinite;
+  color: var(--color-accent);
+  margin: 0 1px;
+}
+
+@keyframes motd-fade {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.motd-enter {
+  animation: motd-fade 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.85); }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Entrance animation ──────────────────────────────────────────────── */
+@keyframes editorial-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.view-enter {
+  animation: editorial-fade 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.view-enter > * {
+  animation: editorial-fade 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.view-enter > *:nth-child(1) { animation-delay: 50ms; }
+.view-enter > *:nth-child(2) { animation-delay: 100ms; }
+.view-enter > *:nth-child(3) { animation-delay: 150ms; }
+.view-enter > *:nth-child(4) { animation-delay: 200ms; }
+.view-enter > *:nth-child(5) { animation-delay: 250ms; }
+.view-enter > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ── Decorative ISO 8601 watermark ───────────────────────────────────── */
+.iso-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.iso-watermark span {
+  position: absolute;
+  font-family: var(--font-mono);
+  color: var(--color-ink);
+  opacity: 0.04;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.dark .iso-watermark span {
+  opacity: 0.05;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-accent);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 0;
+  transition: opacity 180ms ease;
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border-radius: 0;
+  background: transparent;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+table.editorial {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+table.editorial thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--color-rule);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.625rem;
+}
+
+table.editorial tbody td {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--color-rule-soft);
+  color: var(--color-ink);
+  vertical-align: top;
+}
+
+table.editorial tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.editorial tbody tr:hover td {
+  background: var(--color-surface-2);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule);
+  border: 2px solid var(--color-paper);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-muted);
+}
+
+/* ── Selection ────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper);
 }

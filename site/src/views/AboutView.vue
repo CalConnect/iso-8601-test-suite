@@ -1,176 +1,195 @@
 <script setup>
 const emit = defineEmits(["navigate"]);
+
+const audiences = [
+  {
+    key: "standards-authors",
+    title: "Standards authors",
+    blurb:
+      "ISO/TC 154, CalConnect TC DATETIME, or anyone reviewing the standard. Use the suite to spot ambiguous normative text via cross-implementation failure clusters.",
+    docSlug: "standards-authors",
+    dashboardPath: "/matrix",
+    dashboardLabel: "Open the capability matrix",
+    clause: "§ A.01",
+  },
+  {
+    key: "implementers",
+    title: "Library maintainers",
+    blurb:
+      "You write or maintain a date/time library. Find out what your library conforms to, where it fails, and how to fix common patterns.",
+    docSlug: "implementers",
+    dashboardPath: "/implementations",
+    dashboardLabel: "Browse implementations",
+    clause: "§ A.02",
+  },
+  {
+    key: "profile-authors",
+    title: "Profile authors",
+    blurb:
+      "You maintain RFC 3339, W3C Datetime, EDTF, or your own subset. Learn how to formalize a profile and check its interoperability.",
+    docSlug: "profile-authors",
+    dashboardPath: "/profiles",
+    dashboardLabel: "See profile results",
+    clause: "§ A.03",
+  },
+  {
+    key: "application-developers",
+    title: "Application developers",
+    blurb:
+      "You're choosing a date/time library for a project. See what ISO 8601 conformance means in practice and which libraries to rely on per use case.",
+    docSlug: "application-developers",
+    dashboardPath: "/implementations",
+    dashboardLabel: "Compare libraries",
+    clause: "§ A.04",
+  },
+  {
+    key: "contributors",
+    title: "Contributors",
+    blurb:
+      "You want to add a test, fix a bug, or write an adapter. Task index, conventions, and the path from change to merged PR.",
+    docSlug: "contributors",
+    dashboardPath: "/methodology",
+    dashboardLabel: "Read the methodology",
+    clause: "§ A.05",
+  },
+  {
+    key: "curious",
+    title: "Just curious",
+    blurb:
+      "You want the one-minute tour of what ISO 8601 covers and how libraries implement it. Start at the dashboard, then dive deeper when ready.",
+    docSlug: null,
+    dashboardPath: "/",
+    dashboardLabel: "Open the dashboard",
+    clause: "§ A.06",
+  },
+];
+
+const concepts = [
+  { slug: "conformance-model", title: "The conformance model", sub: "Requirements, classes, profiles, declared vs. not-declared" },
+  { slug: "test-types", title: "Test types", sub: "Validity, parsing, generation, equivalence, arithmetic, round-trip" },
+  { slug: "identifier-scheme", title: "Identifier scheme", sub: "CURIE-style local IDs and RFC 5141 URN clause references" },
+];
 </script>
 
 <template>
-  <div class="max-w-[900px] mx-auto px-4 md:px-8 py-8">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-8 py-10 md:py-14">
+
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-gray-500 mb-6">
-      <button @click="emit('navigate', '/')" class="hover:text-gray-300 transition-colors">Dashboard</button>
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-      <span class="text-gray-400">About</span>
+    <div class="flex items-center gap-2 mb-8 flex-wrap">
+      <button @click="emit('navigate', '/')" class="clause-label hover:text-accent transition-colors">Dashboard</button>
+      <svg class="w-3 h-3 text-ink-faint" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      <span class="clause-label clause-label-accent">About</span>
     </div>
 
-    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
-      About the ISO 8601 <span class="text-[#e3000f]">Test Suite</span>
-    </h1>
-
-    <div class="text-sm text-gray-400 leading-relaxed space-y-5 mt-6">
-      <!-- What is this? -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          What Is This?
-        </h2>
-        <p class="mb-3">
-          This is the <strong class="text-gray-200">CalConnect TC DATETIME</strong> machine-readable
-          conformance test suite for the ISO 8601 family of date/time standards, developed as joint
-          work with <strong class="text-gray-200">ISO/TC 154/WG 5</strong>.
-        </p>
-        <p>
-          It provides automated testing for any implementation that parses, generates, validates,
-          or computes ISO 8601 date/time expressions — regardless of programming language. The test
-          suite covers ISO 8601-1:2026 (Basic rules) and ISO 8601-2:2026 (Extensions).
-        </p>
+    <!-- Hero -->
+    <section class="relative mb-16">
+      <div class="iso-watermark hidden md:block">
+        <span style="top: 12%; left: 8%;">2026-04-12T23:20:30Z</span>
+        <span style="top: 70%; right: 12%;">CalConnect / TC DATETIME</span>
       </div>
-
-      <!-- Data model -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          Data Model
-        </h2>
-        <p class="mb-3">
-          The test suite follows the
-          <a href="https://www.ogc.org/standards/modspec" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors">OGC ModSpec</a>
-          terminology:
-        </p>
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs">
-            <tbody>
-              <tr class="border-b border-gray-800/30">
-                <td class="py-1.5 pr-4 font-bold text-gray-300 w-44">Requirement</td>
-                <td class="py-1.5 text-gray-400">An atomic testable criterion (a normative "shall" statement)</td>
-              </tr>
-              <tr class="border-b border-gray-800/30">
-                <td class="py-1.5 pr-4 font-bold text-gray-300">Requirements class</td>
-                <td class="py-1.5 text-gray-400">A set of consistent requirements on a single feature area</td>
-              </tr>
-              <tr class="border-b border-gray-800/30">
-                <td class="py-1.5 pr-4 font-bold text-gray-300">Conformance test</td>
-                <td class="py-1.5 text-gray-400">An individual test that verifies one or more requirements (pass/fail)</td>
-              </tr>
-              <tr class="border-b border-gray-800/30">
-                <td class="py-1.5 pr-4 font-bold text-gray-300">Conformance class</td>
-                <td class="py-1.5 text-gray-400">A group of conformance tests corresponding 1:1 to a requirements class</td>
-              </tr>
-              <tr class="border-b border-gray-800/30">
-                <td class="py-1.5 pr-4 font-bold text-gray-300">Profile</td>
-                <td class="py-1.5 text-gray-400">A set of selected requirements from conformance classes, for a specific use case</td>
-              </tr>
-              <tr>
-                <td class="py-1.5 pr-4 font-bold text-gray-300">Adapter</td>
-                <td class="py-1.5 text-gray-400">A pluggable wrapper for a specific date/time library being tested</td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="relative">
+        <div class="flex items-baseline gap-3 mb-6">
+          <span class="clause-label clause-label-accent">§ 00</span>
+          <span class="clause-label">Audience router</span>
         </div>
-      </div>
-
-      <!-- Profiles -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          Profiles
-        </h2>
-        <p class="mb-3">
-          The ISO 8601 standard family includes many features and allows several different formats
-          for a single feature. An <strong class="text-gray-200">ISO 8601 profile</strong> specifies
-          how ISO 8601 is to be used for a particular context, selecting the necessary features and
-          representations.
-        </p>
-        <p class="mb-2">A profile should at least contain:</p>
-        <ul class="list-disc list-inside space-y-1 text-gray-400 ml-2">
-          <li>Minimum features that <strong class="text-gray-200">must be supported</strong></li>
-        </ul>
-        <p class="mt-3 mb-2">And may optionally contain:</p>
-        <ul class="list-disc list-inside space-y-1 text-gray-400 ml-2">
-          <li>Features that are <strong class="text-gray-200">not relevant</strong> and need not be supported</li>
-          <li><strong class="text-gray-200">Selection of specific methods</strong> where multiple exist</li>
-          <li>The <strong class="text-gray-200">profile's interpretation</strong> where ambiguity exists</li>
-        </ul>
-        <p class="mt-3">
-          ISO 8601-2 supports the creation of a registration agency for profiles. The profiles in this
-          test suite include ISO-defined profiles and well-known community profiles such as
-          <a href="https://www.rfc-editor.org/rfc/rfc3339" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors">RFC 3339</a>
-          and the
-          <a href="https://www.w3.org/TR/NOTE-datetime" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition-colors">W3C Date and Time Formats</a>.
+        <h1 class="display-hero text-4xl md:text-6xl mb-6 max-w-4xl">
+          About the <em>ISO 8601</em><br/>test suite.
+        </h1>
+        <p class="text-ink-soft text-base md:text-lg max-w-2xl leading-relaxed">
+          A machine-readable conformance test suite for the ISO 8601 family of
+          date/time standards, developed by <strong class="text-ink">CalConnect TC DATETIME</strong>
+          as joint work with <strong class="text-ink">ISO/TC 154/WG 5</strong>.
+          Choose what you're here for — each path leads to the right view and
+          deeper documentation.
         </p>
       </div>
+    </section>
 
-      <!-- For developers -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          For Library Developers
-        </h2>
-        <p class="mb-3">
-          If you maintain a date/time library in any language, you can test its ISO 8601 conformance
-          by writing a small adapter that the test harness calls. No Ruby knowledge needed — adapters
-          communicate via a simple JSON protocol.
-        </p>
-        <button
-          @click="emit('navigate', '/developer-guide')"
-          class="text-blue-400 hover:text-blue-300 transition-colors text-xs font-medium flex items-center gap-1"
+    <!-- Audience cards -->
+    <section class="mb-16">
+      <div class="section-header">
+        <span class="section-number">§ 01</span>
+        <h2 class="section-title">Choose your path</h2>
+        <span class="section-meta">{{ audiences.length }} audiences</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <article
+          v-for="a in audiences"
+          :key="a.key"
+          class="surface surface-hover p-6 flex flex-col"
         >
-          Read the Developer Guide
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          <div class="flex items-baseline justify-between mb-4">
+            <span class="font-mono text-xs text-accent tracking-wider">{{ a.clause }}</span>
+            <span class="clause-label">{{ a.key }}</span>
+          </div>
+          <h3 class="font-display text-2xl text-ink mb-2 leading-tight">{{ a.title }}</h3>
+          <p class="text-sm text-ink-muted leading-relaxed mb-5 flex-1">{{ a.blurb }}</p>
+
+          <div class="flex flex-col gap-2">
+            <button
+              @click="emit('navigate', a.dashboardPath)"
+              class="btn-ghost justify-between w-full"
+            >
+              <span>{{ a.dashboardLabel }}</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+            <button
+              v-if="a.docSlug"
+              @click="emit('navigate', `/docs/${a.docSlug}`)"
+              class="font-mono text-xs uppercase tracking-wider text-accent hover:underline text-left px-3 py-2 transition-colors flex items-center justify-between"
+            >
+              <span>Read the full guide</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Concepts reference -->
+    <section class="mb-16">
+      <div class="section-header">
+        <span class="section-number">§ 02</span>
+        <h2 class="section-title">Shared concepts</h2>
+      </div>
+      <p class="text-ink-soft text-sm leading-relaxed mb-5 max-w-2xl">
+        These documents define the vocabulary and mechanics that the
+        audience-specific guides assume you understand.
+      </p>
+      <div class="surface divide-y divide-rule">
+        <button
+          v-for="c in concepts"
+          :key="c.slug"
+          @click="emit('navigate', `/docs/${c.slug}`)"
+          class="block w-full text-left px-5 py-4 hover:bg-surface-2 transition-colors first:hover:rounded-t-sm last:hover:rounded-b-sm"
+        >
+          <div class="flex items-baseline justify-between gap-4">
+            <span class="font-display text-xl text-ink">{{ c.title }}</span>
+            <svg class="w-4 h-4 text-ink-muted shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
+          <div class="font-mono text-xs text-ink-muted mt-1.5">{{ c.sub }}</div>
         </button>
       </div>
+    </section>
 
-      <!-- For standards bodies -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          For Standards Bodies
-        </h2>
-        <p class="mb-3">
-          If you're developing a profile or subset of ISO 8601 for a specific domain (e.g., healthcare,
-          finance, scientific data), you can define it in a YAML file that specifies exactly which
-          ISO 8601 requirements your profile covers, along with any additional requirements.
-        </p>
-        <button
-          @click="emit('navigate', '/developer-guide')"
-          class="text-blue-400 hover:text-blue-300 transition-colors text-xs font-medium flex items-center gap-1"
-        >
-          Profile Creation Guide
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-        </button>
+    <!-- Project context -->
+    <section>
+      <div class="section-header">
+        <span class="section-number">§ 03</span>
+        <h2 class="section-title">Source &amp; canonical reference</h2>
       </div>
-
-      <!-- Test approaches -->
-      <div class="bg-gray-900/50 border border-gray-800/60 rounded-lg p-5">
-        <h2 class="text-base font-bold mb-3 flex items-center gap-2">
-          <span class="w-1 h-4 bg-[#e3000f] rounded-full"></span>
-          Test Approaches
-        </h2>
-        <p class="mb-3">
-          The test suite uses three complementary testing strategies to thoroughly evaluate
-          date/time implementations:
-        </p>
-        <ul class="list-disc list-inside space-y-1 text-gray-400 ml-2">
-          <li><strong class="text-gray-200">Parsing</strong> — Parse an expression and validate extracted components (dedicated or undifferentiated mode)</li>
-          <li><strong class="text-gray-200">Generation</strong> — Build an expression from structured components</li>
-          <li><strong class="text-gray-200">Round-trip</strong> — Parse → extract → generate → verify consistency</li>
-        </ul>
-        <button
-          @click="emit('navigate', '/methodology')"
-          class="text-blue-400 hover:text-blue-300 transition-colors text-xs font-medium flex items-center gap-1 mt-3"
-        >
-          Full Methodology Documentation
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-        </button>
-      </div>
-    </div>
+      <p class="text-ink-soft text-sm leading-relaxed max-w-2xl">
+        Source repository:
+        <a
+          href="https://github.com/CalConnect/iso-8601-test-suite"
+          target="_blank"
+          rel="noopener"
+          class="text-accent underline underline-offset-2 hover:underline-offset-4"
+        >CalConnect/iso-8601-test-suite</a>.
+        The full project README is the canonical reference for adapter
+        protocols, YAML schemas, and CLI options.
+      </p>
+    </section>
   </div>
 </template>

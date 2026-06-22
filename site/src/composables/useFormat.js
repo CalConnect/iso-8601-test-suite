@@ -36,3 +36,41 @@ export function formatValue(v) {
 export function libShortName(name) {
   return name.split(" ").slice(0, 2).join(" ");
 }
+
+export function libVersionLabel(lib) {
+  const m = lib.name.match(/(\d+(?:\.\d+)*)/);
+  return m ? m[1] : lib.version || lib.id;
+}
+
+export function groupByFamily(libs) {
+  const groups = [];
+  const index = new Map();
+  for (const lib of libs) {
+    const key = lib.family || lib.language || "Other";
+    if (!index.has(key)) {
+      const g = { family: key, logo: lib.logo, language: lib.language, versions: [] };
+      index.set(key, g);
+      groups.push(g);
+    }
+    index.get(key).versions.push(lib);
+  }
+  return groups;
+}
+
+export function sortLibsNewestFirst(libs) {
+  const famIdx = new Map();
+  let next = 0;
+  libs.forEach(lib => {
+    const f = lib.family || lib.language || "Other";
+    if (!famIdx.has(f)) famIdx.set(f, next++);
+  });
+  return libs
+    .map((lib, origIdx) => ({ lib, origIdx }))
+    .sort((a, b) => {
+      const fa = famIdx.get(a.lib.family || a.lib.language || "Other");
+      const fb = famIdx.get(b.lib.family || b.lib.language || "Other");
+      if (fa !== fb) return fa - fb;
+      return b.origIdx - a.origIdx;
+    })
+    .map(x => x.lib);
+}

@@ -58,6 +58,14 @@ module TestTypeHandlers
       expected_expr = test.dig("expect", "expression")
       return { "result" => "error", "notes" => "Missing components or expected expression" } unless given_components && expected_expr
 
+      # If the test targets a basic-format requirement, signal that to the adapter
+      # via the format hint. Adapters default to extended format otherwise.
+      reqs = test["requirements"] || []
+      wants_basic = reqs.any? { |r| r.to_s.include?("-basic") }
+      if wants_basic && !given_components.key?("format")
+        given_components = given_components.merge("format" => "basic")
+      end
+
       result = adapter.generate(given_components)
       return { "result" => "not-supported", "notes" => "Adapter cannot generate from given components" } if result.nil?
 

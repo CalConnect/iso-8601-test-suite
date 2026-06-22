@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed, watch, defineAsyncComponent } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } from "vue";
+import { sortLibsNewestFirst } from "./composables/useFormat";
 
 const DashboardView = defineAsyncComponent(() => import("./views/DashboardView.vue"));
 const MatrixView = defineAsyncComponent(() => import("./views/MatrixView.vue"));
@@ -13,6 +14,7 @@ const RequirementDetailView = defineAsyncComponent(() => import("./views/Require
 const ReportsView = defineAsyncComponent(() => import("./views/ReportsView.vue"));
 const ImplementationReportView = defineAsyncComponent(() => import("./views/ImplementationReportView.vue"));
 const AboutView = defineAsyncComponent(() => import("./views/AboutView.vue"));
+const DocsView = defineAsyncComponent(() => import("./views/DocsView.vue"));
 const MethodologyView = defineAsyncComponent(() => import("./views/MethodologyView.vue"));
 const DeveloperGuideView = defineAsyncComponent(() => import("./views/DeveloperGuideView.vue"));
 const DetailModal = defineAsyncComponent(() => import("./components/DetailModal.vue"));
@@ -22,6 +24,44 @@ const detail = ref(null);
 const modalDetail = ref(null);
 const mobileMenuOpen = ref(false);
 const refDropdownOpen = ref(false);
+const clock = ref({ h: "--", m: "--", s: "--", offset: "+00:00", tz: "UTC", utcIso: "", localIso: "" });
+let clockTimer = null;
+
+function pad(n, w = 2) {
+  return String(n).padStart(w, "0");
+}
+
+function tickClock() {
+  const d = new Date();
+  const offsetMin = -d.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  const offset = `${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+  const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || "local").replace(/_/g, " ");
+
+  clock.value = {
+    h: pad(d.getHours()),
+    m: pad(d.getMinutes()),
+    s: pad(d.getSeconds()),
+    offset,
+    tz,
+    utcIso:
+      `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}` +
+      `T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}Z`,
+    localIso:
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+      `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${offset}`,
+  };
+}
+
+onMounted(() => {
+  tickClock();
+  clockTimer = setInterval(tickClock, 1000);
+});
+
+onUnmounted(() => {
+  if (clockTimer) clearInterval(clockTimer);
+});
 
 function closeDropdowns() {
   refDropdownOpen.value = false;
@@ -35,10 +75,11 @@ function toggleTheme() {
   localStorage.setItem("theme", isDark.value ? "dark" : "light");
 }
 
-const hash = ref(location.hash);
-window.addEventListener("hashchange", () => { hash.value = location.hash; });
+const currentPath = () => location.pathname || "/";
+const hash = ref(currentPath());
+window.addEventListener("popstate", () => { hash.value = currentPath(); });
 
-const route = computed(() => hash.value.replace("#", "") || "/");
+const route = computed(() => hash.value || "/");
 
 const needsDetail = computed(() => {
   const r = route.value;
@@ -62,6 +103,7 @@ const currentView = computed(() => {
   if (r.startsWith("/implementation/")) return "implementation-detail";
   if (r === "/reports") return "reports";
   if (r === "/about") return "about";
+  if (r.startsWith("/docs/")) return "docs";
   if (r === "/methodology") return "methodology";
   if (r === "/developer-guide") return "developer-guide";
   return "dashboard";
@@ -75,8 +117,8 @@ const profileId = computed(() => {
 
 const implId = computed(() => {
   const r = route.value;
-  if (r.startsWith("/implementation/")) return r.replace("/implementation/", "");
-  return null;
+  const m = r.match(/^\/implementation\/([^/]+)/);
+  return m ? m[1] : null;
 });
 
 async function loadSummary() {
@@ -123,10 +165,11 @@ loadSummary();
 
 watch(needsDetail, (v) => { if (v) loadDetail(); }, { immediate: true });
 
-const libs = computed(() => summary.value?.libraries || []);
+const libs = computed(() => sortLibsNewestFirst(summary.value?.libraries || []));
 const reqs = computed(() => summary.value?.requirements || []);
 const profiles = computed(() => summary.value?.profiles || []);
 const categories = computed(() => summary.value?.categories || []);
+const familyStats = computed(() => summary.value?.family_stats || []);
 const generatedAt = computed(() =>
   summary.value ? new Date(summary.value.generated_at).toLocaleString() : ""
 );
@@ -145,6 +188,12 @@ const reportProfileId = computed(() => {
   const r = route.value;
   const m = r.match(/^\/implementation\/([^/]+)\/report\/(.+)$/);
   return m ? m[2] : null;
+});
+
+const docsSlug = computed(() => {
+  const r = route.value;
+  if (!r.startsWith("/docs/")) return null;
+  return r.replace("/docs/", "").replace(/\/$/, "");
 });
 
 const reportProfile = computed(() => {
@@ -169,7 +218,8 @@ const activeReqSection = computed(() => {
 });
 
 function nav(path) {
-  location.hash = path;
+  history.pushState(null, "", path);
+  hash.value = path;
   modalDetail.value = null;
   mobileMenuOpen.value = false;
   refDropdownOpen.value = false;
@@ -179,68 +229,68 @@ watch(route, () => { window.scrollTo(0, 0); });
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-950 text-gray-100">
+  <div class="min-h-screen flex flex-col bg-paper text-ink">
     <!-- Topbar -->
-    <nav class="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/60">
-      <div class="max-w-[1400px] mx-auto px-4 md:px-8 h-12 flex items-center gap-4">
-        <a href="#/" class="flex items-center gap-2.5 no-underline group shrink-0" @click.prevent="nav('/')">
+    <nav class="sticky top-0 z-50 bg-paper/95 backdrop-blur-md border-b border-rule">
+      <div class="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center gap-4">
+        <a @click.prevent="nav('/')" class="flex items-center gap-3 no-underline group shrink-0 cursor-pointer">
           <img src="/logos/iso-red.svg" alt="ISO" class="h-7 w-auto" />
-          <div class="hidden sm:block">
-            <div class="text-sm font-bold tracking-tight leading-tight text-gray-100">ISO 8601</div>
-            <div class="text-[9px] text-gray-500 font-medium tracking-wide uppercase leading-tight">Test Suite</div>
+          <div class="hidden sm:block leading-none">
+            <div class="font-display text-lg font-medium tracking-tight text-ink">ISO 8601</div>
+            <div class="clause-label mt-0.5">Conformance Test Suite</div>
           </div>
         </a>
 
-        <div class="w-px h-5 bg-gray-800 shrink-0"></div>
+        <div class="w-px h-6 bg-rule shrink-0 hidden md:block"></div>
 
         <!-- Desktop nav -->
-        <div class="hidden md:flex items-center gap-1 text-[11px]">
+        <div class="hidden md:flex items-center gap-0.5 text-sm">
           <button @click="nav('/')"
-            :class="['px-2.5 py-1 rounded-md font-medium transition-all', (route === '/' || currentView === 'dashboard') ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">
+            :class="['px-2.5 py-1 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/' || currentView === 'dashboard') ? 'text-accent' : 'text-ink-muted hover:text-ink']">
             Dashboard
           </button>
 
-          <span class="text-gray-800 mx-0.5">│</span>
+          <span class="text-rule mx-1 text-xs">·</span>
 
           <button @click="nav('/matrix')"
-            :class="['px-2.5 py-1 rounded-md font-medium transition-all', route === '/matrix' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">
+            :class="['px-2.5 py-1 font-mono text-xs uppercase tracking-wider transition-colors', route === '/matrix' ? 'text-accent' : 'text-ink-muted hover:text-ink']">
             Matrix
           </button>
           <button @click="nav('/reports')"
-            :class="['px-2.5 py-1 rounded-md font-medium transition-all', route === '/reports' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">
+            :class="['px-2.5 py-1 font-mono text-xs uppercase tracking-wider transition-colors', route === '/reports' ? 'text-accent' : 'text-ink-muted hover:text-ink']">
             Reports
           </button>
 
-          <span class="text-gray-800 mx-0.5">│</span>
+          <span class="text-rule mx-1 text-xs">·</span>
 
           <!-- Reference dropdown -->
           <div class="relative" @mouseleave="refDropdownOpen = false">
             <button @click="refDropdownOpen = !refDropdownOpen" @mouseenter="refDropdownOpen = true"
-              :class="['px-2.5 py-1 rounded-md font-medium transition-all flex items-center gap-1', ['profile-detail','requirement-detail','requirements-part','implementations','implementation-detail','implementation-report','profiles','requirements'].includes(currentView) ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">
+              :class="['px-2.5 py-1 font-mono text-xs uppercase tracking-wider transition-colors flex items-center gap-1.5', ['profile-detail','requirement-detail','requirements-part','implementations','implementation-detail','implementation-report','profiles','requirements'].includes(currentView) ? 'text-accent' : 'text-ink-muted hover:text-ink']">
               Reference
               <svg class="w-2.5 h-2.5 transition-transform" :class="{ 'rotate-180': refDropdownOpen }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
             </button>
-            <div v-if="refDropdownOpen" class="absolute top-full left-0 pt-1 w-44 z-50">
-              <div class="bg-gray-900 border border-gray-700/60 rounded-lg shadow-xl py-1">
+            <div v-if="refDropdownOpen" class="absolute top-full left-0 pt-1 w-48 z-50">
+              <div class="surface shadow-xl py-1">
               <button @click="nav('/profiles'); refDropdownOpen = false"
-                :class="['block w-full text-left px-3 py-2 text-[11px] font-medium transition-colors', (route === '/profiles' || currentView === 'profile-detail') ? 'text-gray-100 bg-gray-100/5' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-100/5']">
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/profiles' || currentView === 'profile-detail') ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Profiles
               </button>
               <button @click="nav('/requirements'); refDropdownOpen = false"
-                :class="['block w-full text-left px-3 py-2 text-[11px] font-medium transition-colors', (route === '/requirements' || currentView === 'requirement-detail' || currentView === 'requirements-part') ? 'text-gray-100 bg-gray-100/5' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-100/5']">
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/requirements' || currentView === 'requirement-detail' || currentView === 'requirements-part') ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Requirements
               </button>
               <button @click="nav('/implementations'); refDropdownOpen = false"
-                :class="['block w-full text-left px-3 py-2 text-[11px] font-medium transition-colors', (route === '/implementations' || currentView === 'implementation-detail' || currentView === 'implementation-report') ? 'text-gray-100 bg-gray-100/5' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-100/5']">
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/implementations' || currentView === 'implementation-detail' || currentView === 'implementation-report') ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Implementations
               </button>
-              <div class="border-t border-gray-800/60 my-1"></div>
+              <div class="border-t border-rule-soft my-1"></div>
               <button @click="nav('/methodology'); refDropdownOpen = false"
-                :class="['block w-full text-left px-3 py-2 text-[11px] font-medium transition-colors', route === '/methodology' ? 'text-gray-100 bg-gray-100/5' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-100/5']">
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', route === '/methodology' ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Methodology
               </button>
               <button @click="nav('/developer-guide'); refDropdownOpen = false"
-                :class="['block w-full text-left px-3 py-2 text-[11px] font-medium transition-colors', route === '/developer-guide' ? 'text-gray-100 bg-gray-100/5' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-100/5']">
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', route === '/developer-guide' ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Developer Guide
               </button>
               </div>
@@ -248,25 +298,43 @@ watch(route, () => { window.scrollTo(0, 0); });
           </div>
         </div>
 
-        <div class="ml-auto flex items-center gap-2">
-          <div class="text-[9px] text-gray-600 hidden lg:block">
-            {{ reqs.length }} reqs · {{ libs.length }} libs · {{ profiles.length }} profiles
+        <div class="ml-auto flex items-center gap-3">
+          <!-- Live clock (scientific instrument) -->
+          <div class="hidden lg:flex flex-col items-end leading-none">
+            <div class="live-clock text-sm text-ink flex items-center" :title="clock.utcIso">
+              <span class="tabular-nums">{{ clock.h }}</span>
+              <span class="clock-blink">:</span>
+              <span class="tabular-nums">{{ clock.m }}</span>
+              <span class="clock-blink">:</span>
+              <span class="tabular-nums text-accent">{{ clock.s }}</span>
+            </div>
+            <div class="clause-label mt-1">UTC{{ clock.offset }} · {{ clock.tz }}</div>
           </div>
+
+          <div class="hidden lg:block w-px h-6 bg-rule"></div>
+
+          <div class="hidden md:flex flex-col leading-none">
+            <div class="font-mono text-xs text-ink">
+              <span class="tabular-nums">{{ reqs.length }}</span>·<span class="tabular-nums">{{ libs.length }}</span>·<span class="tabular-nums">{{ profiles.length }}</span>
+            </div>
+            <div class="clause-label mt-1">reqs·libs·profiles</div>
+          </div>
+
           <button @click="nav('/about')"
-            :class="['px-2.5 py-1 rounded-md text-[11px] font-medium transition-all', route === '/about' || route === '/methodology' || route === '/developer-guide' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">
+            :class="['px-2.5 py-1 font-mono text-xs uppercase tracking-wider transition-colors', route === '/about' ? 'text-accent' : 'text-ink-muted hover:text-ink']">
             About
           </button>
           <button
             @click="toggleTheme"
-            class="w-7 h-7 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-gray-100/5 transition-colors"
+            class="w-7 h-7 flex items-center justify-center text-ink-muted hover:text-ink transition-colors"
             :title="isDark ? 'Light mode' : 'Dark mode'"
           >
-            <svg v-if="isDark" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg v-if="isDark" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
           <!-- Mobile menu button -->
           <button @click="mobileMenuOpen = !mobileMenuOpen"
-            class="md:hidden w-7 h-7 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-gray-100/5 transition-colors">
+            class="md:hidden w-7 h-7 flex items-center justify-center text-ink-muted hover:text-ink transition-colors">
             <svg v-if="!mobileMenuOpen" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
             <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
@@ -274,20 +342,20 @@ watch(route, () => { window.scrollTo(0, 0); });
       </div>
 
       <!-- Mobile dropdown menu -->
-      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-800/60 bg-gray-950/98 backdrop-blur-md">
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-rule bg-paper/98 backdrop-blur-md">
         <div class="px-4 py-3 space-y-1">
-          <button @click="nav('/')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all', (route === '/' || currentView === 'dashboard') ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Dashboard</button>
-          <div class="py-1 px-3 text-[9px] text-gray-600 uppercase tracking-wider font-bold">Results</div>
-          <button @click="nav('/matrix')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', route === '/matrix' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Matrix</button>
-          <button @click="nav('/reports')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', route === '/reports' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Reports</button>
-          <div class="py-1 px-3 text-[9px] text-gray-600 uppercase tracking-wider font-bold">Reference</div>
-          <button @click="nav('/profiles')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', (route === '/profiles' || currentView === 'profile-detail') ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Profiles</button>
-          <button @click="nav('/requirements')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', (route === '/requirements' || currentView === 'requirement-detail' || currentView === 'requirements-part') ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Requirements</button>
-          <button @click="nav('/implementations')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', (route === '/implementations' || currentView === 'implementation-detail' || currentView === 'implementation-report') ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Implementations</button>
-          <button @click="nav('/methodology')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', route === '/methodology' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Methodology</button>
-          <button @click="nav('/developer-guide')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', route === '/developer-guide' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">Developer Guide</button>
-          <div class="py-1 px-3 text-[9px] text-gray-600 uppercase tracking-wider font-bold">Info</div>
-          <button @click="nav('/about')" :class="['block w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-all pl-6', route === '/about' ? 'bg-gray-100/10 text-gray-100' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-100/5']">About</button>
+          <button @click="nav('/')" :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/' || currentView === 'dashboard') ? 'text-accent' : 'text-ink-muted hover:text-ink']">Dashboard</button>
+          <div class="py-1 px-3 clause-label">Results</div>
+          <button @click="nav('/matrix')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/matrix' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Matrix</button>
+          <button @click="nav('/reports')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/reports' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Reports</button>
+          <div class="py-1 px-3 clause-label">Reference</div>
+          <button @click="nav('/profiles')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/profiles' || currentView === 'profile-detail') ? 'text-accent' : 'text-ink-muted hover:text-ink']">Profiles</button>
+          <button @click="nav('/requirements')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/requirements' || currentView === 'requirement-detail' || currentView === 'requirements-part') ? 'text-accent' : 'text-ink-muted hover:text-ink']">Requirements</button>
+          <button @click="nav('/implementations')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/implementations' || currentView === 'implementation-detail' || currentView === 'implementation-report') ? 'text-accent' : 'text-ink-muted hover:text-ink']">Implementations</button>
+          <button @click="nav('/methodology')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/methodology' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Methodology</button>
+          <button @click="nav('/developer-guide')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/developer-guide' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Developer Guide</button>
+          <div class="py-1 px-3 clause-label">Info</div>
+          <button @click="nav('/about')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/about' ? 'text-accent' : 'text-ink-muted hover:text-ink']">About</button>
         </div>
       </div>
     </nav>
@@ -296,17 +364,19 @@ watch(route, () => { window.scrollTo(0, 0); });
     <main class="flex-1">
       <div v-if="!summary" class="flex items-center justify-center py-32">
         <div class="text-center">
-          <div class="inline-block w-6 h-6 border-2 border-gray-600 border-t-gray-100 rounded-full animate-spin mb-4"></div>
-          <p class="text-gray-500 text-sm">Loading test suite…</p>
+          <div class="inline-block w-6 h-6 border-2 border-rule border-t-accent rounded-full animate-spin mb-4"></div>
+          <p class="clause-label">Loading test suite…</p>
         </div>
       </div>
       <template v-else>
+        <div :key="route" class="view-enter">
         <DashboardView
           v-if="currentView === 'dashboard'"
           :libs="libs"
           :reqs="reqs"
           :profiles="profiles"
           :categories="categories"
+          :family-stats="familyStats"
           @navigate="nav"
         />
         <MatrixView
@@ -335,6 +405,7 @@ watch(route, () => { window.scrollTo(0, 0); });
           :libs="libs"
           :profiles="profiles"
           :reqs="reqs"
+          :family-stats="familyStats"
           @navigate="nav"
         />
         <RequirementsView
@@ -384,6 +455,11 @@ watch(route, () => { window.scrollTo(0, 0); });
           v-if="currentView === 'about'"
           @navigate="nav"
         />
+        <DocsView
+          v-if="currentView === 'docs' && docsSlug"
+          :slug="docsSlug"
+          @navigate="nav"
+        />
         <MethodologyView
           v-if="currentView === 'methodology'"
           @navigate="nav"
@@ -392,14 +468,31 @@ watch(route, () => { window.scrollTo(0, 0); });
           v-if="currentView === 'developer-guide'"
           @navigate="nav"
         />
+        </div>
       </template>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-gray-800/60 py-4">
-      <div class="max-w-[1400px] mx-auto px-4 md:px-8 flex flex-wrap items-center justify-between gap-2 text-[10px] text-gray-600">
-        <span>ISO/TC 154/WG 5 — ISO 8601 Machine-Readable Test Suite</span>
-        <span v-if="generatedAt">Generated {{ generatedAt }}</span>
+    <footer class="border-t border-rule">
+      <div class="max-w-[1400px] mx-auto px-4 md:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-col leading-none">
+          <span class="font-display text-sm text-ink">ISO/TC 154/WG 5</span>
+          <span class="clause-label mt-1">ISO 8601 Machine-Readable Test Suite</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-6 leading-none">
+          <div class="hidden sm:flex flex-col items-end">
+            <span class="font-mono text-xs text-ink-muted tabular-nums">{{ clock.localIso }}</span>
+            <span class="clause-label mt-1">local · {{ clock.tz }}</span>
+          </div>
+          <div class="hidden md:flex flex-col items-end">
+            <span class="font-mono text-xs text-ink-muted tabular-nums">{{ clock.utcIso }}</span>
+            <span class="clause-label mt-1">coordinated universal time</span>
+          </div>
+          <div v-if="generatedAt" class="flex flex-col items-end">
+            <span class="live-clock text-xs text-ink-faint">{{ generatedAt }}</span>
+            <span class="clause-label mt-1">data generated</span>
+          </div>
+        </div>
       </div>
     </footer>
 
