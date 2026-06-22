@@ -160,35 +160,28 @@ function pctBarTone(pct) {
       </div>
     </div>
 
-    <!-- Other profiles (informational) -->
+    <!-- Other profiles (not implemented) -->
     <div v-if="otherProfiles.length > 0">
       <div class="section-header">
         <span class="section-number">§ 02</span>
-        <h2 class="section-title">Other profiles</h2>
-        <span class="section-meta">not declared by this implementation</span>
+        <h2 class="section-title">Not implemented</h2>
+        <span class="section-meta">{{ otherProfiles.length }} profile{{ otherProfiles.length === 1 ? '' : 's' }} not declared</span>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <button
+        <div
           v-for="p in otherProfiles"
           :key="p.id"
-          @click="openReport(p)"
-          class="surface surface-hover text-left p-4 cursor-pointer opacity-65 hover:opacity-100 transition-opacity"
+          class="surface p-4 opacity-50"
         >
           <div class="flex items-center gap-2 mb-3">
-            <img v-if="p.logo" :src="p.logo" :alt="p.name" class="w-5 h-5 opacity-70" />
+            <img v-if="p.logo" :src="p.logo" :alt="p.name" class="w-5 h-5 opacity-50" />
             <div class="font-display text-lg text-ink-muted">{{ p.name }}</div>
           </div>
-          <div class="mb-3">
-            <span class="pill pill-muted">Not declared</span>
+          <span class="pill pill-muted">Not declared</span>
+          <div class="font-mono text-[11px] text-ink-faint mt-3 leading-relaxed">
+            Not part of this implementation's declared conformance.
           </div>
-          <div class="flex items-center gap-2">
-            <div class="flex-1 cap-bar">
-              <div class="cap-bar-fill" :style="{ width: p.pct + '%' }"></div>
-            </div>
-            <span class="font-mono text-xs tabular-nums text-ink-faint">{{ p.pct }}%</span>
-          </div>
-          <div class="font-mono text-[11px] text-ink-faint mt-2 tabular-nums">{{ p.pass }}/{{ p.total }} tests</div>
-        </button>
+        </div>
       </div>
     </div>
   </div>
