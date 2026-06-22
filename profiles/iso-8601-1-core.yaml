@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../schema/profile.yaml
+---
+id: profile:iso-8601-1-core
+name: ISO 8601-1 Core
+description: >-
+  Core profile covering the commonly supported subset of ISO 8601-1:
+  extended-format calendar dates (YYYY-MM-DD, YYYY-MM, YYYY), time of day
+  (hh:mm:ss, hh:mm), and date-time combinations (YYYY-MM-DDThh:mm:ssZ, etc.).
+  This profile represents what virtually every standard library date/time
+  parser handles well. Excludes basic format, week/ordinal dates, expanded
+  years, durations, intervals, and edge-case fundamentals (time-shift as
+  standalone concept, expansion, leading-zeros validation).
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en
+standardization_target_type: iso-8601-date-time-processor
+traceability:
+  - conformance_class: 8601-1:conf-class:fundamentals
+    requirements:
+      - req:character-set
+      - req:decreasing-order
+      - req:gregorian-calendar
+      - req:leap-year-rules
+      - req:days-per-month
+      - req:week-calendar
+      - req:24-hour-clock
+      - req:year-representation
+      - req:month-representation
+      - req:week-number-representation
+      - req:day-of-week-representation
+      - req:day-of-year-representation
+      - req:decade-representation
+      - req:century-representation
+  - conformance_class: 8601-1:conf-class:calendar-date
+    requirements:
+      - req:cal-date-extended-full
+      - req:cal-date-reduced-month-ext
+      - req:cal-date-reduced-year
+  - conformance_class: 8601-1:conf-class:time-of-day
+    requirements:
+      - req:time-extended-full
+      - req:time-extended-hm
+      - req:time-utc
+      - req:time-offset-extended
+  - conformance_class: 8601-1:conf-class:date-and-time
+    requirements:
+      - req:date-time-cal-extended-local
+      - req:date-time-cal-extended-utc
+      - req:date-time-cal-extended-offset
+      - req:date-time-reduced-precision
+additional_requirements: []
+additional_tests: []

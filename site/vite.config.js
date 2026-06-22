@@ -14,7 +14,7 @@ export default defineConfig({
       plugins: [tailwindcss()],
     },
   },
-  server: { port: 3000 },
+  server: { port: 3000, historyApiFallback: true },
   build: {
     rollupOptions: {
       output: {

@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Regenerate results for all adapters defined in ADAPTER_DEFS.
+# Usage: ruby scripts/regenerate-all-results [--only ID1,ID2] [--skip ID1,ID2]
+
+require_relative "../lib/test_suite"
+require "optparse"
+require "fileutils"
+
+REPO_ROOT = File.expand_path(File.join(__dir__, ".."))
+Dir.chdir(REPO_ROOT)
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: ruby scripts/regenerate-all-results [options]"
+  opts.on("--only IDS", "Comma-separated adapter IDs to run") { |v| options[:only] = v.split(",") }
+  opts.on("--skip IDS", "Comma-separated adapter IDs to skip") { |v| options[:skip] = v.split(",") }
+  opts.on("--quiet", "Suppress per-test output") { options[:quiet] = true }
+  opts.on("--help", "Show help") { puts opts; exit 0 }
+end.parse!
+
+defs = CapabilityMatrix::ADAPTER_DEFS
+only = options[:only]
+skip = options[:skip] || []
+
+to_run = defs.select { |d| only ? only.include?(d[:id]) : true }
+to_run = to_run.reject { |d| skip.include?(d[:id]) }
+
+puts "Regenerating #{to_run.length} adapter results..."
+puts ""
+
+results_dir = File.join(REPO_ROOT, "results")
+FileUtils.mkdir_p(results_dir)
+
+success = []
+failed = []
+
+to_run.each_with_index do |d, i|
+  id = d[:id]
+  adapter_spec = d[:adapter]
+  output = File.join(results_dir, "#{id}.yaml")
+
+  print "[#{i+1}/#{to_run.length}] #{id.ljust(20)} ... "
+  $stdout.flush
+
+  start = Time.now
+  cmd = ["ruby", "scripts/run-tests", "--adapter", adapter_spec, "-o", output]
+  cmd << "--quiet" if options[:quiet]
+  system(*cmd, out: "/dev/null", err: "/dev/null")
+  elapsed = Time.now - start
+
+  if File.exist?(output) && File.size(output) > 100
+    puts sprintf("done (%.1fs)", elapsed)
+    success << id
+  else
+    puts sprintf("FAILED (%.1fs)", elapsed)
+    failed << id
+  end
+end
+
+puts ""
+puts "Success: #{success.length}/#{to_run.length}"
+puts "Failed:  #{failed.length}" if failed.any?
+failed.each { |id| puts "  - #{id}" }

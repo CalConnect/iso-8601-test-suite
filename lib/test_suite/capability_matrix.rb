@@ -5,11 +5,46 @@ require 'fileutils'
 require 'set'
 
 class CapabilityMatrix
+  PYTHON38  = File.expand_path("~/.local/share/mise/installs/python/3.8.20/bin/python3")
+  PYTHON39  = File.expand_path("~/.local/share/mise/installs/python/3.9.25/bin/python3")
+  PYTHON310 = File.expand_path("~/.local/share/mise/installs/python/3.10.5/bin/python3")
+  PYTHON312 = File.expand_path("~/.local/share/mise/installs/python/3.12.11/bin/python3")
+  PYTHON313 = File.expand_path("~/.local/share/mise/installs/python/3.13.6/bin/python3")
+  NODE18    = File.expand_path("~/.local/share/mise/installs/node/18.20.8/bin/node")
+  NODE20    = File.expand_path("~/.local/share/mise/installs/node/20.20.2/bin/node")
+  NODE22    = File.expand_path("~/.local/share/mise/installs/node/22.20.0/bin/node")
+  JAVA8_HOME  = "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home"
+  JAVA15_HOME = "/Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home"
+  JAVA21_HOME = File.expand_path("~/.local/share/mise/installs/java/openjdk-21.0.2")
+  APPLE_CLANG_PP  = "/usr/bin/clang++"
+  HOMEBREW_LLVM_PP = "/opt/homebrew/opt/llvm/bin/clang++"
+  REPO_ROOT       = File.expand_path(File.join(__dir__, "..", ".."))
+
   ADAPTER_DEFS = [
-    { id: "ruby-date",       name: "Ruby Date/DateTime/Time",       logo: "/logos/ruby.svg",       adapter: "ruby-date" },
-    { id: "ruby-date-40",    name: "Ruby 4.0 Date/DateTime/Time",   logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/4.0.5/bin/ruby')} adapters/ruby-date-40.rb" },
-    { id: "python-datetime", name: "Python datetime",               logo: "/logos/python.svg",     adapter: "exec:python3 adapters/python-datetime.py" },
-    { id: "node-datetime",   name: "JavaScript Date",               logo: "/logos/javascript.svg", adapter: "exec:node adapters/node-datetime.js" },
+    { id: "ruby-30",         name: "Ruby 3.0 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.0.7/bin/ruby')} adapters/ruby-date-exec.rb" },
+    { id: "ruby-31",         name: "Ruby 3.1 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.1.6/bin/ruby')} adapters/ruby-date-exec.rb" },
+    { id: "ruby-32",         name: "Ruby 3.2 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.2.10/bin/ruby')} adapters/ruby-date-exec.rb" },
+    { id: "ruby-33",         name: "Ruby 3.3 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.3.7/bin/ruby')} adapters/ruby-date-exec.rb" },
+    { id: "ruby-date",       name: "Ruby 3.4 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "ruby-date" },
+    { id: "ruby-date-40",    name: "Ruby 4.0 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/4.0.5/bin/ruby')} adapters/ruby-date-exec.rb" },
+    { id: "python-38",       name: "Python 3.8 datetime", family: "Python datetime",  logo: "/logos/python.svg",     adapter: "exec:#{PYTHON38} adapters/python-datetime.py" },
+    { id: "python-39",       name: "Python 3.9 datetime", family: "Python datetime",  logo: "/logos/python.svg",     adapter: "exec:#{PYTHON39} adapters/python-datetime.py" },
+    { id: "python-datetime", name: "Python 3.10 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON310} adapters/python-datetime.py" },
+    { id: "python-312",      name: "Python 3.12 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON312} adapters/python-datetime.py" },
+    { id: "python-313",      name: "Python 3.13 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON313} adapters/python-datetime.py" },
+    { id: "node-18",         name: "Node.js 18 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE18} adapters/node-datetime.js" },
+    { id: "node-20",         name: "Node.js 20 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE20} adapters/node-datetime.js" },
+    { id: "node-22",         name: "Node.js 22 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE22} adapters/node-datetime.js" },
+    { id: "node-datetime",   name: "Node.js 24 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:node adapters/node-datetime.js" },
+    { id: "c-stdio",         name: "C strftime/strptime (BSD)", family: "C stdio",          logo: "/logos/c.svg",          adapter: "exec:env ADAPTER_LABEL='C strftime/strptime (BSD)' ADAPTER_VERSION='BSD libc' gcc -o /tmp/c-stdio-adapter adapters/c-stdio.c && /tmp/c-stdio-adapter" },
+    { id: "c-stdio-glibc",   name: "C strftime/strptime (glibc)", family: "C stdio",        logo: "/logos/c.svg",          adapter: "exec:docker run --rm -i -v #{REPO_ROOT}/adapters:/adapters:ro gcc:15 sh -c 'gcc -O2 -D_GNU_SOURCE -o /tmp/c-adapter /adapters/c-stdio.c && ADAPTER_LABEL=\"C strftime/strptime (glibc)\" ADAPTER_VERSION=\"glibc (gcc 15)\" /tmp/c-adapter'" },
+    { id: "cpp-chrono",      name: "C++ std::chrono (LLVM)", family: "C++ chrono",     logo: "/logos/cpp.svg",        adapter: "exec:#{HOMEBREW_LLVM_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (LLVM)\"' -o /tmp/cpp-chrono adapters/cpp-chrono.cpp && /tmp/cpp-chrono" },
+    { id: "cpp-chrono-apple", name: "C++ std::chrono (Apple)", family: "C++ chrono",   logo: "/logos/cpp.svg",        adapter: "exec:#{APPLE_CLANG_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (Apple)\"' -o /tmp/cpp-chrono-apple adapters/cpp-chrono.cpp && /tmp/cpp-chrono-apple" },
+    { id: "rust-chrono",     name: "Rust chrono (latest)", family: "Rust chrono",      logo: "/logos/rust.svg",       adapter: "exec:env ADAPTER_LABEL='Rust chrono (latest)' ADAPTER_VERSION='chrono 0.4 (latest)' adapters/rust-chrono/target/release/rust-chrono" },
+    { id: "rust-chrono-0419", name: "Rust chrono 0.4.19", family: "Rust chrono",       logo: "/logos/rust.svg",       adapter: "exec:env ADAPTER_LABEL='Rust chrono 0.4.19' ADAPTER_VERSION='chrono 0.4.19' adapters/rust-chrono-0419/target/release/rust-chrono-0419" },
+    { id: "java-8",          name: "Java 8 java.time",    family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-8 && #{JAVA8_HOME}/bin/javac -d /tmp/java-adapters-8 adapters/JavaDateTime.java && #{JAVA8_HOME}/bin/java -cp /tmp/java-adapters-8 JavaDateTime" },
+    { id: "java-15",         name: "Java 15 java.time",   family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-15 && #{JAVA15_HOME}/bin/javac -d /tmp/java-adapters-15 adapters/JavaDateTime.java && #{JAVA15_HOME}/bin/java -cp /tmp/java-adapters-15 JavaDateTime" },
+    { id: "java-time",       name: "Java 21 java.time",   family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-21 && #{JAVA21_HOME}/bin/javac -d /tmp/java-adapters-21 adapters/JavaDateTime.java && #{JAVA21_HOME}/bin/java -cp /tmp/java-adapters-21 JavaDateTime" },
   ].freeze
 
   TEST_TYPE_TO_CAPABILITY = {
@@ -28,6 +63,7 @@ class CapabilityMatrix
     "profile:edtf-level-1"            => "/logos/loc.svg",
     "profile:edtf-level-2"            => "/logos/loc.svg",
     "profile:iso-8601-1-complete"     => "/logos/iso-red.svg",
+    "profile:iso-8601-1-core"         => "/logos/iso-red.svg",
     "profile:iso-8601-2-complete"     => "/logos/iso-red.svg",
     "profile:iso-8601-1-basic-format" => "/logos/iso-red.svg",
   }.freeze
@@ -41,6 +77,8 @@ class CapabilityMatrix
   def generate(adapter_defs: ADAPTER_DEFS, on_progress: nil)
     req_index = build_requirements_index
     adapters = load_adapters(adapter_defs, on_progress)
+    declared_classes = adapters.to_h { |a| [a[:id], read_declared_classes(a[:id])] }
+    declared_profiles = adapters.to_h { |a| [a[:id], read_declared_profiles(a[:id])] }
     all_tests = @suite.all_tests
     test_reqs = @index.test_reqs
 
@@ -50,16 +88,17 @@ class CapabilityMatrix
     profile_req_map = build_profile_req_map(class_tests, test_reqs)
 
     requirements_output = build_requirements(
-      adapters, req_index, req_tests, profile_req_map, on_progress
+      adapters, req_index, req_tests, profile_req_map, declared_classes, on_progress
     )
 
     profile_results = build_profile_results(
-      adapters, profile_tests, test_reqs, req_index
+      adapters, profile_tests, test_reqs, req_index, declared_classes
     )
 
     {
       generated_at: Time.now.utc.iso8601,
-      libraries: build_library_output(adapters, profile_results),
+      libraries: build_library_output(adapters, profile_results, declared_classes, declared_profiles),
+      family_stats: build_family_stats(adapters, requirements_output),
       requirements: requirements_output,
       profiles: profile_results,
       categories: build_categories(requirements_output),
@@ -201,7 +240,7 @@ class CapabilityMatrix
     profile_req_map
   end
 
-  def build_requirements(adapters, req_index, req_tests, profile_req_map, on_progress)
+  def build_requirements(adapters, req_index, req_tests, profile_req_map, declared_classes, on_progress)
     all_req_ids = req_index.keys.sort
     (req_tests.keys - all_req_ids).sort.each { |rid| all_req_ids << rid }
 
@@ -228,7 +267,8 @@ class CapabilityMatrix
       }
 
       adapters.each do |adefn|
-        capabilities = build_adapter_capabilities(adefn, tests_by_type)
+        declared = declared_classes[adefn[:id]] || []
+        capabilities = build_adapter_capabilities(adefn, tests_by_type, declared)
         req_entry[:tests][adefn[:id]] = capabilities unless capabilities.empty?
       end
 
@@ -238,19 +278,42 @@ class CapabilityMatrix
     requirements_output
   end
 
-  def build_adapter_capabilities(adefn, tests_by_type)
+  def build_adapter_capabilities(adefn, tests_by_type, declared)
     adapter = adefn[:adapter]
+    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
     capabilities = {}
 
     tests_by_type.each do |test_type, tests|
       cap_key = TEST_TYPE_TO_CAPABILITY[test_type] || test_type
-      results = tests.map { |t| run_single_test(adapter, t) }
+      results = tests.map { |t|
+        cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
+        if !declared_bare.empty? && !declared_bare.include?(cc_bare)
+          { "result" => "not-supported", "notes" => "Conformance class not declared" }
+        else
+          run_single_test(adapter, t)
+        end
+      }
       pass_count = results.count { |r| r["result"] == "pass" }
+      not_supported_count = results.count { |r| r["result"] == "not-supported" }
+      fail_count = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
       total = results.length
 
       if total > 0
+        status = if pass_count == total
+          "pass"
+        elsif fail_count == total
+          "fail"
+        elsif not_supported_count == total
+          "not-supported"
+        elsif pass_count > 0
+          "partial"
+        elsif fail_count > 0
+          "fail"
+        else
+          "not-supported"
+        end
         capabilities[cap_key] = {
-          status: pass_count == total ? "pass" : (pass_count > 0 ? "partial" : "fail"),
+          status: status,
           pass: pass_count,
           total: total,
           details: tests.zip(results).map { |t, r|
@@ -266,18 +329,19 @@ class CapabilityMatrix
     capabilities
   end
 
-  def build_profile_results(adapters, profile_tests, test_reqs, req_index)
+  def build_profile_results(adapters, profile_tests, test_reqs, req_index, declared_classes)
     @index.profile_ids.map do |pid|
       data = @index.profiles[pid]
       next unless data
 
       ptests = profile_tests[pid] || {}
 
-      conf_class_details = build_traceability_details(pid, adapters, test_reqs, req_index)
+      conf_class_details = build_traceability_details(pid, adapters, test_reqs, req_index, declared_classes)
       req_ids_in_profile = collect_profile_req_ids(data, conf_class_details)
 
       adapter_results = adapters.map do |adefn|
-        compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests)
+        declared = declared_classes[adefn[:id]] || []
+        compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests, declared)
       end
 
       {
@@ -296,7 +360,7 @@ class CapabilityMatrix
     end.compact
   end
 
-  def build_traceability_details(profile_id, adapters, test_reqs, req_index)
+  def build_traceability_details(profile_id, adapters, test_reqs, req_index, declared_classes)
     @index.profile_traceability(profile_id).map do |tc|
       cc_id = tc[:conformance_class]
       explicit_reqs = tc[:requirements]
@@ -324,7 +388,8 @@ class CapabilityMatrix
               given: t["given"], expect: t["expect"] }
           },
           per_library: adapters.map { |adefn|
-            compute_per_library_detail(adefn, tests)
+            declared = declared_classes[adefn[:id]] || []
+            compute_per_library_detail(adefn, tests, declared)
           },
         }
       end
@@ -333,11 +398,35 @@ class CapabilityMatrix
     end
   end
 
-  def compute_per_library_detail(adefn, tests)
-    results = tests.map { |t| run_single_test(adefn[:adapter], t) }
+  def compute_per_library_detail(adefn, tests, declared)
+    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
+    results = tests.map { |t|
+      cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
+      if !declared_bare.empty? && !declared_bare.include?(cc_bare)
+        { "result" => "not-supported", "notes" => "Conformance class not declared" }
+      else
+        run_single_test(adefn[:adapter], t)
+      end
+    }
     p = results.count { |r| r["result"] == "pass" }
+    ns = results.count { |r| r["result"] == "not-supported" }
+    f = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
     total = results.length
-    status = total == 0 ? "not-applicable" : (p == total ? "pass" : (p > 0 ? "partial" : "fail"))
+    status = if total == 0
+      "not-applicable"
+    elsif p == total
+      "pass"
+    elsif f == total
+      "fail"
+    elsif ns == total
+      "not-supported"
+    elsif p > 0
+      "partial"
+    elsif f > 0
+      "fail"
+    else
+      "not-supported"
+    end
     {
       library_id: adefn[:id], status: status, pass: p, total: total,
       details: tests.zip(results).map { |t, r|
@@ -354,35 +443,146 @@ class CapabilityMatrix
     ids
   end
 
-  def compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests)
+  def compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests, declared)
+    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
     test_pass = 0; test_total = 0
-    req_pass = 0; req_partial = 0; req_fail = 0
+    req_pass = 0; req_partial = 0; req_fail = 0; req_not_supported = 0
     req_ids_in_profile.each do |rid|
       tests = ptests[rid]
       next unless tests && !tests.empty?
-      results = tests.map { |t| run_single_test(adefn[:adapter], t) }
+      results = tests.map { |t|
+        cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
+        if !declared_bare.empty? && !declared_bare.include?(cc_bare)
+          { "result" => "not-supported", "notes" => "Conformance class not declared" }
+        else
+          run_single_test(adefn[:adapter], t)
+        end
+      }
       p = results.count { |r| r["result"] == "pass" }
+      ns = results.count { |r| r["result"] == "not-supported" }
+      f = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
       test_pass += p
       test_total += results.length
       if p == results.length
         req_pass += 1
-      elsif p > 0
-        req_partial += 1
-      else
+      elsif f == results.length
         req_fail += 1
+      elsif ns == results.length
+        req_not_supported += 1
+      else
+        req_partial += 1
       end
     end
     { id: adefn[:id], test_pass: test_pass, test_total: test_total,
-      req_pass: req_pass, req_partial: req_partial, req_fail: req_fail }
+      req_pass: req_pass, req_partial: req_partial, req_fail: req_fail,
+      req_not_supported: req_not_supported }
   end
 
-  def build_library_output(adapters, profile_results)
+  def build_library_output(adapters, profile_results, declared_classes, declared_profiles)
     adapters.map do |a|
-      declared = read_declared_classes(a[:id])
-      targeted = compute_target_profiles(declared, profile_results)
-      { id: a[:id], name: a[:name], logo: a[:logo], language: a[:language], version: a[:version],
+      declared = declared_classes[a[:id]] || []
+      profiles = declared_profiles[a[:id]] || []
+      targeted = compute_target_profiles(declared, profile_results, profiles)
+      { id: a[:id], name: a[:name], family: a[:family], logo: a[:logo], language: a[:language], version: a[:version],
         declared_conformance_classes: declared, target_profiles: targeted }
     end
+  end
+
+  def build_family_stats(adapters, requirements)
+    adapters.group_by { |a| a[:family] }.map do |family, fam_adapters|
+      version_ids = fam_adapters.map { |a| a[:id] }
+      range_label = build_family_range_label(fam_adapters)
+
+      stats = if fam_adapters.size == 1
+        { delta_count: 0, divergent_tests: [], per_version_delta: {}, stability: "single" }
+      else
+        compute_family_divergence(fam_adapters, requirements)
+      end
+
+      {
+        family: family,
+        logo: fam_adapters.first[:logo],
+        language: fam_adapters.first[:language],
+        version_count: fam_adapters.size,
+        version_ids: version_ids,
+        range_label: range_label,
+        **stats,
+      }
+    end
+  end
+
+  def compute_family_divergence(fam_adapters, requirements)
+    divergent = []
+    per_version_delta = fam_adapters.each_with_object(Hash.new(0)) { |a, h| h[a[:id]] = 0 }
+
+    requirements.each do |req|
+      tests = req[:tests]
+      next unless tests
+
+      test_map = Hash.new { |h, k| h[k] = {} }
+      fam_adapters.each do |a|
+        caps = tests[a[:id]]
+        next unless caps
+        caps.each do |cap_key, cap|
+          (cap[:details] || []).each do |d|
+            test_map[[cap_key, d[:test_id]]][a[:id]] = d[:result] if d.key?(:result)
+          end
+        end
+      end
+
+      test_map.each do |(cap_key, test_id), results_by_lib|
+        next unless results_by_lib.size > 1
+        unique = results_by_lib.values.uniq
+        next unless unique.size > 1
+
+        tally = results_by_lib.values.tally
+        majority = tally.max_by { |_, c| c }.first
+
+        divergent << {
+          req_id: req[:id],
+          cap_key: cap_key,
+          test_id: test_id,
+          results: results_by_lib.transform_values { |r| r || "unknown" },
+        }
+
+        results_by_lib.each do |lib_id, result|
+          per_version_delta[lib_id] += 1 if result != majority
+        end
+      end
+    end
+
+    delta_count = divergent.size
+    stability = case delta_count
+                when 0 then "stable"
+                when 1..5 then "minor"
+                else "divergent"
+                end
+
+    { delta_count: delta_count, divergent_tests: divergent, per_version_delta: per_version_delta, stability: stability }
+  end
+
+  def build_family_range_label(fam_adapters)
+    names = fam_adapters.map { |a| a[:name] }
+    return names.first if names.size == 1
+
+    labels = names.map { |n| version_label_for(n) }.compact
+    return names.first if labels.empty? || labels.uniq.size == 1
+    return labels.first if labels.uniq.size == 1
+
+    numeric = labels.select { |l| l.match?(/\A\d+(\.\d+)*\z/) }
+    if numeric.size == labels.size
+      sorted = labels.sort_by { |l| l.split(".").map(&:to_i) }
+      return "#{sorted.first} → #{sorted.last}"
+    end
+
+    "#{labels.first} → #{labels.last}"
+  end
+
+  def version_label_for(name)
+    paren = name[/\(([^)]+)\)/, 1]
+    return paren if paren
+    m = name.match(/(\d+(?:\.\d+)*)/)
+    m ? m[1] : nil
   end
 
   def read_declared_classes(adapter_id)
@@ -393,6 +593,14 @@ class CapabilityMatrix
     result.data["declared_conformance_classes"] || []
   end
 
+  def read_declared_profiles(adapter_id)
+    result_file = find_result_file(adapter_id)
+    return [] unless result_file
+    result = @store.load(result_file)
+    return [] if result.failure?
+    result.data["profiles_tested"] || []
+  end
+
   def find_result_file(adapter_id)
     @store.files_in("results/**/*.yaml").each do |f|
       next if File.basename(f) == "TEMPLATE.yaml"
@@ -401,7 +609,13 @@ class CapabilityMatrix
     nil
   end
 
-  def compute_target_profiles(declared, profile_results)
+  def compute_target_profiles(declared, profile_results, declared_profiles = [])
+    if declared_profiles && !declared_profiles.empty?
+      profile_set = declared_profiles.to_set
+      return profile_results.select { |p| profile_set.include?(p[:id]) }
+                         .map { |p| { id: p[:id], name: p[:name] } }
+    end
+
     return profile_results.map { |p| { id: p[:id], name: p[:name] } } if declared.empty?
 
     declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
@@ -427,6 +641,7 @@ class CapabilityMatrix
     {
       generated_at: full_data[:generated_at],
       libraries: full_data[:libraries],
+      family_stats: full_data[:family_stats],
       categories: full_data[:categories],
       profiles: full_data[:profiles].map { |prof|
         p = {}

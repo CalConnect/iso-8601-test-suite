@@ -1,0 +1,17 @@
+[package]
+name = "rust-chrono-0419"
+version = "0.1.0"
+edition = "2018"
+publish = false
+
+[[bin]]
+name = "rust-chrono-0419"
+path = "../rust-chrono/src/main.rs"
+
+[dependencies]
+chrono = "=0.4.19"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 1

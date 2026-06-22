@@ -19,5 +19,15 @@ vendor/bundle/
 node_modules/
 site/dist/
 
+# Rust build artifacts
+adapters/rust-chrono/target/
+adapters/rust-chrono-0419/target/
+
+# Compiled adapter artifacts (C/C++/Java)
+adapters/*.class
+adapters/cpp-chrono
+adapters/cpp-chrono-apple
+adapters/cpp-chrono.cpp.bak
+
 # Source artwork (site logos derived from these)
 /*.svg

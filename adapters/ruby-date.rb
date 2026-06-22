@@ -407,10 +407,11 @@ class RubyDateAdapter
     offset = time_hash[:utc_offset]
 
     if offset
-      off_h = offset[:hours] || 0
-      off_m = offset[:minutes] || 0
-      off_sign = offset[:sign] || "+"
-      off_rational = Rational(off_sign == "-" ? -1 : 1) * Rational(off_h * 60 + off_m, 1440)
+      off_h = symbolize_keys(offset)
+      off_hours = off_h[:hours] || 0
+      off_mins = off_h[:minutes] || 0
+      off_sign = off_h[:sign] || "+"
+      off_rational = Rational(off_sign == "-" ? -1 : 1) * Rational(off_hours * 60 + off_mins, 1440)
     else
       off_rational = Rational(0, 24)
     end
@@ -497,17 +498,19 @@ class RubyDateAdapter
   end
 
   def format_offset_basic(offset)
-    return "Z" if offset && offset[:hours] == 0 && (offset[:minutes] || 0) == 0 && offset[:sign] == "+"
     return "" unless offset
-    sign = offset[:sign] || "+"
-    "#{sign}%02d%02d" % [offset[:hours] || 0, offset[:minutes] || 0]
+    h = symbolize_keys(offset)
+    return "Z" if h[:hours] == 0 && (h[:minutes] || 0) == 0 && h[:sign] == "+"
+    sign = h[:sign] || "+"
+    "#{sign}%02d%02d" % [h[:hours] || 0, h[:minutes] || 0]
   end
 
   def format_offset_extended(offset)
-    return "Z" if offset && offset[:hours] == 0 && (offset[:minutes] || 0) == 0 && offset[:sign] == "+"
     return "" unless offset
-    sign = offset[:sign] || "+"
-    "#{sign}%02d:%02d" % [offset[:hours] || 0, offset[:minutes] || 0]
+    h = symbolize_keys(offset)
+    return "Z" if h[:hours] == 0 && (h[:minutes] || 0) == 0 && h[:sign] == "+"
+    sign = h[:sign] || "+"
+    "#{sign}%02d:%02d" % [h[:hours] || 0, h[:minutes] || 0]
   end
 
   def symbolize_keys(hash)

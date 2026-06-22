@@ -106,15 +106,24 @@ STRPTIME_FORMATS = [
     # Date-only formats
     (re.compile(r'^\d{4}\d{2}\d{2}$'),                                   "%Y%m%d"),
     (re.compile(r'^\d{4}-\d{2}-\d{2}$'),                                 "%Y-%m-%d"),
+    (re.compile(r'^\d{4}-\d{2}$'),                                        "%Y-%m"),
+    (re.compile(r'^\d{4}$'),                                              "%Y"),
     (re.compile(r'^\d{4}\d{3}$'),                                        "%Y%j"),
     (re.compile(r'^\d{4}-\d{3}$'),                                       "%Y-%j"),
     (re.compile(r'^\d{4}W\d{2}\d$'),                                     "%GW%V%u"),
     (re.compile(r'^\d{4}-W\d{2}-\d$'),                                   "%G-W%V-%u"),
+    # Note: Python strptime requires weekday with %G/%V, so week-only formats
+    # (e.g. "1985W15") cannot be parsed with strptime.
 
     # Time-only, basic format with T prefix
+    (re.compile(r'^T\d{2}\d{2}\d{2}[.,]\d+Z$'),                          "T%H%M%S.%f%z"),
+    (re.compile(r'^T\d{2}\d{2}\d{2}[.,]\d+[+-]\d{2}:?\d{2}$'),           "T%H%M%S.%f%z"),
+    (re.compile(r'^T\d{2}\d{2}\d{2}[.,]\d+$'),                            "T%H%M%S.%f"),
     (re.compile(r'^T\d{2}\d{2}\d{2}Z$'),                                 "T%H%M%S%z"),
     (re.compile(r'^T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}$'),                 "T%H%M%S%z"),
     (re.compile(r'^T\d{2}\d{2}\d{2}$'),                                  "T%H%M%S"),
+    (re.compile(r'^T\d{2}\d{2}[.,]\d+Z$'),                               "T%H%M.%f%z"),
+    (re.compile(r'^T\d{2}\d{2}[.,]\d+$'),                                 "T%H%M.%f"),
     (re.compile(r'^T\d{2}\d{2}Z$'),                                      "T%H%M%z"),
     (re.compile(r'^T\d{2}\d{2}$'),                                       "T%H%M"),
     (re.compile(r'^T\d{2}$'),                                            "T%H"),
@@ -136,14 +145,15 @@ def _try_strptime(expr):
     """Try format-specific parsing with strptime."""
     for pattern, fmt in STRPTIME_FORMATS:
         if pattern.match(expr):
-            # Normalize Z to +0000 so %z handles it
+            # Normalize: Z → +0000, comma → dot (for fractional seconds)
             normalized = expr[:-1] + "+0000" if expr.endswith("Z") else expr
+            normalized = normalized.replace(",", ".")
             try:
-                if "%j" in fmt or "%G" in fmt or "%V" in fmt:
-                    # date-only or datetime with ordinal/week formats
-                    parsed = datetime.strptime(normalized, fmt.replace("Z", "+0000"))
-                else:
-                    parsed = datetime.strptime(normalized, fmt.replace("Z", "+0000"))
+                parsed = datetime.strptime(normalized, fmt.replace("Z", "+0000"))
+                # Date-only formats produce datetime with time 00:00:00.
+                # Convert to plain date so extract_components omits time.
+                if "%H" not in fmt and "%M" not in fmt and "%S" not in fmt:
+                    parsed = parsed.date()
                 return {"valid": True, "parsed": _store(parsed), "api": "datetime.strptime"}
             except (ValueError, TypeError):
                 continue
@@ -152,13 +162,27 @@ def _try_strptime(expr):
 
 # ── Protocol methods ─────────────────────────────────────────────────────────
 
+DECLARED_CONFORMANCE_CLASSES = [
+    "conf-class:fundamentals",
+    "conf-class:calendar-date",
+    "conf-class:ordinal-date",
+    "conf-class:week-date",
+    "conf-class:time-of-day",
+    "conf-class:date-and-time",
+]
+
+
 def info(params):
     vi = sys.version_info
     return {
-        "name": "Python datetime",
+        "name": f"Python {vi.major}.{vi.minor} datetime",
         "language": "python",
         "version": f"{vi.major}.{vi.minor}.{vi.micro}",
     }
+
+
+def declared_conformance_classes(params):
+    return DECLARED_CONFORMANCE_CLASSES
 
 
 def try_parse(params):
@@ -201,10 +225,17 @@ def extract_components(params):
     if isinstance(obj, (date, datetime)):
         result["calendar"] = {"year": obj.year, "month": obj.month, "day": obj.day}
 
-    if isinstance(obj, datetime):
-        result["time"] = {"hour": obj.hour, "minute": obj.minute, "second": obj.second}
+        iso_year, iso_week, iso_weekday = obj.isocalendar()
+        result["week"] = {
+            "week_year": iso_year,
+            "week": iso_week,
+            "day_of_week": iso_weekday,
+        }
 
         result["ordinal"] = {"year": obj.year, "day_of_year": obj.timetuple().tm_yday}
+
+    if isinstance(obj, datetime):
+        result["time"] = {"hour": obj.hour, "minute": obj.minute, "second": obj.second}
 
         off = obj.utcoffset()
         if off is not None:
@@ -214,9 +245,6 @@ def extract_components(params):
                 "hours": abs(total_sec) // 3600,
                 "minutes": (abs(total_sec) % 3600) // 60,
             }
-
-    if isinstance(obj, date) and not isinstance(obj, datetime):
-        result["ordinal"] = {"year": obj.year, "day_of_year": obj.timetuple().tm_yday}
 
     return result
 
@@ -388,6 +416,7 @@ def run_arithmetic(params):
 
 METHODS = {
     "info": info,
+    "declared_conformance_classes": declared_conformance_classes,
     "try_parse": try_parse,
     "extract_components": extract_components,
     "generate": generate,

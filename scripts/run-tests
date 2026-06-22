@@ -62,7 +62,7 @@ class Runner
       if declared && !declared.empty?
         type, id = infer_class(tid, index)
         if type == :conformance_class && !declared.include?(id)
-          results << { test: tid, description: desc, result: "not-supported", notes: "Conformance class not declared by implementation" }
+          results << { "test" => tid, "description" => desc, "result" => "not-supported", "notes" => "Conformance class not declared by implementation" }
           counts[:not_supported] += 1
           unless @quiet
             puts "  #{Term.dim("  N/S ")}  #{Term.cyan(tid)} #{Term.dim("not declared: #{id}")}"
