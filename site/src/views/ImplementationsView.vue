@@ -12,7 +12,10 @@ const props = defineProps({
 
 const emit = defineEmits(["navigate"]);
 
-const families = computed(() => groupByFamily(props.libs));
+const families = computed(() => {
+  const groups = groupByFamily(props.libs);
+  return groups.slice().sort((a, b) => (a.language || "").localeCompare(b.language || ""));
+});
 
 const familyStatsMap = computed(() => {
   const m = {};
@@ -31,25 +34,28 @@ function versionDelta(libId, family) {
 }
 
 function libProfiles(lib) {
-  return props.profiles.map(p => {
-    const ar = p.adapter_results?.find(a => a.id === lib.id);
-    const total = ar?.test_total || 0;
-    const pass = ar?.test_pass || 0;
-    const pct = total ? Math.round(pass / total * 100) : 0;
-    const statuses = [];
-    p.traceability?.forEach(cc => {
-      cc.requirements.forEach(r => {
-        const pl = r.per_library?.find(pl => pl.library_id === lib.id);
-        if (pl) statuses.push(pl.status);
+  const targetIds = new Set((lib.target_profiles || []).map(p => p.id));
+  return props.profiles
+    .filter(p => targetIds.has(p.id))
+    .map(p => {
+      const ar = p.adapter_results?.find(a => a.id === lib.id);
+      const total = ar?.test_total || 0;
+      const pass = ar?.test_pass || 0;
+      const pct = total ? Math.round(pass / total * 100) : 0;
+      const statuses = [];
+      p.traceability?.forEach(cc => {
+        cc.requirements.forEach(r => {
+          const pl = r.per_library?.find(pl => pl.library_id === lib.id);
+          if (pl) statuses.push(pl.status);
+        });
       });
+      let det = "none";
+      if (statuses.length > 0) {
+        if (statuses.every(s => s === "pass")) det = "full";
+        else if (statuses.some(s => s === "pass" || s === "partial")) det = "partial";
+      }
+      return { id: p.id, name: p.name, logo: p.logo, pct, det, pass, total };
     });
-    let det = "none";
-    if (statuses.length > 0) {
-      if (statuses.every(s => s === "pass")) det = "full";
-      else if (statuses.some(s => s === "pass" || s === "partial")) det = "partial";
-    }
-    return { id: p.id, name: p.name, logo: p.logo, pct, det, pass, total };
-  });
 }
 
 function detPill(det) {
@@ -161,12 +167,15 @@ function pctBarTone(pct) {
                 <span class="text-rust">{{ libStats(lib, reqs).fail }} fail</span>
               </div>
 
-              <div class="space-y-1.5">
+              <div v-if="libProfiles(lib).length > 0" class="space-y-1.5">
                 <div v-for="p in libProfiles(lib)" :key="p.id" class="flex items-center gap-2">
                   <img v-if="p.logo" :src="p.logo" :alt="p.name" class="w-4 h-4 shrink-0 opacity-70" />
                   <span class="font-mono text-xs text-ink-muted flex-1 truncate">{{ p.name }}</span>
                   <span :class="detPill(p.det).cls">{{ p.pct }}%</span>
                 </div>
+              </div>
+              <div v-else class="font-mono text-[11px] text-ink-faint italic">
+                No declared profiles
               </div>
 
               <div class="mt-4 font-mono text-xs text-ink-faint flex items-center gap-1">

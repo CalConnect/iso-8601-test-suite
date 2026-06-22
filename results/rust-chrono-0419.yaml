@@ -11,12 +11,10 @@ verification: automated
 declared_conformance_classes:
 - conf-class:fundamentals
 - conf-class:calendar-date
-- conf-class:ordinal-date
-- conf-class:week-date
 - conf-class:time-of-day
 - conf-class:date-and-time
 profiles_tested:
-  error: 'Unknown method: declared_profiles'
+- profile:iso-8601-1-core
 conformance_class_results:
 - conformance_class: conf-class:calendar-date
   status: failed
@@ -24,10 +22,10 @@ conformance_class_results:
   - test: conf-test:cal-date-parse-001
     result: pass
   - test: conf-test:cal-date-parse-002
-    result: pass
-  - test: conf-test:cal-date-parse-003
     result: fail
     notes: Component mismatch
+  - test: conf-test:cal-date-parse-003
+    result: fail
   - test: conf-test:cal-date-parse-004
     result: fail
   - test: conf-test:cal-date-parse-005
@@ -38,10 +36,10 @@ conformance_class_results:
   - test: conf-test:cal-date-parse-007
     result: fail
   - test: conf-test:cal-date-parse-008
-    result: pass
-  - test: conf-test:cal-date-parse-009
     result: fail
     notes: Component mismatch
+  - test: conf-test:cal-date-parse-009
+    result: fail
   - test: conf-test:cal-date-parse-010
     result: fail
   - test: conf-test:cal-date-parse-011
@@ -83,7 +81,8 @@ conformance_class_results:
   - test: conf-test:cal-date-valid-006
     result: pass
   - test: conf-test:cal-date-valid-007
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-valid-008
     result: pass
   - test: conf-test:cal-date-valid-009
@@ -91,7 +90,8 @@ conformance_class_results:
   - test: conf-test:cal-date-valid-010
     result: pass
   - test: conf-test:cal-date-equiv-001
-    result: pass
+    result: fail
+    notes: Expected true
   - test: conf-test:cal-date-equiv-002
     result: not-supported
     notes: Cannot parse one or both expressions
@@ -105,7 +105,7 @@ conformance_class_results:
   - test: conf-test:date-time-parse-003
     result: pass
   - test: conf-test:date-time-parse-004
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-005
     result: pass
   - test: conf-test:date-time-parse-006
@@ -113,7 +113,7 @@ conformance_class_results:
   - test: conf-test:date-time-parse-007
     result: pass
   - test: conf-test:date-time-parse-008
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-009
     result: fail
     notes: Component mismatch
@@ -125,6 +125,7 @@ conformance_class_results:
     notes: Component mismatch
   - test: conf-test:date-time-parse-012
     result: fail
+    notes: Component mismatch
   - test: conf-test:date-time-parse-013
     result: pass
   - test: conf-test:date-time-parse-014
@@ -132,7 +133,7 @@ conformance_class_results:
   - test: conf-test:date-time-parse-015
     result: pass
   - test: conf-test:date-time-parse-016
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-017
     result: fail
   - test: conf-test:date-time-parse-018
@@ -346,7 +347,8 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-028
     result: pass
   - test: conf-test:fundamentals-valid-029
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-030
     result: pass
   - test: conf-test:fundamentals-valid-031
@@ -362,10 +364,9 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-036
     result: pass
   - test: conf-test:fundamentals-parse-007
-    result: pass
+    result: fail
   - test: conf-test:fundamentals-parse-008
     result: fail
-    notes: Component mismatch
   - test: conf-test:fundamentals-valid-037
     result: fail
     notes: Expected true, got false
@@ -391,44 +392,53 @@ conformance_class_results:
   - test: conf-test:fundamentals-parse-010
     result: fail
 - conformance_class: conf-class:ordinal-date
-  status: failed
+  status: not-supported
   test_results:
   - test: conf-test:ord-date-parse-001
-    result: fail
-    notes: Component mismatch
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-003
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-004
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-005
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-006
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-parse-007
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-001
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-002
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-003
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-gen-004
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-valid-003
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:ord-date-equiv-001
-    result: fail
-    notes: Expected true
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:recurring-time-interval
   status: not-supported
   test_results:
@@ -611,12 +621,16 @@ conformance_class_results:
     notes: Component mismatch
   - test: conf-test:time-parse-024
     result: fail
+    notes: Component mismatch
   - test: conf-test:time-parse-025
     result: fail
+    notes: Component mismatch
   - test: conf-test:time-parse-026
     result: fail
+    notes: Component mismatch
   - test: conf-test:time-parse-027
     result: fail
+    notes: Component mismatch
   - test: conf-test:time-parse-028
     result: fail
   - test: conf-test:time-parse-029
@@ -679,47 +693,59 @@ conformance_class_results:
   - test: conf-test:time-equiv-002
     result: pass
 - conformance_class: conf-class:week-date
-  status: failed
+  status: not-supported
   test_results:
   - test: conf-test:week-date-parse-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-003
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-004
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-005
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-006
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-007
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-parse-008
-    result: fail
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-001
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-002
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-003
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-gen-004
     result: not-supported
-    notes: Adapter cannot generate from given components
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-001
-    result: fail
-    notes: Expected false, got true
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-002
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-003
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-valid-004
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:week-date-equiv-001
-    result: pass
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:arithmetic
   status: not-supported
   test_results:
@@ -1869,7 +1895,8 @@ profile_results:
   - test: conf-test:edtf-level-0-invalid-003
     result: pass
   - test: conf-test:edtf-level-0-invalid-004
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-0-invalid-005
     result: pass
   - test: conf-test:edtf-level-0-invalid-006
@@ -1920,7 +1947,8 @@ profile_results:
   - test: conf-test:edtf-level-1-valid-012
     result: pass
   - test: conf-test:edtf-level-1-invalid-007
-    result: pass
+    result: fail
+    notes: Expected false, got true
 - profile: profile:edtf-level-2
   status: failed
   test_results:
@@ -1970,7 +1998,8 @@ profile_results:
   - test: conf-test:edtf-level-2-valid-014
     result: pass
   - test: conf-test:edtf-level-2-invalid-005
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-2-valid-015
     result: fail
     notes: Expected true, got false
@@ -2037,8 +2066,7 @@ profile_results:
     result: fail
     notes: Expected false, got true
   - test: conf-test:rfc-3339-invalid-005
-    result: fail
-    notes: Expected false, got true
+    result: pass
   - test: conf-test:rfc-3339-invalid-006
     result: pass
   - test: conf-test:rfc-3339-valid-006
@@ -2057,7 +2085,8 @@ profile_results:
     result: fail
     notes: Expected true, got false
   - test: conf-test:w3c-datetime-valid-002
-    result: pass
+    result: fail
+    notes: Expected true, got false
   - test: conf-test:w3c-datetime-valid-003
     result: pass
   - test: conf-test:w3c-datetime-valid-004
@@ -2086,8 +2115,7 @@ profile_results:
   - test: conf-test:w3c-datetime-invalid-005
     result: pass
   - test: conf-test:w3c-datetime-invalid-006
-    result: fail
-    notes: Expected false, got true
+    result: pass
   - test: conf-test:w3c-datetime-invalid-007
     result: fail
     notes: Expected false, got true
