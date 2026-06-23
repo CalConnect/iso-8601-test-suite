@@ -1,0 +1,77 @@
+= Java java.time adapter
+
+Wraps Java's standard-library `java.time` API (`LocalDate`,
+`LocalDateTime`, `OffsetDateTime`, `DateTimeFormatter`).
+
+== File
+
+`JavaDateTime.java` — single source file. The public class is named
+`JavaDateTime`, so the file name must match (Java requirement). The
+`exec:` commands recompile on every invocation.
+
+== Running
+
+Three variants are wired in `lib/test_suite/capability_matrix.rb`:
+
+[source,bash]
+----
+# Java 21 (default; active JDK on PATH):
+ruby scripts/run-tests --adapter java-time
+
+# Java 8 (via AdoptOpenJDK):
+ruby scripts/run-tests --adapter java-8
+
+# Java 15 (via AdoptOpenJDK):
+ruby scripts/run-tests --adapter java-15
+----
+
+Each variant compiles into a separate `/tmp/java-adapters-{N}`
+directory to avoid class-file collisions between JDK versions.
+
+== Parser strategy
+
+`java.time` was designed for ISO 8601, so this adapter leans on its
+built-in parsers:
+
+* `LocalDate.parse(input)` / `LocalDateTime.parse(input)` /
+  `OffsetDateTime.parse(input)` — strict ISO parsers.
+* `DateTimeFormatterBuilder` — used for formats the strict parsers
+  reject (basic format, reduced precision).
+* `IsoFields` — week-date and ordinal-date support.
+
+Each parse path returns a `ParseResult` with the parsed value, the
+matched API, and any error.
+
+== Versions tested
+
+[cols="1,1,4",options="header"]
+|===
+| Adapter ID | JDK | Notes
+
+| `java-time` | 21 (active)  | Current LTS.
+| `java-8`    | 8            | First JDK with `java.time`. Surfaces pre-8 era regressions.
+| `java-15`   | 15           | Non-LTS but widely deployed.
+|===
+
+JDK versions are managed via `mise`.
+
+== Build
+
+The `exec:` commands in `capability_matrix.rb` recompile on each run.
+For a manual build:
+
+[source,bash]
+----
+javac -d /tmp/java-adapters adapters/java/JavaDateTime.java
+java  -cp /tmp/java-adapters JavaDateTime
+----
+
+== Known limitations
+
+* No fractional-second support in basic format.
+* No expanded-year (`+01985`) support.
+* No reduced-precision (`1985`, `1985-04`) support.
+* No duration / interval / recurring interval support.
+
+`JavaDateTime*.class` files in this folder (if any) are stale build
+artifacts from prior layouts; the active build target is `/tmp/`.

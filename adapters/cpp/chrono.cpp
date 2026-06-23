@@ -1,7 +1,7 @@
 // ISO 8601 Test Suite — C++ std::chrono + get_time adapter (JSON protocol)
 //
 // Implements the newline-delimited JSON protocol for use with:
-//   ruby run-tests --adapter "exec:./adapters/cpp-chrono"
+//   ruby run-tests --adapter "exec:./adapters/cpp/cpp-chrono"
 //
 // Uses C++20 <chrono> calendar types (year_month_day, weekday) combined with
 // C-style get_time/strftime for parsing/formatting. strptime is not in the C++
@@ -12,7 +12,7 @@
 //   - macOS get_time doesn't support %z (timezone offset parsing)
 //   - get_time with smart normalization accepts Feb 30 → Mar 2 (we re-validate)
 //
-// Build: clang++ -std=c++20 -O2 -o adapters/cpp-chrono adapters/cpp-chrono.cpp
+// Build: clang++ -std=c++20 -O2 -o adapters/cpp/cpp-chrono adapters/cpp/chrono.cpp
 
 #ifndef ADAPTER_LABEL
 #define ADAPTER_LABEL "C++ std::chrono"

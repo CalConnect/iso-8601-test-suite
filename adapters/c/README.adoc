@@ -1,0 +1,67 @@
+= C stdio adapter
+
+Wraps the C standard library `strftime` and `strptime` functions.
+
+== File
+
+`stdio.c` — single source file. Compiled on each invocation by `gcc`
+(or inside Docker for the glibc variant).
+
+== Running
+
+Two variants are wired in `lib/test_suite/capability_matrix.rb`:
+
+[source,bash]
+----
+# BSD/macOS strptime/strftime (default):
+ruby scripts/run-tests --adapter c-stdio
+
+# glibc strptime/strftime (via Docker gcc:15):
+ruby scripts/run-tests --adapter c-stdio-glibc
+----
+
+The macOS variant compiles locally via `gcc`; the glibc variant runs
+`gcc:15` in a Docker container so the test hits real glibc rather than
+Apple's libc.
+
+== Parser strategy
+
+Pure C standard library:
+
+* `strptime(input, format, &tm)` — parses one format at a time. The
+  adapter walks a list of format strings, returning the first match.
+* `strftime(buf, len, format, &tm)` — generates output from a
+  populated `struct tm`.
+
+Each format pair is tried in turn. `tm` is zeroed between attempts.
+
+== Variants
+
+[cols="1,1,4",options="header"]
+|===
+| Adapter ID | libc | Why it exists
+
+| `c-stdio`
+| BSD (macOS)
+| Default; reflects what most macOS / FreeBSD users get.
+
+| `c-stdio-glibc`
+| glibc (gcc 15)
+| Most Linux distributions use glibc. Behavior diverges from BSD on
+  edge cases (e.g. `%z` parsing, week-date acceptance).
+|===
+
+The two variants share one source file; the only difference is which
+libc the compiled binary links against.
+
+== Known limitations
+
+POSIX/C99 `strptime` is intentionally small:
+
+* No expanded-year support (`+01985`).
+* No reduced-precision date support (`1985`, `1985-04`).
+* No fractional seconds.
+* Week-date parsing (`%G`, `%V`, `%u`) is a glibc/BSD extension and
+  behaves differently between the two variants — the harness surfaces
+  this divergence as a test result.
+* No duration / interval / recurring interval support.

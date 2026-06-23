@@ -1,0 +1,71 @@
+= Node.js Date adapter
+
+Wraps JavaScript's built-in `Date` and `Date.parse`.
+
+== File
+
+`datetime.js` — single source file. Invoked as a long-lived child
+process via `node`.
+
+== Running
+
+[source,bash]
+----
+# Active Node:
+ruby scripts/run-tests --adapter "exec:node adapters/node/datetime.js"
+
+# Specific Node version via mise:
+ruby scripts/run-tests --adapter "exec:~/.local/share/mise/installs/node/18.20.4/bin/node adapters/node/datetime.js"
+----
+
+Version-pinned invocations are pre-wired in
+`lib/test_suite/capability_matrix.rb` (`node-18`, `node-20`, `node-22`).
+
+== Parser strategy
+
+JavaScript's `Date.parse` is intentionally minimal — this adapter exists
+to document exactly how minimal. It accepts a subset of ISO 8601
+extended format (calendar date-time with optional offset) and rejects
+everything else:
+
+* No basic format (`19850412` → invalid).
+* No ordinal dates.
+* No week dates.
+* No durations, intervals.
+* No reduced precision.
+* `toISOString()` always emits UTC extended format.
+
+The adapter returns parse errors for unsupported formats rather than
+attempting fallback parsing — those errors are themselves the test
+signal.
+
+== Versions tested
+
+[cols="1,1",options="header"]
+|===
+| Adapter ID | Node version
+
+| `node-18`       | 18.x (LTS)
+| `node-20`       | 20.x (LTS)
+| `node-22`       | 22.x (current)
+| `node-datetime` | active Node (24.x)
+|===
+
+Versions are managed via `mise`.
+
+== Known limitations
+
+This list IS the test surface for Node — each item is a format the
+adapter rejects:
+
+* Basic format dates and times.
+* Ordinal dates (`1985-102`).
+* Week dates (`1985-W15-1`).
+* Expanded years (`+01985`).
+* Reduced precision (`1985`, `1985-04`).
+* Fractional seconds in basic format.
+* Durations (`P1Y2M10D`), intervals, recurring intervals.
+
+Adding support would require either bundling a third-party library
+(which would defeat the purpose — measuring the stdlib) or implementing
+a parser in JavaScript. Both are intentionally out of scope.

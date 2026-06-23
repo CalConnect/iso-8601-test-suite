@@ -134,9 +134,31 @@ iso-8601-test-suite/
 │   ├── graph_util.rb                 # Directed cycle detection
 │   └── hash_util.rb                  # Hash key normalization
 ├── adapters/                         # Pluggable implementation adapters
-│   ├── TEMPLATE.rb                   # Adapter interface template
-│   ├── ruby-date.rb                  # Ruby stdlib Date/DateTime/Time adapter
-│   └── python-datetime.py            # Example: Python datetime (exec protocol)
+│   ├── TEMPLATE.rb                   # Ruby adapter interface template
+│   ├── README.adoc                   # Adapters overview
+│   ├── ruby/                         # Ruby Date/DateTime/Time
+│   │   ├── README.adoc
+│   │   ├── date.rb                   # In-process adapter (loaded by Ruby adapter loader)
+│   │   └── date-exec.rb              # Exec wrapper — same logic, any Ruby runtime
+│   ├── python/                       # Python datetime
+│   │   ├── README.adoc
+│   │   └── datetime.py
+│   ├── node/                         # Node.js Date
+│   │   ├── README.adoc
+│   │   └── datetime.js
+│   ├── c/                            # C strftime/strptime
+│   │   ├── README.adoc
+│   │   └── stdio.c
+│   ├── cpp/                          # C++ std::chrono
+│   │   ├── README.adoc
+│   │   └── chrono.cpp
+│   ├── java/                         # Java java.time
+│   │   ├── README.adoc
+│   │   └── JavaDateTime.java
+│   └── rust/                         # Rust chrono (one source, two crate versions)
+│       ├── README.adoc
+│       ├── chrono-latest/            # chrono = "0.4" (resolves to latest 0.4.x)
+│       └── chrono-0419/              # chrono = "=0.4.19" (pinned)
 ├── schema/
 │   ├── suite.yaml                    # YAML Schema for suite manifest
 │   ├── requirements-class.yaml       # YAML Schema for requirements class files
@@ -262,40 +284,51 @@ traceability requirements) plus 15 RFC 3339-specific additional tests.
 
 ==== Writing a new adapter
 
-Adapters live in `adapters/{name}.rb` and wrap a specific date/time
-implementation so the test harness can execute conformance tests against it.
-Each adapter implements a well-defined interface:
+Adapters wrap a specific date/time implementation so the test harness can
+execute conformance tests against it. There are two adapter shapes:
+
+[cols="1,4",options="header"]
+|===
+| Shape | When to use
+| Ruby class (`adapters/{name}.rb`) | The implementation is Ruby or has a Ruby binding. The harness loads it in-process — fastest, no JSON marshalling overhead.
+| External process (`exec:...`) | Anything else: JavaScript, Python, Rust, C, C++, Java, a binary you built by hand. The harness spawns a long-lived child process and talks to it over newline-delimited JSON.
+|===
+
+Every adapter implements the same logical interface, regardless of shape:
 
 [cols="1,4"]
 |===
 | `try_parse(expression, options)` | Parse an expression; return `{valid:, parsed:, api:}` or `{valid: false, error:, api:}`. `options` may include `parse_mode` ("dedicated" or "undifferentiated").
-| `extract_components(parsed)` | Extract components (year, month, day, etc.) from a parsed object
-| `generate(components)` | Build an expression from components; return `{expression:}` or `nil`
-| `equivalent?(obj_a, obj_b)` | Check if two parsed objects represent the same instant
-| `run_arithmetic(test)` | Optional: execute an arithmetic test (default: not-supported)
+| `extract_components(parsed)` | Extract components (year, month, day, etc.) from a parsed object.
+| `generate(components)` | Build an expression from components; return `{expression:}` or `nil`.
+| `equivalent?(obj_a, obj_b)` | Check if two parsed objects represent the same instant.
+| `run_arithmetic(test)` | Optional: execute an arithmetic test (default: not-supported).
+| `declared_conformance_classes` | Optional: which conformance classes the implementation claims. Tests outside this list are recorded as `not-supported` rather than `fail`.
+| `declared_profiles` | Optional: which profiles the implementation explicitly targets. When set, the dashboard uses this to scope per-library statistics (overrides inference from `declared_conformance_classes`).
 |===
 
-To create a new adapter:
+===== Ruby adapter
 
 . Copy `adapters/TEMPLATE.rb` to `adapters/{name}.rb`
 . Rename the class to `{CamelCaseName}Adapter` (e.g. `ruby-date.rb` → `RubyDateAdapter`)
-. Implement the required methods
+. Implement the required methods and set `declared_conformance_classes` / `declared_profiles`
 . Run: `ruby scripts/run-tests --adapter {name}`
 
 The class naming convention converts the filename by capitalizing each
 hyphen-separated segment and appending `Adapter` (e.g. `my-lib` → `MyLibAdapter`).
 
-==== Testing non-Ruby implementations (exec adapter)
+===== Exec adapter (any language)
 
 The `exec:` adapter type lets you test any implementation in any language —
-JavaScript, Python, Rust, an XML parser, a web API — without writing Ruby code.
-It communicates with a child process via a newline-delimited JSON protocol.
+JavaScript, Python, Rust, an XML parser, a web API — without writing Ruby
+code. It communicates with a child process via a newline-delimited JSON
+protocol.
 
 [source,bash]
 ----
-ruby scripts/run-tests --adapter "exec:python3 adapters/python-datetime.py"
-ruby scripts/run-tests --adapter "exec:node adapters/js-temporal.mjs"
-ruby scripts/run-tests --adapter exec:./adapters/rust-chrono
+ruby scripts/run-tests --adapter "exec:python3 adapters/python/datetime.py"
+ruby scripts/run-tests --adapter "exec:node adapters/node/datetime.js"
+ruby scripts/run-tests --adapter exec:./adapters/rust/chrono-latest/target/release/rust-chrono
 ----
 
 ===== JSON protocol
@@ -353,6 +386,19 @@ Return `true`, `false`, or `null` (cannot determine).
 | `run_arithmetic`
 | Params: `{"test":{...}}`. +
 Return `{"result":"not-supported","notes":"..."}` if unsupported.
+
+| `declared_conformance_classes`
+| No params. +
+Return `["conf-class:fundamentals", ...]` — the conformance classes this
+implementation claims. Tests outside this list are recorded as
+`not-supported` rather than `fail`.
+
+| `declared_profiles`
+| No params. +
+Return `["profile:iso-8601-1-core", ...]` — the profiles this implementation
+explicitly targets. When non-empty, the dashboard uses this to scope
+per-library statistics; otherwise it infers target profiles from
+`declared_conformance_classes`.
 |===
 
 The `parsed` value is an opaque handle (any JSON value) managed by the adapter
@@ -361,9 +407,118 @@ object and returns a handle. The harness passes this handle to
 `extract_components` and `equivalent`. The adapter looks up the cached object
 by handle.
 
-See `adapters/python-datetime.py` for a working example (Python standard library).
-See `adapters/node-datetime.js` for a working example (JavaScript Date).
+See `adapters/python/datetime.py` for a working example (Python standard library).
+See `adapters/node/datetime.js` for a working example (JavaScript Date).
 See `adapters/TEMPLATE.rb` for the full adapter interface specification.
+
+==== Bundled adapters
+
+The repository ships adapters for 24 standard-library implementations across
+7 language families. Each adapter's `declared_conformance_classes` and
+`declared_profiles` reflect what the implementation actually claims to
+implement — by convention, every adapter currently declares only the 4
+ISO 8601-1 Core classes and targets `profile:iso-8601-1-core`.
+
+[cols="1,1,4",options="header"]
+|===
+| Family | Adapter ID | Implementation / invocation
+
+| Ruby Date
+| `ruby-date`
+| Ruby `Date`/`DateTime`/`Time` via in-process adapter (uses whatever Ruby is on PATH)
+
+| Ruby Date
+| `ruby-30` / `ruby-31` / `ruby-32` / `ruby-33` / `ruby-date-40`
+| Same Ruby adapter run under specific Ruby versions (via `mise`) — uses `adapters/ruby/date-exec.rb` as a long-lived child process
+
+| Python datetime
+| `python-datetime`
+| Python `datetime` via `exec:python3 adapters/python/datetime.py`
+
+| Python datetime
+| `python-38` / `python-39` / `python-312` / `python-313`
+| Same Python adapter run under specific Python versions (via `mise`)
+
+| Node.js Date
+| `node-datetime`
+| JavaScript `Date.parse` via `exec:node adapters/node/datetime.js`
+
+| Node.js Date
+| `node-18` / `node-20` / `node-22`
+| Same Node adapter under specific Node versions (via `mise`)
+
+| C stdio
+| `c-stdio`
+| BSD/macOS `strptime`/`strftime` via `exec:gcc -o /tmp/c-stdio-adapter adapters/c/stdio.c && /tmp/c-stdio-adapter`
+
+| C stdio
+| `c-stdio-glibc`
+| glibc `strptime`/`strftime` via Docker `gcc:15`
+
+| C++ chrono
+| `cpp-chrono`
+| C++20 `std::chrono` compiled with Homebrew LLVM (`/opt/homebrew/opt/llvm/bin/clang++`)
+
+| C++ chrono
+| `cpp-chrono-apple`
+| Same source compiled with Apple Clang (`/usr/bin/clang++`)
+
+| Rust chrono
+| `rust-chrono`
+| Rust `chrono 0.4 (latest)` — pre-built binary at `adapters/rust/chrono-latest/target/release/rust-chrono`
+
+| Rust chrono
+| `rust-chrono-0419`
+| Rust `chrono =0.4.19` — pre-built binary at `adapters/rust/chrono-0419/target/release/rust-chrono-0419`
+
+| Java java.time
+| `java-time`
+| Java 21 `java.time` via `exec:javac + java`
+
+| Java java.time
+| `java-8` / `java-15`
+| Same source compiled under Java 8 / Java 15 (via AdoptOpenJDK)
+|===
+
+===== Building the compiled adapters
+
+The Ruby, Python, Node, and C adapters are compiled (or interpreted) on
+each invocation — no separate build step. The Rust and Java adapters
+require a one-time build:
+
+[source,bash]
+----
+# Rust (both versions share adapters/rust/chrono-latest/src/main.rs)
+cargo build --release --manifest-path adapters/rust/chrono-latest/Cargo.toml
+cargo build --release --manifest-path adapters/rust/chrono-0419/Cargo.toml
+----
+
+Java is recompiled on each invocation via the `exec:` command in
+`lib/test_suite/capability_matrix.rb`, so no separate build step is needed.
+
+===== Regenerating all result files
+
+`scripts/regenerate-all-results` runs the full test suite against every
+adapter defined in `CapabilityMatrix::ADAPTER_DEFS` and writes one
+`results/{id}.yaml` per adapter:
+
+[source,bash]
+----
+ruby scripts/regenerate-all-results                              # all 24
+ruby scripts/regenerate-all-results --only rust-chrono,java-8    # subset
+ruby scripts/regenerate-all-results --skip c-stdio-glibc         # skip slow Docker build
+----
+
+After regenerating result YAMLs, refresh the dashboard JSON:
+
+[source,bash]
+----
+ruby scripts/capability-matrix    # writes site/public/summary.json + detail.json
+----
+
+The Rust adapter binaries are not rebuilt automatically — if you edit
+`adapters/rust/chrono-latest/src/main.rs`, rebuild both Cargo projects
+before running `regenerate-all-results` (see above).
 
 === Creating a new profile
 

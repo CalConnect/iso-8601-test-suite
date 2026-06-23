@@ -20,14 +20,14 @@ node_modules/
 site/dist/
 
 # Rust build artifacts
-adapters/rust-chrono/target/
-adapters/rust-chrono-0419/target/
+adapters/rust/*/target/
 
 # Compiled adapter artifacts (C/C++/Java)
+adapters/java/*.class
 adapters/*.class
-adapters/cpp-chrono
-adapters/cpp-chrono-apple
-adapters/cpp-chrono.cpp.bak
+adapters/cpp/cpp-chrono
+adapters/cpp/cpp-chrono-apple
+adapters/cpp/chrono.cpp.bak
 
 # Source artwork (site logos derived from these)
 /*.svg

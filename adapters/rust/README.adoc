@@ -1,0 +1,98 @@
+= Rust chrono adapter
+
+Wraps the `chrono` crate (the de facto standard datetime library in the
+Rust ecosystem). Not stdlib, but universal.
+
+== Folders
+
+Two crates share one source file:
+
+[cols="1,1,4",options="header"]
+|===
+| Folder | Crate | Purpose
+
+| `chrono-latest/`
+| `rust-chrono` (chrono 0.4 latest)
+| Tracks the current `chrono` release. Default Rust adapter.
+
+| `chrono-0419/`
+| `rust-chrono-0419` (chrono `=0.4.19`)
+| Pinned to a 2019 release. Surfaces regressions and fixes between
+  historical and current chrono.
+|===
+
+The crates are independent Cargo projects with their own `Cargo.toml`,
+`Cargo.lock`, and `target/` — but both compile `chrono-latest/src/main.rs`
+(see `path = "../chrono-latest/src/main.rs"` in
+`chrono-0419/Cargo.toml`). This keeps behavior comparison apples-to-apples.
+
+== Build
+
+Unlike the Ruby / Python / Node / Java adapters, the Rust adapters are
+**pre-built binaries** — the `exec:` command in
+`lib/test_suite/capability_matrix.rb` invokes the binary directly and
+does *not* trigger `cargo build`. This is intentional (cargo rebuilds
+are slow), but it means source edits require a manual rebuild.
+
+[source,bash]
+----
+cargo build --release --manifest-path adapters/rust/chrono-latest/Cargo.toml
+cargo build --release --manifest-path adapters/rust/chrono-0419/Cargo.toml
+----
+
+If you edit `chrono-latest/src/main.rs` and forget to rebuild, the test
+results will reflect the *old* binary. The `regenerate-all-results`
+script does not rebuild automatically.
+
+== Running
+
+[source,bash]
+----
+# Latest chrono:
+ruby scripts/run-tests --adapter rust-chrono
+
+# chrono 0.4.19 (regression check):
+ruby scripts/run-tests --adapter rust-chrono-0419
+----
+
+== Parser strategy
+
+`chrono` exposes `NaiveDate`, `NaiveDateTime`, `NaiveTime`,
+`DateTime<FixedOffset>`, plus `parse_from_str` with `strptime`-style
+format strings. The adapter walks format tables in priority order:
+
+1. `DateTime::parse_from_rfc3339` — handles RFC 3339 / ISO 8601
+   extended date-time with offset/Z.
+2. `NaiveDateTime::parse_from_str` — basic and extended formats with
+   optional offset.
+3. `NaiveDate::parse_from_str` — date-only formats (calendar, ordinal,
+   week).
+4. `NaiveTime::parse_from_str` — time-only formats.
+
+Trailing timezone offset (`Z`, `±HH:MM`, `±HHMM`, `±HH`) is stripped
+before date/time parsing and re-applied via `FixedOffset`.
+
+== Edition differences
+
+[cols="1,1",options="header"]
+|===
+| Crate | Rust edition
+
+| `chrono-latest`
+| 2021
+
+| `chrono-0419`
+| 2018 (chrono 0.4.19 predates edition 2021)
+|===
+
+The source `main.rs` is edition-2018-compatible.
+
+== Known limitations
+
+* No fractional-second support.
+* No expanded-year (`+01985`) support.
+* No reduced-precision (`1985`, `1985-04`) support.
+* `chrono` does not implement ISO 8601 durations, intervals, or
+  recurring intervals — `run_arithmetic` returns `not-supported`.
+* `target/` directories under each crate are large; both are
+  gitignored.
