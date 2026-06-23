@@ -1,0 +1,85 @@
+= Ruby Date adapter
+
+Wraps Ruby's standard-library `Date`, `DateTime`, and `Time` classes.
+
+== Files
+
+[cols="1,4",options="header"]
+|===
+| File | Purpose
+
+| `date.rb`
+| Defines `RubyDateAdapter`. Loaded directly into the harness process via
+  `--adapter ruby-date`. Uses whatever Ruby is on `PATH`.
+
+| `date-exec.rb`
+| Thin JSON-protocol wrapper around `RubyDateAdapter`. Spawned as a
+  long-lived child process for version-specific runs (Ruby 3.0 / 3.1 /
+  3.2 / 3.3 / 4.0) so the harness can pin a specific Ruby binary via
+  `mise` without restarting.
+|===
+
+The two files exist because the harness has two adapter kinds:
+
+* **In-process Ruby adapter** — fastest path; the harness `require`s the
+  file and calls methods directly. Only one Ruby version per process.
+* **External process adapter** — speaks the newline-delimited JSON
+  protocol over stdio. The Ruby binary that runs `date-exec.rb` decides
+  which stdlib version is under test.
+
+`date-exec.rb` exists *only* to wrap `date.rb` for the JSON protocol —
+all behavior lives in `date.rb`.
+
+== Running
+
+[source,bash]
+----
+# In-process (uses active Ruby):
+ruby scripts/run-tests --adapter ruby-date
+
+# Specific Ruby version via mise + exec:
+ruby scripts/run-tests --adapter "exec:~/.local/share/mise/installs/ruby/3.0.7/bin/ruby adapters/ruby/date-exec.rb"
+----
+
+The version-pinned invocations are pre-wired in
+`lib/test_suite/capability_matrix.rb` under `ADAPTER_DEFS` (`ruby-30`,
+`ruby-31`, `ruby-32`, `ruby-33`, `ruby-date-40`).
+
+== Parser strategy
+
+Ruby's stdlib gives three parsing entry points, used in this order:
+
+1. `Date.strptime` / `DateTime.strptime` — format-specific ("dedicated"
+   parse mode). Handles basic format, ordinal, week, and reduced
+   precision.
+2. `Date.iso8601` — strict ISO 8601 parser built into stdlib.
+3. `Date.parse` — general-purpose parser ("undifferentiated" mode);
+   accepts a wider grammar than ISO 8601, useful for surfacing parser
+   leniency as a test signal.
+
+For reduced-precision dates (year-only, year-month, decade, century),
+the adapter returns a `ReducedPrecisionDate` struct rather than a plain
+`Date` — this lets `extract_components` report the correct granularity
+without inventing a fake month/day.
+
+== Versions tested
+
+[cols="1,1",options="header"]
+|===
+| Adapter ID | Ruby version
+
+| `ruby-30`       | 3.0.7
+| `ruby-31`       | 3.1.x
+| `ruby-32`       | 3.2.x
+| `ruby-33`       | 3.3.x
+| `ruby-date`     | 3.4.x (active Ruby)
+| `ruby-date-40`  | 4.0.5 (preview)
+|===
+
+Versions are managed via `mise`; see `.tool-versions` for the pins.
+
+== Known limitations
+
+* No ISO 8601 duration, interval, or recurring interval support in stdlib.
+* `DateTime.parse` accepts some non-ISO inputs; only used in
+  undifferentiated mode where the wider grammar is the point.

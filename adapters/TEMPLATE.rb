@@ -59,6 +59,21 @@ class TemplateAdapter
     nil
   end
 
+  # ── Optional: declare which profiles this implementation targets ──────────
+  #
+  # Return an Array of profile IDs (e.g. "profile:iso-8601-1-core") that
+  # this implementation explicitly claims conformance to. When non-empty,
+  # this overrides any inference from declared_conformance_classes and is
+  # used by the dashboard to scope per-library statistics to the relevant
+  # requirements.
+  #
+  # Return nil or an empty Array if no profile claim is being made; the
+  # dashboard will then infer target profiles from declared_conformance_classes.
+  #
+  def declared_profiles
+    nil
+  end
+
   # ── Required: parse an expression ──────────────────────────────────────
   #
   # The harness calls this for validity, parsing, and round_trip tests.

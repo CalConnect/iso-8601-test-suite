@@ -1,7 +1,7 @@
 // ISO 8601 Test Suite — Rust chrono adapter (JSON protocol)
 //
 // Implements the newline-delimited JSON protocol for use with:
-//   ruby run-tests --adapter "exec:cargo run --release --quiet --manifest-path adapters/rust-chrono/Cargo.toml --"
+//   ruby run-tests --adapter "exec:cargo run --release --quiet --manifest-path adapters/rust/chrono-latest/Cargo.toml --"
 //
 // Uses the chrono crate for date/time operations. chrono is the de facto
 // standard datetime library in the Rust ecosystem (not stdlib, but universal).

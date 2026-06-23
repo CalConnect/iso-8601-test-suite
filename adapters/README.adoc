@@ -1,0 +1,81 @@
+= Adapters
+
+Pluggable implementations of ISO 8601 date/time handling, each wrapped so
+the test harness (`scripts/run-tests`) can execute the conformance suite
+against it.
+
+The adapter contract is defined in `TEMPLATE.rb` at this directory's
+parent. Every adapter — regardless of language — implements the same
+small set of methods (`try_parse`, `extract_components`, `generate`,
+`equivalent`, plus metadata) so the harness can drive it uniformly.
+
+== Layout
+
+Adapters are grouped by language family. Each family folder holds the
+adapter source(s) for that language; one source file typically covers
+several library versions (the version under test is selected by which
+runtime invokes it).
+
+[cols="1,1,4",options="header"]
+|===
+| Folder | Family | Notes
+
+| `ruby/`    | Ruby Date        | Two files: in-process `date.rb` and exec wrapper `date-exec.rb`
+| `python/`  | Python datetime  | Single source, `datetime.fromisoformat` + `strptime`
+| `node/`    | Node.js Date     | Single source, built-in `Date` / `Date.parse`
+| `c/`       | C stdio          | POSIX `strftime` / `strptime`
+| `cpp/`     | C++ chrono       | C++20 `std::chrono` + `get_time` / `strftime`
+| `rust/`    | Rust chrono      | Two crates: `chrono-latest` and `chrono-0419` share one `main.rs`
+| `java/`    | Java java.time   | Single source; public class name drives file name
+|===
+
+Each subfolder has its own `README.adoc` with language-specific build,
+invocation, and known-limitation notes.
+
+== Adapter kinds
+
+There are two ways an adapter can be invoked:
+
+[cols="1,1,4",options="header"]
+|===
+| Kind | Declared via | How it runs
+
+| Ruby in-process
+| `--adapter ruby-date`
+| Loaded into the harness process via `AdapterLoader`. Fastest — no JSON.
+| External process
+| `--adapter exec:<command>`
+| Spawned as a long-lived child; speaks newline-delimited JSON over stdio.
+|===
+
+The exec protocol is what makes it possible to test Python, Node, C, C++,
+Rust, Java, and even alternate Ruby versions from a single Ruby harness.
+See `TEMPLATE.rb` (parent directory) for the full protocol specification
+and `lib/test_suite/exec_adapter.rb` for the harness side.
+
+== Declared conformance
+
+Every adapter ships two metadata methods that the dashboard uses to scope
+results to what the implementation actually claims to support:
+
+* `declared_conformance_classes` — array of `conf-class:*` IDs
+* `declared_profiles` — array of `profile:*` IDs (optional; when present,
+  overrides inference from the conformance classes)
+
+By convention, all bundled adapters currently declare only the four
+ISO 8601-1 Core classes and target `profile:iso-8601-1-core`. This keeps
+the dashboard honest — a library isn't credited for formats it doesn't
+implement.
+
+== Regenerating results
+
+[source,bash]
+----
+ruby scripts/regenerate-all-results                              # all 24
+ruby scripts/regenerate-all-results --only rust-chrono,java-8    # subset
+ruby scripts/regenerate-all-results --skip c-stdio-glibc         # skip Docker
+ruby scripts/capability-matrix                                   # refresh JSON
+----
+
+Compiled adapters (Rust, Java) need a one-time build before
+regenerating — see each subfolder's README.

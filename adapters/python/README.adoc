@@ -1,0 +1,66 @@
+= Python datetime adapter
+
+Wraps the Python standard-library `date` and `datetime` classes.
+
+== File
+
+`datetime.py` — single source file. Invoked as a long-lived child
+process speaking the newline-delimited JSON protocol.
+
+== Running
+
+[source,bash]
+----
+# Active Python:
+ruby scripts/run-tests --adapter "exec:python3 adapters/python/datetime.py"
+
+# Specific Python version via mise:
+ruby scripts/run-tests --adapter "exec:~/.local/share/mise/installs/python/3.8.18/bin/python adapters/python/datetime.py"
+----
+
+Version-pinned invocations are pre-wired in
+`lib/test_suite/capability_matrix.rb` (`python-38`, `python-39`,
+`python-312`, `python-313`).
+
+== Parser strategy
+
+Python's stdlib has two parsing entry points. The adapter uses both:
+
+1. `datetime.strptime` — format-specific ("dedicated" mode). Required
+   for basic format, ordinal dates, week dates, and reduced-precision
+   formats that `fromisoformat` rejects.
+2. `datetime.fromisoformat` / `date.fromisoformat` — strict ISO 8601
+   parser. Used as the fallback in dedicated mode and always tried in
+   undifferentiated mode.
+
+The strptime format table is the bulk of `datetime.py` (`STRPTIME_FORMATS`).
+Each entry pairs a regex (so we don't try every format on every input)
+with a `%Y-%m-%d...` format string. `Z` is normalized to `+0000` and
+`,` to `.` (for fractional seconds) before parsing.
+
+== Versions tested
+
+[cols="1,1",options="header"]
+|===
+| Adapter ID | Python version
+
+| `python-38`       | 3.8
+| `python-39`       | 3.9
+| `python-datetime` | active Python (3.11/3.12)
+| `python-312`      | 3.12
+| `python-313`      | 3.13
+|===
+
+Versions are managed via `mise`.
+
+== Known limitations
+
+* `fromisoformat` gained fractional-seconds and `Z` support only in
+  Python 3.11+; older versions reject them (which is why we have the
+  strptime table).
+* No expanded-year (signed `±YYYYY`) support — TODO.
+* No reduced-precision date support (`YYYY`, `YYYY-MM`) — TODO.
+* `strptime` requires `%G`/`%V` to be paired with `%u` (weekday), so
+  week-only formats like `1985W15` cannot be parsed.
+* `__pycache__/` appears under this folder after running — it's
+  gitignored.

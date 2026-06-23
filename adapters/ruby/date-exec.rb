@@ -8,7 +8,7 @@
 # runtime that executes this file determines which stdlib version is under
 # test. ADAPTER_DEFS specifies which ruby binary invokes this file per entry.
 #
-# Usage: invoked via exec:<path-to-ruby> adapters/ruby-date-exec.rb
+# Usage: invoked via exec:<path-to-ruby> adapters/ruby/date-exec.rb
 # =============================================================================
 
 require "json"

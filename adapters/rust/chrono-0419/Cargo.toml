@@ -6,7 +6,7 @@ publish = false
 
 [[bin]]
 name = "rust-chrono-0419"
-path = "../rust-chrono/src/main.rs"
+path = "../chrono-latest/src/main.rs"
 
 [dependencies]
 chrono = "=0.4.19"

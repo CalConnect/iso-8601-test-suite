@@ -2,7 +2,7 @@
 """ISO 8601 Test Suite — Python datetime adapter (JSON protocol)
 
 Implements the newline-delimited JSON protocol for use with:
-  ruby run-tests --adapter "exec:python3 adapters/python-datetime.py"
+  ruby run-tests --adapter "exec:python3 adapters/python/datetime.py"
 
 Uses Python's standard library date/datetime for parsing, with strptime
 for format-specific parsing (basic format, ordinal, week dates) that

@@ -2,7 +2,7 @@
  * ISO 8601 Test Suite — C stdlib strftime/strptime adapter (JSON protocol)
  *
  * Implements the newline-delimited JSON protocol for use with:
- *   ruby run-tests --adapter "exec:gcc -o /tmp/c-stdio adapters/c-stdio.c && /tmp/c-stdio"
+ *   ruby run-tests --adapter "exec:gcc -o /tmp/c-stdio adapters/c/stdio.c && /tmp/c-stdio"
  *
  * Uses C standard library strftime/strptime for date/time operations.
  * Limited to what POSIX/C99 provides:

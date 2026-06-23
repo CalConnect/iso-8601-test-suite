@@ -2,7 +2,7 @@
 // ISO 8601 Test Suite — Node.js Date adapter (JSON protocol)
 //
 // Implements the newline-delimited JSON protocol for use with:
-//   ruby run-tests --adapter "exec:node adapters/node-datetime.js"
+//   ruby run-tests --adapter "exec:node adapters/node/datetime.js"
 //
 // Tests JavaScript's built-in Date/Date.parse behavior — this is effectively
 // what browsers provide. Very limited ISO 8601 support:

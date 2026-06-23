@@ -1,0 +1,76 @@
+= C++ chrono adapter
+
+Wraps C++20 `std::chrono` calendar types (`year_month_day`,
+`weekday`, etc.) combined with C-style `get_time` / `strftime` for
+parsing and formatting.
+
+== File
+
+`chrono.cpp` — single source file. Compiled on each invocation by
+`clang++` (or Apple Clang for the Apple variant).
+
+== Running
+
+Two variants are wired in `lib/test_suite/capability_matrix.rb`:
+
+[source,bash]
+----
+# Homebrew LLVM (default):
+ruby scripts/run-tests --adapter cpp-chrono
+
+# Apple Clang:
+ruby scripts/run-tests --adapter cpp-chrono-apple
+----
+
+== Parser strategy
+
+C++ has no first-class ISO 8601 parser in the standard. The adapter
+uses a layered approach:
+
+1. `std::get_time(&tm, format)` — C-style parser; walks a list of
+   format strings, populating `struct tm`.
+2. `std::chrono::year_month_day` — converts the parsed `tm` into a
+   strong calendar type for round-trip and arithmetic.
+3. `std::strftime` — generates output from `tm`.
+
+`get_time` uses smart normalization, so a malformed input like
+`Feb 30` silently rolls into `Mar 2`. The adapter re-validates by
+round-tripping the parsed components back through `year_month_day` and
+rejecting inputs that don't match.
+
+== Variants
+
+[cols="1,1,4",options="header"]
+|===
+| Adapter ID | Compiler | Why it exists
+
+| `cpp-chrono`
+| Homebrew LLVM (`/opt/homebrew/opt/llvm/bin/clang++`)
+| Default; reflects modern C++20 stdlib on macOS.
+
+| `cpp-chrono-apple`
+| Apple Clang (`/usr/bin/clang++`)
+| Ships with macOS. `std::chrono` calendar support is incomplete in
+  older Apple Clang versions; the divergence is itself test signal.
+|===
+
+Both variants share one source file. `ADAPTER_LABEL` and
+`ADAPTER_VERSION` are injected via `-D` macros at compile time so the
+dashboard can tell them apart.
+
+== Build
+
+The `exec:` command in `capability_matrix.rb` recompiles on every run.
+For a manual build:
+
+[source,bash]
+----
+clang++ -std=c++20 -O2 -o adapters/cpp/cpp-chrono adapters/cpp/chrono.cpp
+----
+
+== Known limitations
+
+* macOS `get_time` does not support `%G` / `%V` / `%u` (ISO week dates).
+* macOS `get_time` does not support `%z` (timezone offset parsing).
+* `std::chrono` does not include fractional-second parsing for ISO 8601.
+* No duration / interval / recurring interval support.
