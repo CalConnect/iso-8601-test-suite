@@ -164,15 +164,11 @@ class Runner
   end
 
   def phase_coverage
-    referenced = @index.test_reqs.values.flatten.to_set
-    all_reqs = @index.all_req_ids
-    unreferenced = all_reqs - referenced.to_a
-    unreferenced.each do |r|
-      source = @index.req_ids[r] || @index.profile_req_ids[r]
-      @stats.warn(source, "#{r}: not referenced by any test")
-    end
-    if unreferenced.empty?
-      print_ok("All #{Term.bold(all_reqs.length)} requirements referenced by tests")
+    total, unreferenced = SuiteValidations.check_unreferenced_requirements(@index, @stats)
+    if unreferenced.zero?
+      print_ok("All #{Term.bold(total)} requirements referenced by tests")
+    else
+      print_warn("#{unreferenced} of #{total} requirements not referenced by any test (see warnings)")
     end
   end
 
@@ -186,79 +182,21 @@ class Runner
   end
 
   def phase_profiles
-    @store.files_in("profiles/**/*.yaml").each do |f|
-      next if File.basename(f) == "TEMPLATE.yaml"
-      result = @store.load(f)
-      next if result.failure?
-
-      data = result.data
-      before = @stats.error_count_snapshot
-
-      (data["conformance_classes"] || []).each do |cc|
-        unless @index.conf_class_ids.key?(cc)
-          @stats.error(f, "references unknown conformance class '#{cc}'")
-        end
-      end
-
-      (data["additional_tests"] || []).each do |t|
-        tid = t["id"]
-        (t["requirements"] || []).each do |r|
-          unless @index.req_ids.key?(r) || @index.profile_req_ids.key?(r)
-            @stats.error(f, "test #{tid}: references undefined requirement '#{r}' (not in requirements/ or profile additional_requirements)")
-          end
-        end
-        if @index.conf_test_ids.key?(tid) && @index.conf_test_ids[tid] != f
-          prev = @index.conf_test_ids[tid]
-          @stats.error(f, "duplicate test ID '#{tid}' (also in #{prev})")
-        end
-      end
-
-      errors = @stats.error_count_snapshot - before
-      tc_count = (data["traceability"] || []).length
-      test_count = (data["additional_tests"] || []).length
-      if errors.zero?
-        print_ok("#{Term.cyan(File.basename(f))} — #{tc_count} traceability classes, #{test_count} additional tests")
-      else
-        print_fail("#{Term.cyan(File.basename(f))} — #{errors} error(s)")
-      end
+    checked, errors = SuiteValidations.check_profile_references(@index, @store, @stats)
+    if errors.zero?
+      print_ok("All #{Term.bold(checked)} profile files have valid references")
+    else
+      print_fail("#{errors} error(s) across #{checked} profile file(s)")
     end
   end
 
   def phase_results
-    @store.files_in("results/**/*.yaml")
-      .reject { |f| File.basename(f) == "TEMPLATE.yaml" }
-      .each do |f|
-        result = @store.load(f)
-        next if result.failure?
-
-        data = result.data
-        impl = data.dig("implementation", "name") || File.basename(f)
-        total = 0
-        before = @stats.error_count_snapshot
-
-        (data["conformance_class_results"] || []).each do |cc|
-          cc_ref = cc["conformance_class"]
-          @stats.error(f, "references unknown conformance class '#{cc_ref}'") unless @index.conf_class_ids.key?(cc_ref)
-          (cc["test_results"] || []).each do |tr|
-            total += 1
-            @stats.error(f, "references undefined test '#{tr['test']}'") unless @index.conf_test_ids.key?(tr["test"])
-          end
-        end
-
-        (data["profile_results"] || []).each do |pr|
-          (pr["test_results"] || []).each do |tr|
-            total += 1
-            @stats.error(f, "references undefined profile test '#{tr['test']}'") unless @index.conf_test_ids.key?(tr["test"])
-          end
-        end
-
-        errors = @stats.error_count_snapshot - before
-        if errors.zero?
-          print_ok("#{Term.cyan(File.basename(f))} — #{Term.bold(impl)} (#{total} tests)")
-        else
-          print_fail("#{Term.cyan(File.basename(f))} — #{errors} error(s)")
-        end
-      end
+    checked, errors = SuiteValidations.check_result_references(@index, @store, @stats)
+    if errors.zero?
+      print_ok("All #{Term.bold(checked)} result files have valid references")
+    else
+      print_fail("#{errors} error(s) across #{checked} result file(s)")
+    end
   end
 
   def phase_dag
