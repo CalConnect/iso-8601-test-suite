@@ -17,6 +17,7 @@ const AboutView = defineAsyncComponent(() => import("./views/AboutView.vue"));
 const DocsView = defineAsyncComponent(() => import("./views/DocsView.vue"));
 const MethodologyView = defineAsyncComponent(() => import("./views/MethodologyView.vue"));
 const DeveloperGuideView = defineAsyncComponent(() => import("./views/DeveloperGuideView.vue"));
+const AdapterRulesView = defineAsyncComponent(() => import("./views/AdapterRulesView.vue"));
 const DetailModal = defineAsyncComponent(() => import("./components/DetailModal.vue"));
 
 const summary = ref(null);
@@ -106,6 +107,7 @@ const currentView = computed(() => {
   if (r.startsWith("/docs/")) return "docs";
   if (r === "/methodology") return "methodology";
   if (r === "/developer-guide") return "developer-guide";
+  if (r === "/adapter-rules") return "adapter-rules";
   return "dashboard";
 });
 
@@ -293,6 +295,10 @@ watch(route, () => { window.scrollTo(0, 0); });
                 :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', route === '/developer-guide' ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
                 Developer Guide
               </button>
+              <button @click="nav('/adapter-rules'); refDropdownOpen = false"
+                :class="['block w-full text-left px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors', route === '/adapter-rules' ? 'text-accent bg-surface-2' : 'text-ink-muted hover:text-ink hover:bg-surface-2']">
+                Adapter Rules
+              </button>
               </div>
             </div>
           </div>
@@ -354,6 +360,7 @@ watch(route, () => { window.scrollTo(0, 0); });
           <button @click="nav('/implementations')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', (route === '/implementations' || currentView === 'implementation-detail' || currentView === 'implementation-report') ? 'text-accent' : 'text-ink-muted hover:text-ink']">Implementations</button>
           <button @click="nav('/methodology')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/methodology' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Methodology</button>
           <button @click="nav('/developer-guide')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/developer-guide' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Developer Guide</button>
+          <button @click="nav('/adapter-rules')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/adapter-rules' ? 'text-accent' : 'text-ink-muted hover:text-ink']">Adapter Rules</button>
           <div class="py-1 px-3 clause-label">Info</div>
           <button @click="nav('/about')" :class="['block w-full text-left px-3 py-1.5 pl-6 font-mono text-xs uppercase tracking-wider transition-colors', route === '/about' ? 'text-accent' : 'text-ink-muted hover:text-ink']">About</button>
         </div>
@@ -466,6 +473,10 @@ watch(route, () => { window.scrollTo(0, 0); });
         />
         <DeveloperGuideView
           v-if="currentView === 'developer-guide'"
+          @navigate="nav"
+        />
+        <AdapterRulesView
+          v-if="currentView === 'adapter-rules'"
           @navigate="nav"
         />
         </div>
