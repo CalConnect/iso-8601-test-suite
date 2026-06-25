@@ -107,10 +107,13 @@ class TemplateAdapter
   # Return: a Hash with one of two shapes:
   #
   #   Parse succeeded:
-  #     { valid: true, parsed: <any object>, api: "Class.method" }
+  #     { "valid" => true, "parsed" => <any object>, "api" => "Class.method" }
   #
   #   Parse failed:
-  #     { valid: false, error: "error message", api: "Class.method" }
+  #     { "valid" => false, "error" => "error message", "api" => "Class.method" }
+  #
+  # IMPORTANT: adapter return hashes use STRING keys (not symbols).
+  # The test type handlers index results via parse_result["valid"] etc.
   #
   # The `parsed` object is passed back to `extract_components` and
   # `equivalent?` — it can be any type your adapter uses internally.
@@ -119,11 +122,11 @@ class TemplateAdapter
     # Example:
     #   begin
     #     result = MyDate.parse(expression)
-    #     { valid: true, parsed: result, api: "MyDate.parse" }
+    #     { "valid" => true, "parsed" => result, "api" => "MyDate.parse" }
     #   rescue => e
-    #     { valid: false, error: e.message, api: "MyDate.parse" }
+    #     { "valid" => false, "error" => e.message, "api" => "MyDate.parse" }
     #   end
-    { valid: false, error: "not implemented", api: "none" }
+    { "valid" => false, "error" => "not implemented", "api" => "none" }
   end
 
   # ── Required: extract components from a parsed object ───────────────────
@@ -131,26 +134,29 @@ class TemplateAdapter
   # The harness calls this for parsing tests to compare extracted components
   # against the expected values in the YAML test definition.
   #
-  # Input:  parsed — the object returned by try_parse in the :parsed field
+  # Input:  parsed — the object returned by try_parse under the "parsed" key
   # Return: a Hash with component keys matching the YAML test schema:
   #
   #   {
-  #     calendar: { year: 1985, month: 4, day: 12 },
-  #     ordinal:  { year: 1985, day_of_year: 102 },
-  #     week:     { week_year: 1985, week: 15, day_of_week: 5 },
-  #     time:     { hour: 23, minute: 20, second: 50,
-  #                 utc_offset: { sign: "+", hours: 1, minutes: 0 } },
-  #     duration: { years: 1, months: 2, days: 10, hours: 2, minutes: 30 },
-  #     interval: { start: { calendar: {...}, time: {...} },
-  #                 end:   { calendar: {...}, time: {...} } }
+  #     "calendar" => { "year" => 1985, "month" => 4, "day" => 12 },
+  #     "ordinal"  => { "year" => 1985, "day_of_year" => 102 },
+  #     "week"     => { "week_year" => 1985, "week" => 15, "day_of_week" => 5 },
+  #     "time"     => { "hour" => 23, "minute" => 20, "second" => 50,
+  #                     "utc_offset" => { "sign" => "+", "hours" => 1, "minutes" => 0 } },
+  #     "duration" => { "years" => 1, "months" => 2, "days" => 10, "hours" => 2, "minutes" => 30 },
+  #     "interval" => { "start" => { "calendar" => {...}, "time" => {...} },
+  #                     "end"   => { "calendar" => {...}, "time" => {...} } }
   #   }
+  #
+  # Keys MUST be strings — components_match? compares them against
+  # the YAML-loaded expected components (which always use string keys).
   #
   # Include only the keys that the implementation can extract.
   # Return an empty Hash {} if extraction is not possible.
   #
   def extract_components(parsed)
     # Example:
-    #   { calendar: { year: parsed.year, month: parsed.month, day: parsed.day } }
+    #   { "calendar" => { "year" => parsed.year, "month" => parsed.month, "day" => parsed.day } }
     {}
   end
 
@@ -162,16 +168,16 @@ class TemplateAdapter
   # Return: a Hash with one of two shapes:
   #
   #   Generation succeeded:
-  #     { expression: "1985-04-12" }
+  #     { "expression" => "1985-04-12" }
   #
   #   Generation not supported:
   #     nil
   #
   def generate(components)
     # Example:
-    #   cal = components[:calendar]
-    #   return nil unless cal && cal[:year] && cal[:month] && cal[:day]
-    #   { expression: sprintf("%04d-%02d-%02d", cal[:year], cal[:month], cal[:day]) }
+    #   cal = components["calendar"]
+    #   return nil unless cal && cal["year"] && cal["month"] && cal["day"]
+    #   { "expression" => sprintf("%04d-%02d-%02d", cal["year"], cal["month"], cal["day"]) }
     nil
   end
 
@@ -196,11 +202,11 @@ class TemplateAdapter
   #
   # Input:  test (Hash) — the full test definition from YAML
   # Return: a result Hash, same as what run_test returns:
-  #   { result: "pass" | "fail" | "not-supported" | "error",
-  #     actual: { ... },
-  #     notes: "..." }
+  #   { "result" => "pass" | "fail" | "not-supported" | "error",
+  #     "actual" => { ... },
+  #     "notes" => "..." }
   #
   def run_arithmetic(test)
-    { result: "not-supported", notes: "#{name} does not support ISO 8601 arithmetic" }
+    { "result" => "not-supported", "notes" => "#{name} does not support ISO 8601 arithmetic" }
   end
 end
