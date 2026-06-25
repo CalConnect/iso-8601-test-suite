@@ -16,7 +16,7 @@ tests:
   - id: conf-test:extended-interval-open-end-parse-001
     description: "Parse open end interval implicit '1985-04-12/..'"
     requirements:
-      - req:extended-interval-open-end
+      - req:extended-interval-open-end-implicit
     test_type: parsing
     given:
       expression: "1985-04-12/.."
@@ -33,7 +33,7 @@ tests:
   - id: conf-test:extended-interval-open-end-parse-002
     description: "Parse open end interval with month precision '1985-04/..'"
     requirements:
-      - req:extended-interval-open-end
+      - req:extended-interval-open-end-implicit
     test_type: parsing
     given:
       expression: "1985-04/.."
@@ -49,7 +49,7 @@ tests:
   - id: conf-test:extended-interval-open-end-parse-003
     description: "Parse open end interval with year precision '1985/..'"
     requirements:
-      - req:extended-interval-open-end
+      - req:extended-interval-open-end-implicit
     test_type: parsing
     given:
       expression: "1985/.."
@@ -64,7 +64,7 @@ tests:
   - id: conf-test:extended-interval-open-end-explicit-parse-001
     description: "Parse open end interval explicit '1985Y4M12D/..'"
     requirements:
-      - req:extended-interval-open-end
+      - req:extended-interval-open-end-explicit
     test_type: parsing
     given:
       expression: "1985Y4M12D/.."
@@ -82,7 +82,7 @@ tests:
   - id: conf-test:extended-interval-open-start-parse-001
     description: "Parse open start interval implicit '../1985-04-12'"
     requirements:
-      - req:extended-interval-open-start
+      - req:extended-interval-open-start-implicit
     test_type: parsing
     given:
       expression: "../1985-04-12"
@@ -99,7 +99,7 @@ tests:
   - id: conf-test:extended-interval-open-start-parse-002
     description: "Parse open start interval month precision '../1985-04'"
     requirements:
-      - req:extended-interval-open-start
+      - req:extended-interval-open-start-implicit
     test_type: parsing
     given:
       expression: "../1985-04"
@@ -115,7 +115,7 @@ tests:
   - id: conf-test:extended-interval-open-start-parse-003
     description: "Parse open start interval year precision '../1985'"
     requirements:
-      - req:extended-interval-open-start
+      - req:extended-interval-open-start-implicit
     test_type: parsing
     given:
       expression: "../1985"
@@ -127,11 +127,28 @@ tests:
         end:
           year: 1985
 
+  - id: conf-test:extended-interval-open-start-explicit-parse-001
+    description: "Parse open start interval explicit '../1985Y4M12D'"
+    requirements:
+      - req:extended-interval-open-start-explicit
+    test_type: parsing
+    given:
+      expression: "../1985Y4M12D"
+    expect:
+      valid: true
+      components:
+        start:
+          open: true
+        end:
+          year: 1985
+          month: 4
+          day: 12
+
   # --- Unknown end time interval (Clause 10.2.3) ---
   - id: conf-test:extended-interval-unknown-end-parse-001
     description: "Parse unknown end interval implicit '1985-04-12/'"
     requirements:
-      - req:extended-interval-unknown-end
+      - req:extended-interval-unknown-end-implicit
     test_type: parsing
     given:
       expression: "1985-04-12/"
@@ -148,7 +165,7 @@ tests:
   - id: conf-test:extended-interval-unknown-end-parse-002
     description: "Parse unknown end interval month precision '1985-04/'"
     requirements:
-      - req:extended-interval-unknown-end
+      - req:extended-interval-unknown-end-implicit
     test_type: parsing
     given:
       expression: "1985-04/"
@@ -164,7 +181,7 @@ tests:
   - id: conf-test:extended-interval-unknown-end-parse-003
     description: "Parse unknown end interval year precision '1985/'"
     requirements:
-      - req:extended-interval-unknown-end
+      - req:extended-interval-unknown-end-implicit
     test_type: parsing
     given:
       expression: "1985/"
@@ -176,11 +193,28 @@ tests:
         end:
           unknown: true
 
+  - id: conf-test:extended-interval-unknown-end-explicit-parse-001
+    description: "Parse unknown end interval explicit '1985Y4M12D/'"
+    requirements:
+      - req:extended-interval-unknown-end-explicit
+    test_type: parsing
+    given:
+      expression: "1985Y4M12D/"
+    expect:
+      valid: true
+      components:
+        start:
+          year: 1985
+          month: 4
+          day: 12
+        end:
+          unknown: true
+
   # --- Unknown start time interval (Clause 10.2.4) ---
   - id: conf-test:extended-interval-unknown-start-parse-001
     description: "Parse unknown start interval implicit '/1985-04-12'"
     requirements:
-      - req:extended-interval-unknown-start
+      - req:extended-interval-unknown-start-implicit
     test_type: parsing
     given:
       expression: "/1985-04-12"
@@ -197,7 +231,7 @@ tests:
   - id: conf-test:extended-interval-unknown-start-parse-002
     description: "Parse unknown start interval month precision '/1985-04'"
     requirements:
-      - req:extended-interval-unknown-start
+      - req:extended-interval-unknown-start-implicit
     test_type: parsing
     given:
       expression: "/1985-04"
@@ -213,7 +247,7 @@ tests:
   - id: conf-test:extended-interval-unknown-start-parse-003
     description: "Parse unknown start interval year precision '/1985'"
     requirements:
-      - req:extended-interval-unknown-start
+      - req:extended-interval-unknown-start-implicit
     test_type: parsing
     given:
       expression: "/1985"
@@ -224,6 +258,23 @@ tests:
           unknown: true
         end:
           year: 1985
+
+  - id: conf-test:extended-interval-unknown-start-explicit-parse-001
+    description: "Parse unknown start interval explicit '/1985Y4M12D'"
+    requirements:
+      - req:extended-interval-unknown-start-explicit
+    test_type: parsing
+    given:
+      expression: "/1985Y4M12D"
+    expect:
+      valid: true
+      components:
+        start:
+          unknown: true
+        end:
+          year: 1985
+          month: 4
+          day: 12
 
   # --- Complete qualification of dates in intervals (Clause 10.3.1) ---
   - id: conf-test:extended-interval-qualification-parse-001

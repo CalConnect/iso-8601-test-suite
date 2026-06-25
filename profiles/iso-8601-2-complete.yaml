@@ -367,10 +367,14 @@ traceability:
       - req:set-integer-expressions
   - conformance_class: 8601-2:conf-class:extended-time-intervals
     requirements:
-      - req:extended-interval-open-end
-      - req:extended-interval-open-start
-      - req:extended-interval-unknown-end
-      - req:extended-interval-unknown-start
+      - req:extended-interval-open-end-implicit
+      - req:extended-interval-open-end-explicit
+      - req:extended-interval-open-start-implicit
+      - req:extended-interval-open-start-explicit
+      - req:extended-interval-unknown-end-implicit
+      - req:extended-interval-unknown-end-explicit
+      - req:extended-interval-unknown-start-implicit
+      - req:extended-interval-unknown-start-explicit
       - req:extended-interval-qualification-complete
       - req:extended-interval-qualification-partial
       - req:extended-interval-unspecified
