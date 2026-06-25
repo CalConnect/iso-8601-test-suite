@@ -534,6 +534,72 @@ conformance_class_results:
   - test: conf-test:recur-equiv-001
     result: not-supported
     notes: Conformance class not declared by implementation
+- conformance_class: conf-class:symbols
+  status: not-supported
+  test_results:
+  - test: conf-test:symbols-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-003
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-004
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-005
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-006
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-007
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-008
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-009
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-010
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-011
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-012
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-013
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-014
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-015
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-016
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-017
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-018
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-invalid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-valid-019
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:symbols-invalid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:time-interval
   status: not-supported
   test_results:
@@ -1266,6 +1332,9 @@ conformance_class_results:
   - test: conf-test:extended-interval-open-start-parse-003
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:extended-interval-open-start-explicit-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:extended-interval-unknown-end-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
@@ -1275,6 +1344,9 @@ conformance_class_results:
   - test: conf-test:extended-interval-unknown-end-parse-003
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:extended-interval-unknown-end-explicit-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:extended-interval-unknown-start-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
@@ -1282,6 +1354,9 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:extended-interval-unknown-start-parse-003
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:extended-interval-unknown-start-explicit-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:extended-interval-qualification-parse-001
