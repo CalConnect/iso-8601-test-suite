@@ -65,6 +65,10 @@ class Runner
         subtitle: "Checking test-referenced requirements",
         handler: -> { phase_coverage }),
 
+      Phase.new(name: "Test Requirement References", type: :test_reqs,
+        subtitle: "Checking tests reference existing requirements",
+        handler: -> { phase_test_req_references }),
+
       Phase.new(name: "Profile References", type: :profiles,
         subtitle: "Checking profile conformance class refs",
         handler: -> { phase_profiles }),
@@ -169,6 +173,15 @@ class Runner
     end
     if unreferenced.empty?
       print_ok("All #{Term.bold(all_reqs.length)} requirements referenced by tests")
+    end
+  end
+
+  def phase_test_req_references
+    checked, bad = SuiteValidations.check_test_req_references(@index, @stats)
+    if bad.zero?
+      print_ok("All #{Term.bold(checked)} test requirement references resolve")
+    else
+      print_fail("#{bad} test reference(s) to undefined requirements")
     end
   end
 

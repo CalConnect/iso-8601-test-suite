@@ -43,7 +43,8 @@ module Term
     components: "  ",
     urn_format: "  ",
     patterns: "  ",
-    naming: "  "
+    naming: "  ",
+    test_reqs: "  "
   }.freeze
 
   module_function
