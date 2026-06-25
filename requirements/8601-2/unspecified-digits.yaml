@@ -93,11 +93,40 @@ requirements:
       One to four rightmost digits of the calendar year may be replaced with "X"
       to indicate those digits are unspecified.
     format: any
-  - id: req:unspecified-anywhere-calendar-date
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.2"
+  - id: req:unspecified-year-omitted
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.6"
     statement: >
-      Unspecified digits may appear at any position within a calendar date
-      representation, not limited to rightmost components.
+      A calendar date with the calendar year entirely or partially unspecified,
+      with one or more "X" digits appearing at any position within the year
+      component while the remaining date components are specified.
+    format: any
+  - id: req:unspecified-month-omitted
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.7"
+    statement: >
+      A calendar date with the calendar month entirely or partially unspecified,
+      with one or more "X" digits appearing at any position within the month
+      component while year and day remain specified.
+    format: any
+  - id: req:unspecified-day-omitted
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.8"
+    statement: >
+      A calendar date with the day of month entirely or partially unspecified,
+      with one or more "X" digits appearing at any position within the day
+      component while year and month remain specified.
+    format: any
+  - id: req:unspecified-combination
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.9"
+    statement: >
+      A calendar date with two or more time scale components simultaneously
+      carrying unspecified digits ("X"), combining year, month, and day
+      omissions in a single expression.
+    format: any
+  - id: req:unspecified-time-omitted
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.2.10"
+    statement: >
+      A date and time expression with one or more time-of-day components
+      (hour, minute, second) entirely or partially unspecified via "X" digits,
+      while the date portion remains fully or partially specified.
     format: any
   - id: req:unspecified-datetime-expression
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:9.3"

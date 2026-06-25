@@ -89,7 +89,7 @@ tests:
   - id: conf-test:time-parse-006
     description: "Parse basic format time with decimal fraction of second T232030,5"
     requirements:
-      - req:time-fraction-second
+      - req:time-fraction-second-comma
     test_type: parsing
     given:
       expression: "T232030,5"
@@ -125,7 +125,7 @@ tests:
   - id: conf-test:time-parse-008
     description: "Parse basic format time with decimal fraction of minute T2320,8"
     requirements:
-      - req:time-fraction-minute
+      - req:time-fraction-minute-comma
     test_type: parsing
     given:
       expression: "T2320,8"
@@ -142,7 +142,7 @@ tests:
   - id: conf-test:time-parse-009
     description: "Parse extended format time with decimal fraction of minute 23:20,8"
     requirements:
-      - req:time-fraction-minute
+      - req:time-fraction-minute-comma
     test_type: parsing
     given:
       expression: "23:20,8"
@@ -172,11 +172,44 @@ tests:
             value: 3
             precision: 1
 
+  - id: conf-test:time-parse-035
+    description: "Parse basic format time with decimal point fraction of minute T2320.8"
+    requirements:
+      - req:time-fraction-minute
+    test_type: parsing
+    given:
+      expression: "T2320.8"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          minute: 20
+          fractional_minute:
+            value: 8
+            precision: 1
+
+  - id: conf-test:time-parse-036
+    description: "Parse basic format time with comma fraction of hour T23,3"
+    requirements:
+      - req:time-fraction-hour-comma
+    test_type: parsing
+    given:
+      expression: "T23,3"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 23
+          fractional_hour:
+            value: 3
+            precision: 1
+
   # Parsing tests: beginning and ending of the day
   - id: conf-test:time-parse-011
     description: "Parse beginning of the day in basic format T000000"
     requirements:
-      - req:time-beginning-of-day
+      - req:time-bod-basic-full
     test_type: parsing
     given:
       expression: "T000000"
@@ -191,7 +224,7 @@ tests:
   - id: conf-test:time-parse-012
     description: "Parse beginning of the day in extended format 00:00:00"
     requirements:
-      - req:time-beginning-of-day
+      - req:time-bod-extended-full
     test_type: parsing
     given:
       expression: "00:00:00"
@@ -206,7 +239,7 @@ tests:
   - id: conf-test:time-parse-013
     description: "Parse ending of the day in basic format T240000"
     requirements:
-      - req:time-ending-of-day
+      - req:time-eod-basic-full
     test_type: parsing
     given:
       expression: "T240000"
@@ -221,7 +254,7 @@ tests:
   - id: conf-test:time-parse-014
     description: "Parse ending of the day in extended format 24:00:00"
     requirements:
-      - req:time-ending-of-day
+      - req:time-eod-extended-full
     test_type: parsing
     given:
       expression: "24:00:00"
@@ -237,7 +270,7 @@ tests:
   - id: conf-test:time-parse-015
     description: "Parse basic format UTC time T232030Z"
     requirements:
-      - req:time-utc
+      - req:time-utc-basic-full
     test_type: parsing
     given:
       expression: "T232030Z"
@@ -256,7 +289,7 @@ tests:
   - id: conf-test:time-parse-016
     description: "Parse extended format UTC time 23:20:30Z"
     requirements:
-      - req:time-utc
+      - req:time-utc-extended-full
     test_type: parsing
     given:
       expression: "23:20:30Z"
@@ -275,7 +308,7 @@ tests:
   - id: conf-test:time-parse-017
     description: "Parse basic format UTC time reduced precision T2320Z"
     requirements:
-      - req:time-utc
+      - req:time-utc-basic-hm
     test_type: parsing
     given:
       expression: "T2320Z"
@@ -293,7 +326,7 @@ tests:
   - id: conf-test:time-parse-018
     description: "Parse basic format UTC time hours only T23Z"
     requirements:
-      - req:time-utc
+      - req:time-utc-basic-h
     test_type: parsing
     given:
       expression: "T23Z"
@@ -310,7 +343,7 @@ tests:
   - id: conf-test:time-parse-019
     description: "Parse extended format UTC time reduced precision 23:20Z"
     requirements:
-      - req:time-utc
+      - req:time-utc-extended-hm
     test_type: parsing
     given:
       expression: "23:20Z"
@@ -329,7 +362,7 @@ tests:
   - id: conf-test:time-parse-020
     description: "Parse basic format time with positive offset T152746+0100"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-hm
     test_type: parsing
     given:
       expression: "T152746+0100"
@@ -348,7 +381,7 @@ tests:
   - id: conf-test:time-parse-021
     description: "Parse basic format time with negative offset T152746-0500"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-hm
     test_type: parsing
     given:
       expression: "T152746-0500"
@@ -367,7 +400,7 @@ tests:
   - id: conf-test:time-parse-022
     description: "Parse extended format time with positive offset 15:27:46+01:00"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-hm
     test_type: parsing
     given:
       expression: "15:27:46+01:00"
@@ -386,7 +419,7 @@ tests:
   - id: conf-test:time-parse-023
     description: "Parse extended format time with negative offset 15:27:46-05:00"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-hm
     test_type: parsing
     given:
       expression: "15:27:46-05:00"
@@ -405,7 +438,7 @@ tests:
   - id: conf-test:time-parse-024
     description: "Parse basic format time with hours-only offset T152746+01"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-h
     test_type: parsing
     given:
       expression: "T152746+01"
@@ -423,7 +456,7 @@ tests:
   - id: conf-test:time-parse-025
     description: "Parse basic format time with hours-only negative offset T152746-05"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-h
     test_type: parsing
     given:
       expression: "T152746-05"
@@ -441,7 +474,7 @@ tests:
   - id: conf-test:time-parse-026
     description: "Parse extended format time with hours-only offset 15:27:46+01"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-h
     test_type: parsing
     given:
       expression: "15:27:46+01"
@@ -459,7 +492,7 @@ tests:
   - id: conf-test:time-parse-027
     description: "Parse extended format time with hours-only negative offset 15:27:46-05"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-h
     test_type: parsing
     given:
       expression: "15:27:46-05"
@@ -478,7 +511,7 @@ tests:
   - id: conf-test:time-parse-028
     description: "Parse beginning of the day reduced precision T00"
     requirements:
-      - req:time-beginning-of-day
+      - req:time-bod-basic-h
     test_type: parsing
     given:
       expression: "T00"
@@ -491,7 +524,7 @@ tests:
   - id: conf-test:time-parse-029
     description: "Parse beginning of the day reduced precision T00:00"
     requirements:
-      - req:time-beginning-of-day
+      - req:time-bod-extended-hm
     test_type: parsing
     given:
       expression: "T00:00"
@@ -505,7 +538,7 @@ tests:
   - id: conf-test:time-parse-030
     description: "Parse ending of the day reduced precision T24"
     requirements:
-      - req:time-ending-of-day
+      - req:time-eod-basic-h
     test_type: parsing
     given:
       expression: "T24"
@@ -518,7 +551,7 @@ tests:
   - id: conf-test:time-parse-031
     description: "Parse ending of the day reduced precision 24:00"
     requirements:
-      - req:time-ending-of-day
+      - req:time-eod-extended-hm
     test_type: parsing
     given:
       expression: "24:00"
@@ -533,7 +566,7 @@ tests:
   - id: conf-test:time-parse-032
     description: "Parse beginning of the day with decimal fraction T000000.000"
     requirements:
-      - req:time-beginning-of-day
+      - req:time-bod-basic-full
       - req:time-fraction-second
     test_type: parsing
     given:
@@ -552,7 +585,7 @@ tests:
   - id: conf-test:time-parse-033
     description: "Parse ending of the day with decimal fraction T240000.000"
     requirements:
-      - req:time-ending-of-day
+      - req:time-eod-basic-full
       - req:time-fraction-second
     test_type: parsing
     given:
@@ -642,7 +675,7 @@ tests:
   - id: conf-test:time-gen-005
     description: "Generate basic format UTC time"
     requirements:
-      - req:time-utc
+      - req:time-utc-basic-full
     test_type: generation
     given:
       components:
@@ -660,7 +693,7 @@ tests:
   - id: conf-test:time-gen-006
     description: "Generate extended format UTC time"
     requirements:
-      - req:time-utc
+      - req:time-utc-extended-full
     test_type: generation
     given:
       components:
@@ -678,7 +711,7 @@ tests:
   - id: conf-test:time-gen-007
     description: "Generate basic format time with positive UTC offset"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-hm
     test_type: generation
     given:
       components:
@@ -696,7 +729,7 @@ tests:
   - id: conf-test:time-gen-008
     description: "Generate extended format time with positive UTC offset"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-hm
     test_type: generation
     given:
       components:
@@ -714,7 +747,7 @@ tests:
   - id: conf-test:time-gen-009
     description: "Generate basic format time with negative UTC offset"
     requirements:
-      - req:time-offset-basic
+      - req:time-offset-basic-hm
     test_type: generation
     given:
       components:
@@ -732,7 +765,7 @@ tests:
   - id: conf-test:time-gen-010
     description: "Generate extended format time with negative UTC offset"
     requirements:
-      - req:time-offset-extended
+      - req:time-offset-extended-hm
     test_type: generation
     given:
       components:
@@ -781,7 +814,7 @@ tests:
   - id: conf-test:time-valid-004
     description: "Verify hour 24 with non-zero minutes is invalid"
     requirements:
-      - req:time-ending-of-day
+      - req:time-24-only-valid-eod
     test_type: validity
     given:
       expression: "T240001"
@@ -791,7 +824,7 @@ tests:
   - id: conf-test:time-valid-005
     description: "Verify hour 24 with non-zero seconds is invalid"
     requirements:
-      - req:time-ending-of-day
+      - req:time-24-only-valid-eod
     test_type: validity
     given:
       expression: "T240001"
@@ -801,7 +834,7 @@ tests:
   - id: conf-test:time-valid-006
     description: "Verify time designator disambiguation (1920 vs T1920)"
     requirements:
-      - req:time-designator-omission
+      - req:time-designator-required-to-disambiguate
     test_type: validity
     given:
       expression: "T1920"
@@ -828,11 +861,78 @@ tests:
   - id: conf-test:time-equiv-002
     description: "Z designator is equivalent to +00:00 offset"
     requirements:
-      - req:time-utc
-      - req:time-offset-extended
+      - req:time-utc-basic-full
+      - req:time-offset-basic-hm
     test_type: equivalence
     given:
       expression_a: "T232030Z"
       expression_b: "T232030+0000"
     expect:
       equivalent: true
+
+  # Parsing tests: reduced-precision BoD/EoD variants not covered above
+  - id: conf-test:time-parse-037
+    description: "Parse beginning of the day basic reduced-precision hm T0000"
+    requirements:
+      - req:time-bod-basic-hm
+    test_type: parsing
+    given:
+      expression: "T0000"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+          minute: 0
+
+  - id: conf-test:time-parse-038
+    description: "Parse beginning of the day extended reduced-precision h 00"
+    requirements:
+      - req:time-bod-extended-h
+    test_type: parsing
+    given:
+      expression: "00"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 0
+
+  - id: conf-test:time-parse-039
+    description: "Parse ending of the day basic reduced-precision hm T2400"
+    requirements:
+      - req:time-eod-basic-hm
+    test_type: parsing
+    given:
+      expression: "T2400"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+          minute: 0
+
+  - id: conf-test:time-parse-040
+    description: "Parse ending of the day extended reduced-precision h 24"
+    requirements:
+      - req:time-eod-extended-h
+    test_type: parsing
+    given:
+      expression: "24"
+    expect:
+      valid: true
+      components:
+        time:
+          hour: 24
+
+  # Time designator omission rule
+  - id: conf-test:time-valid-007
+    description: >-
+      Time-only expression without designator is valid when unambiguous
+    requirements:
+      - req:time-designator-omittable-when-unambiguous
+    test_type: validity
+    given:
+      expression: "232030"
+    expect:
+      valid: true

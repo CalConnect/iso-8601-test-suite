@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:extended-date-forms
+name: Extended date forms
+description: >
+  Defines extended date form designators for individual time scale components
+  used in explicit representations: day-of-week (K), day-of-year (O), decade
+  (J), and century (C), together with value-prefixing rules for leading zeros.
+  These symbols are introduced by ISO 8601-2:2026 Clause 4.3 separately from
+  the Clause 7 explicit representation syntax that uses them.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:req-class:fundamentals
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3
+requirements:
+  - id: req:explicit-additional-forms-day-of-week
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.3"
+    statement: >
+      The calendar day of week in explicit form encodes the value with the K
+      designator: [i]["K"].
+    format: any
+    pattern: '[i]["K"]'
+  - id: req:explicit-additional-forms-day-of-year
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.4"
+    statement: >
+      The calendar day of year in explicit form encodes the value with the O
+      designator: [i]["O"].
+    format: any
+    pattern: '[i]["O"]'
+  - id: req:explicit-additional-forms-decade
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.5"
+    statement: >
+      The decade in explicit form encodes the value with the J designator:
+      [i]["J"].
+    format: any
+    pattern: '[i]["J"]'
+  - id: req:explicit-additional-forms-century
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.6"
+    statement: >
+      The century in explicit form encodes the value with the C designator:
+      [i]["C"].
+    format: any
+    pattern: '[i]["C"]'
+  - id: req:explicit-value-prefixing
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.2"
+    statement: >
+      Leading zeros may be prepended to values in explicit form time scale
+      components.
+    format: any

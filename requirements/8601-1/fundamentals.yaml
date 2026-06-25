@@ -4,21 +4,15 @@ id: req-class:fundamentals
 name: Fundamentals
 description: >
   Fundamental principles for ISO 8601 date and time representations, including
-  character set, calendar rules, time scale components, and expansion rules.
+  calendar rules, time scale components, and expansion rules. Character-set
+  validity is implicit in every other conformance class — if a parser accepts
+  a well-formed date, the characters are by definition valid — so it is not
+  modelled as a separate requirement here.
 standardization_target_type: iso-8601-date-time-processor
 source:
   - urn:iso:std:iso:8601:-1:ed-1:en:clause:4
   - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.1
 requirements:
-  - id: req:character-set
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.1:tech:character-set"
-    statement: >
-      The character set used in ISO 8601 representations shall be limited to
-      digits 0 through 9, and the separator and designator characters hyphen-minus
-      (-), colon (:), letter T, letter W, letter P, letter R, letter Z, plus sign (+),
-      and solidus (/).
-    format: any
-    pattern: "[0-9\\-:TWPQRZ+/]"
   - id: req:decreasing-order
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.1:tech:decreasing-order"
     statement: >
@@ -61,16 +55,52 @@ requirements:
     statement: >
       Time of day is expressed using a 24-hour clock. A clock hour is identified
       by a two-digit ordinal number from '00' to '23'. A clock minute from '00'
-      to '59'. A clock second from '00' to '60' (60 accommodates leap seconds).
+      to '59'. A clock second from '00' to '59' under normal conditions.
     format: any
-  - id: req:year-representation
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.2"
+  - id: req:second-range-59-normal
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.2.3:tech:second-range-59-normal"
     statement: >
-      Each Gregorian calendar year can be identified by a 4-digit ordinal number
-      beginning with '0000' for year zero, through '9999'. The year number may be
-      preceded by a minus sign to indicate a year preceding year zero.
+      Under normal conditions, a clock second is identified by a two-digit
+      ordinal number from '00' through '59'.
+    format: any
+    pattern: "[ss]"
+  - id: req:leap-second-positive
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.2.3:tech:leap-second-positive"
+    statement: >
+      A positive leap second is represented by the second value '60', inserted
+      as the 61st second of the affected minute (UTC only).
+    format: any
+    pattern: "[hh][mm]60"
+  - id: req:leap-second-negative
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.2.3:tech:leap-second-negative"
+    statement: >
+      A negative leap second is represented by the second value '58' (the
+      last second of the affected minute being dropped). The second value '58'
+      is the last value of that minute in place of '59'.
+    format: any
+    pattern: "[hh][mm]58"
+  - id: req:proleptic-gregorian-mutual-agreement
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.2.1:tech:proleptic-gregorian-mutual-agreement"
+    statement: >
+      By mutual agreement of the communicating partners, the Gregorian calendar
+      may be used proleptically, i.e. applied to dates preceding its
+      introduction in 1582, by treating it as if it had been in continuous
+      operation from year zero onwards.
+    format: any
+  - id: req:year-range-0000-9999
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.2:tech:year-range-0000-9999"
+    statement: >
+      Each Gregorian calendar year can be identified by a 4-digit ordinal
+      number beginning with '0000' for year zero, through '9999'.
     format: any
     pattern: "[YYYY]"
+  - id: req:year-minus-sign
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.2:tech:year-minus-sign"
+    statement: >
+      A year preceding year zero is indicated by prefixing the year number with
+      a minus sign ['-'][YYYY]. Years at or after year zero carry no sign.
+    format: any
+    pattern: "[-][YYYY]"
   - id: req:month-representation
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.3"
     statement: >
@@ -116,15 +146,41 @@ requirements:
       represented in implied form as [YY].
     format: basic
     pattern: "[YY]"
-  - id: req:time-shift
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13"
+  - id: req:time-shift-basic-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13:tech:time-shift-basic-hm"
     statement: >
-      A time shift is represented in basic format as [±][hour][min] or [±][hour],
-      and in extended format as [±][hour][":"][min] or ["Z"]. The UTC designator
-      ["Z"] indicates no time shift from UTC. The time shift shall be positive if
-      ahead of or equal to UTC, and negative if behind UTC.
+      A time shift in basic format is encoded as a sign followed by hour and
+      minute as contiguous fields: [±][hour][min].
+    format: basic
+    pattern: "[±][hh][mm]"
+  - id: req:time-shift-basic-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13:tech:time-shift-basic-h"
+    statement: >
+      A time shift in basic format may omit the minute component, encoding only
+      the sign and hour: [±][hour].
+    format: basic
+    pattern: "[±][hh]"
+  - id: req:time-shift-extended-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13:tech:time-shift-extended-hm"
+    statement: >
+      A time shift in extended format is encoded as a sign followed by hour and
+      minute with a colon separator: [±][hour][":"][min].
+    format: extended
+    pattern: "[±][hh][\":\"][mm]"
+  - id: req:time-shift-utc
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13:tech:time-shift-utc"
+    statement: >
+      The UTC designator ["Z"] indicates that the associated time is the UTC
+      time scale (no shift from UTC). It is appended directly after the time
+      expression with no intervening space.
     format: any
-    pattern: "[±][hour][min]|[±][hour]|\"Z\""
+    pattern: "[\"Z\"]"
+  - id: req:time-shift-sign-mandatory
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.3.13:tech:time-shift-sign-mandatory"
+    statement: >
+      The sign of a time shift is mandatory. The shift shall be positive when
+      the local time is ahead of or equal to UTC, and negative when behind UTC.
+    format: any
   - id: req:expansion
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:4.4"
     statement: >

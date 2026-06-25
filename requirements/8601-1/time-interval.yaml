@@ -60,12 +60,37 @@ requirements:
       [duration]["/"][dateX]["T"][timeX].
     format: extended
     pattern: "[duration][\"/\"][dateX][\"T\"][timeX]"
-  - id: req:interval-abbreviated-end
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviated-end"
+  - id: req:interval-abbreviated-end-year-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviated-end-year-omitted"
     statement: >
-      In a start/end interval, higher-order time scale components may be omitted
-      from the end expression when the result remains unambiguous. The omitted
-      components inherit their values from the start expression.
+      In a start/end interval, the year of the end expression may be omitted
+      when it is unambiguous; the omitted year inherits its value from the
+      start expression. The end expression begins with the month component,
+      e.g. [start]["/"][MM][-][DD].
+    format: any
+  - id: req:interval-abbreviated-end-month-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviated-end-month-omitted"
+    statement: >
+      In a start/end interval, the year and month of the end expression may
+      both be omitted when unambiguous; the omitted components inherit their
+      values from the start expression. The end expression begins with the
+      day component, e.g. [start]["/"][DD].
+    format: any
+  - id: req:interval-abbreviated-end-day-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviated-end-day-omitted"
+    statement: >
+      In a start/end interval, the year, month, and day of the end expression
+      may all be omitted when unambiguous; the end expression then contains
+      only the time-of-day, e.g. [start]["T"][time]["/"]["T"][time].
+    format: any
+  - id: req:interval-abbreviation-ambiguity-rule
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-abbreviation-ambiguity-rule"
+    statement: >
+      Abbreviated end expressions shall be used only where the resulting
+      interval remains unambiguous. The number of components in the end
+      expression shall not exceed the number in the start expression, and
+      each omitted component shall be unambiguously inheritable from the
+      start.
     format: any
   - id: req:interval-time-shift-inheritance
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.1:tech:interval-time-shift-inheritance"

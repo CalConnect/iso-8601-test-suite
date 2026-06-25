@@ -20,7 +20,7 @@ traceability:
     requirements:
       - req:date-time-cal-extended-utc
       - req:date-time-cal-extended-offset
-      - req:date-time-reduced-precision
+      - req:date-time-cal-extended-reduced-hm
 additional_requirements:
   - id: req:w3c-datetime-extended-format-only
     statement: >-

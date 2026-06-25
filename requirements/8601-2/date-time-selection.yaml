@@ -74,6 +74,27 @@ requirements:
       Position selection identifies the i-th occurrence using an integer with
       the I designator: [position]["I"].
     format: any
+  - id: req:selection-position-i-single
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.9:tech:selection-position-i-single"
+    statement: >
+      A positive integer position ["i"]["I"] selects the i-th occurrence of the
+      surrounding selection expression within its interval, where 1 is the
+      first element.
+    format: any
+    pattern: '["i"]["I"]'
+  - id: req:selection-position-i-last
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.9:tech:selection-position-i-last"
+    statement: >
+      A negative integer position ["-i"]["I"] counts in reverse from the end
+      of the interval, with ["-1"]["I"] selecting the last element.
+    format: any
+    pattern: '["-"i]["I"]'
+  - id: req:selection-position-i-out-of-range
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.9:tech:selection-position-i-out-of-range"
+    statement: >
+      A position value that exceeds the number of occurrences within the
+      interval (|i| greater than N) is invalid and shall be rejected.
+    format: any
   - id: req:selection-time-interval
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.10"
     statement: >
@@ -96,4 +117,23 @@ requirements:
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.11.3"
     statement: >
       A selection expression may serve as the start or end of a time interval.
+    format: any
+  - id: req:selection-nested-arbitrary-depth
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.3.11:tech:selection-nested-arbitrary-depth"
+    statement: >
+      A selection expression may itself contain another selection expression,
+      allowing selections to nest to arbitrary depth.
+    format: any
+  - id: req:selection-nested-parenthesization
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.3.11:tech:selection-nested-parenthesization"
+    statement: >
+      A nested selection expression shall be enclosed in parentheses or
+      brackets to disambiguate the inner from the outer selection.
+    format: any
+  - id: req:selection-nested-valid-only-if-outer-valid
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:12.3.11:tech:selection-nested-valid-only-if-outer-valid"
+    statement: >
+      A nested selection expression is valid only if the outer selection
+      expression is itself valid. An invalid outer selection renders the
+      nested expression invalid regardless of inner syntax.
     format: any

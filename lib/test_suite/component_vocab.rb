@@ -36,7 +36,7 @@ class ComponentVocabulary
   end
 
   def known_sub_key?(parent, key)
-    @sub_keys[parent]&.include?(key)
+    @sub_keys.fetch(parent, nil)&.include?(key) || false
   end
 
   def top_keys

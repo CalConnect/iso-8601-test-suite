@@ -112,7 +112,7 @@ tests:
   - id: conf-test:explicit-local-time-parse-002
     description: "Parse explicit local time with reduced precision 'T23H20M'"
     requirements:
-      - req:explicit-time-reduced-precision
+      - req:explicit-time-reduced-minute
     test_type: parsing
     given:
       expression: "T23H20M"
@@ -139,7 +139,7 @@ tests:
   - id: conf-test:explicit-beginning-of-day-parse-001
     description: "Parse beginning of day 'T0H0M0S'"
     requirements:
-      - req:explicit-beginning-of-day
+      - req:explicit-bod-full
     test_type: parsing
     given:
       expression: "T0H0M0S"
@@ -153,8 +153,8 @@ tests:
   - id: conf-test:explicit-beginning-of-day-parse-002
     description: "Parse beginning of day with zero omission 'T0S'"
     requirements:
-      - req:explicit-beginning-of-day
-      - req:explicit-omission-zero
+      - req:explicit-bod-omitted-zeros
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "T0S"
@@ -169,7 +169,7 @@ tests:
   - id: conf-test:explicit-time-shift-parse-001
     description: "Parse time shift behind UTC 'Z-5H'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-offset
     test_type: parsing
     given:
       expression: "Z-5H"
@@ -183,7 +183,7 @@ tests:
   - id: conf-test:explicit-time-shift-parse-002
     description: "Parse time shift ahead of UTC 'Z8H'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-positive
     test_type: parsing
     given:
       expression: "Z8H"
@@ -197,7 +197,8 @@ tests:
   - id: conf-test:explicit-time-shift-parse-003
     description: "Parse time shift of 28 hours ahead 'Z28H'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-positive
+      - req:explicit-time-shift-reduced-precision
     test_type: parsing
     given:
       expression: "Z28H"
@@ -211,7 +212,7 @@ tests:
   - id: conf-test:explicit-time-shift-parse-004
     description: "Parse time shift with minutes 'Z6H0M'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-offset
     test_type: parsing
     given:
       expression: "Z6H0M"
@@ -226,7 +227,7 @@ tests:
   - id: conf-test:explicit-time-shift-parse-005
     description: "Parse time shift with full precision 'Z7H33M14S'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-offset
     test_type: parsing
     given:
       expression: "Z7H33M14S"
@@ -242,7 +243,7 @@ tests:
   - id: conf-test:explicit-time-shift-parse-006
     description: "Parse UTC zero shift 'Z'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-utc
     test_type: parsing
     given:
       expression: "Z"
@@ -258,7 +259,8 @@ tests:
   - id: conf-test:explicit-time-shift-parse-007
     description: "Parse UTC zero shift with minute precision 'Z0H0M'"
     requirements:
-      - req:explicit-time-shift
+      - req:explicit-time-shift-utc
+      - req:explicit-time-shift-offset
     test_type: parsing
     given:
       expression: "Z0H0M"
@@ -273,8 +275,8 @@ tests:
   - id: conf-test:explicit-time-shift-parse-008
     description: "Parse UTC zero shift with second precision 'Z0S'"
     requirements:
-      - req:explicit-time-shift
-      - req:explicit-omission-zero
+      - req:explicit-time-shift-utc
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "Z0S"
@@ -465,109 +467,13 @@ tests:
       components:
         century: 3
 
-  # --- Additional explicit forms (Clause 4.3) ---
-  - id: conf-test:explicit-day-of-week-parse-001
-    description: "Parse day of week '1K' (Monday)"
-    requirements:
-      - req:explicit-additional-forms-day-of-week
-    test_type: parsing
-    given:
-      expression: "1K"
-    expect:
-      valid: true
-      components:
-        day_of_week: 1
-
-  - id: conf-test:explicit-day-of-year-parse-001
-    description: "Parse day of year '350O'"
-    requirements:
-      - req:explicit-additional-forms-day-of-year
-    test_type: parsing
-    given:
-      expression: "350O"
-    expect:
-      valid: true
-      components:
-        day_of_year: 350
-
-  - id: conf-test:explicit-decade-additional-parse-001
-    description: "Parse decade '196J'"
-    requirements:
-      - req:explicit-additional-forms-decade
-    test_type: parsing
-    given:
-      expression: "196J"
-    expect:
-      valid: true
-      components:
-        decade: 196
-
-  - id: conf-test:explicit-decade-additional-parse-002
-    description: "Parse decade '0J'"
-    requirements:
-      - req:explicit-additional-forms-decade
-    test_type: parsing
-    given:
-      expression: "0J"
-    expect:
-      valid: true
-      components:
-        decade: 0
-
-  - id: conf-test:explicit-century-additional-parse-001
-    description: "Parse century '16C'"
-    requirements:
-      - req:explicit-additional-forms-century
-    test_type: parsing
-    given:
-      expression: "16C"
-    expect:
-      valid: true
-      components:
-        century: 16
-
-  - id: conf-test:explicit-century-additional-parse-002
-    description: "Parse century '0C'"
-    requirements:
-      - req:explicit-additional-forms-century
-    test_type: parsing
-    given:
-      expression: "0C"
-    expect:
-      valid: true
-      components:
-        century: 0
-
-  # --- Value prefixing (Clause 4.3.2) ---
-  - id: conf-test:explicit-value-prefixing-parse-001
-    description: "Parse month with zero padding '01M'"
-    requirements:
-      - req:explicit-value-prefixing
-    test_type: parsing
-    given:
-      expression: "01M"
-    expect:
-      valid: true
-      components:
-        month: 1
-
-  - id: conf-test:explicit-value-prefixing-parse-002
-    description: "Parse month with extra zero padding '0001M'"
-    requirements:
-      - req:explicit-value-prefixing
-    test_type: parsing
-    given:
-      expression: "0001M"
-    expect:
-      valid: true
-      components:
-        month: 1
+  # --- Additional explicit forms (Clause 4.3) moved to conf-class:extended-date-forms ---
 
   # --- Omission of zero-valued components (Clause 7.12) ---
   - id: conf-test:explicit-omission-zero-parse-001
     description: "Parse date with omitted zero hour '2018Y8M8DT30M0SZ'"
     requirements:
-      - req:explicit-omission-zero
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "2018Y8M8DT30M0SZ"
@@ -589,7 +495,7 @@ tests:
   - id: conf-test:explicit-omission-zero-parse-002
     description: "Parse date with omitted zero minute '1985Y4M15DT15H10S'"
     requirements:
-      - req:explicit-omission-zero
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "1985Y4M15DT15H10S"
@@ -606,7 +512,7 @@ tests:
   - id: conf-test:explicit-omission-zero-valid-001
     description: "Verify that '1988Y3M1DT2H0M0S' and '1988Y3M1DT2H' are unequal in precision"
     requirements:
-      - req:explicit-omission-zero
+      - req:explicit-omission-zero-precision-preservation
       - req:explicit-precision
     test_type: validity
     given:
@@ -647,7 +553,7 @@ tests:
     description: "Parse with minute precision and omitted hour '1985Y4M12DT30M'"
     requirements:
       - req:explicit-precision
-      - req:explicit-omission-zero
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "1985Y4M12DT30M"
@@ -664,7 +570,7 @@ tests:
   - id: conf-test:explicit-decimal-fractions-parse-001
     description: "Parse with comma decimal hour '2018Y8M8DT0,5H'"
     requirements:
-      - req:explicit-decimal-fractions
+      - req:explicit-fraction-hour
     test_type: parsing
     given:
       expression: "2018Y8M8DT0,5H"
@@ -679,7 +585,7 @@ tests:
   - id: conf-test:explicit-decimal-fractions-parse-002
     description: "Parse with period decimal minute '2018Y8M8DT10H30.5M'"
     requirements:
-      - req:explicit-decimal-fractions
+      - req:explicit-fraction-minute
     test_type: parsing
     given:
       expression: "2018Y8M8DT10H30.5M"
@@ -695,7 +601,7 @@ tests:
   - id: conf-test:explicit-decimal-fractions-parse-003
     description: "Parse with comma decimal second '2018Y8M8DT10H30M15,3S'"
     requirements:
-      - req:explicit-decimal-fractions
+      - req:explicit-fraction-second
     test_type: parsing
     given:
       expression: "2018Y8M8DT10H30M15,3S"
@@ -727,7 +633,7 @@ tests:
     description: "Parse minute precision with omitted hour '2018Y8M8DT30M'"
     requirements:
       - req:explicit-precision
-      - req:explicit-omission-zero
+      - req:explicit-omission-zero-component
     test_type: parsing
     given:
       expression: "2018Y8M8DT30M"

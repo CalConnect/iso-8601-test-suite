@@ -60,15 +60,89 @@ requirements:
       Component values exceeding their valid range indicate overflow (positive
       excess) or underflow (negative excess).
     format: any
-  - id: req:arithmetic-conversion-boundaries
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6"
+  - id: req:arithmetic-conversion-century-decade
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-century-decade"
     statement: >
-      Some pairs of time scale components convert unambiguously while others do
-      not, establishing conversion boundaries between units.
+      Century and decade components convert unambiguously: 1 century equals
+      10 decades. Conversion in either direction yields a fixed result.
     format: any
-  - id: req:arithmetic-canonical-form
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.7"
+  - id: req:arithmetic-conversion-decade-year
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-decade-year"
     statement: >
-      A date and time expression can be reduced to canonical form with no
-      overflow and minimal underflow.
+      Decade and year components convert unambiguously: 1 decade equals 10
+      years. Conversion in either direction yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-year-month
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-year-month"
+    statement: >
+      Year and month components convert unambiguously: 1 year equals 12
+      months. Conversion in either direction yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-week-day
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-week-day"
+    statement: >
+      Week and day components convert unambiguously: 1 week equals 7 days.
+      Conversion in either direction yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-day-hour
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-day-hour"
+    statement: >
+      Day and hour components convert unambiguously: 1 day equals 24 hours.
+      Conversion in either direction yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-hour-minute
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-hour-minute"
+    statement: >
+      Hour and minute components convert unambiguously: 1 hour equals 60
+      minutes. Conversion in either direction yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-minute-second
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-minute-second"
+    statement: >
+      Minute and second components convert unambiguously: 1 minute equals
+      60 seconds (ignoring leap seconds). Conversion in either direction
+      yields a fixed result.
+    format: any
+  - id: req:arithmetic-conversion-year-week-ambiguous
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-year-week-ambiguous"
+    statement: >
+      Year and week components do not convert unambiguously because a year
+      may contain 52 or 53 weeks depending on the year. Conversion between
+      them requires a context date.
+    format: any
+  - id: req:arithmetic-conversion-year-day-ambiguous
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-year-day-ambiguous"
+    statement: >
+      Year and day components do not convert unambiguously because a year
+      may contain 365 or 366 days depending on whether it is a leap year.
+      Conversion between them requires a context date.
+    format: any
+  - id: req:arithmetic-conversion-month-day-ambiguous
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.6:tech:arithmetic-conversion-month-day-ambiguous"
+    statement: >
+      Month and day components do not convert unambiguously because a month
+      may contain 28, 29, 30, or 31 days depending on the month and year.
+      Conversion between them requires a context date.
+    format: any
+  - id: req:arithmetic-canonical-form-concrete-context
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.7:tech:arithmetic-canonical-form-concrete-context"
+    statement: >
+      When the context is concrete (a specific calendar date is known), a
+      date and time expression can be reduced to a canonical form with no
+      overflow and minimal underflow by carrying excess into higher-order
+      components.
+    format: any
+  - id: req:arithmetic-canonical-form-context-dependent
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.7:tech:arithmetic-canonical-form-context-dependent"
+    statement: >
+      When the context lacks a specific calendar date (e.g. only a year is
+      known), canonical-form reduction cannot fully resolve ambiguous
+      conversions and the result retains the original unit structure.
+    format: any
+  - id: req:arithmetic-canonical-form-algorithm
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:14.7:tech:arithmetic-canonical-form-algorithm"
+    statement: >
+      The canonical-form algorithm proceeds component-wise from lowest to
+      highest order, carrying excess into the next higher component when
+      conversion is unambiguous, as specified in Annex D.
     format: any

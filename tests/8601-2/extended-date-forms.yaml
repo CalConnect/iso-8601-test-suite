@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:extended-date-forms
+name: Extended date forms
+description: >
+  Tests for the K (day-of-week), O (day-of-year), J (decade), and C (century)
+  designators and value-prefixing rules defined by ISO 8601-2:2026 Clause 4.3
+  for explicit time scale component representation.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:fundamentals
+requirements_class: req-class:extended-date-forms
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3
+tests:
+  # --- Day-of-week designator K (Clause 4.3.3) ---
+  - id: conf-test:explicit-day-of-week-parse-001
+    description: "Parse day of week '1K' (Monday)"
+    requirements:
+      - req:explicit-additional-forms-day-of-week
+    test_type: parsing
+    given:
+      expression: "1K"
+    expect:
+      valid: true
+      components:
+        day_of_week: 1
+
+  # --- Day-of-year designator O (Clause 4.3.4) ---
+  - id: conf-test:explicit-day-of-year-parse-001
+    description: "Parse day of year '350O'"
+    requirements:
+      - req:explicit-additional-forms-day-of-year
+    test_type: parsing
+    given:
+      expression: "350O"
+    expect:
+      valid: true
+      components:
+        day_of_year: 350
+
+  # --- Decade designator J (Clause 4.3.5) ---
+  - id: conf-test:explicit-decade-additional-parse-001
+    description: "Parse decade '196J'"
+    requirements:
+      - req:explicit-additional-forms-decade
+    test_type: parsing
+    given:
+      expression: "196J"
+    expect:
+      valid: true
+      components:
+        decade: 196
+
+  - id: conf-test:explicit-decade-additional-parse-002
+    description: "Parse decade '0J'"
+    requirements:
+      - req:explicit-additional-forms-decade
+    test_type: parsing
+    given:
+      expression: "0J"
+    expect:
+      valid: true
+      components:
+        decade: 0
+
+  # --- Century designator C (Clause 4.3.6) ---
+  - id: conf-test:explicit-century-additional-parse-001
+    description: "Parse century '16C'"
+    requirements:
+      - req:explicit-additional-forms-century
+    test_type: parsing
+    given:
+      expression: "16C"
+    expect:
+      valid: true
+      components:
+        century: 16
+
+  - id: conf-test:explicit-century-additional-parse-002
+    description: "Parse century '0C'"
+    requirements:
+      - req:explicit-additional-forms-century
+    test_type: parsing
+    given:
+      expression: "0C"
+    expect:
+      valid: true
+      components:
+        century: 0
+
+  # --- Value prefixing (Clause 4.3.2) ---
+  - id: conf-test:explicit-value-prefixing-parse-001
+    description: "Parse month with zero padding '01M'"
+    requirements:
+      - req:explicit-value-prefixing
+    test_type: parsing
+    given:
+      expression: "01M"
+    expect:
+      valid: true
+      components:
+        month: 1
+
+  - id: conf-test:explicit-value-prefixing-parse-002
+    description: "Parse month with extra zero padding '0001M'"
+    requirements:
+      - req:explicit-value-prefixing
+    test_type: parsing
+    given:
+      expression: "0001M"
+    expect:
+      valid: true
+      components:
+        month: 1

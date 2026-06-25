@@ -532,11 +532,148 @@ tests:
             sign: "+"
             hours: 4
 
+  # Parsing tests: reduced offset (hours only, no minutes) variants
+  - id: conf-test:date-time-parse-031
+    description: "Parse calendar date basic with hours-only UTC offset 19850412T232030+04"
+    requirements:
+      - req:date-time-cal-basic-shift-h
+    test_type: parsing
+    given:
+      expression: "19850412T232030+04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-032
+    description: "Parse calendar date extended with hours-only UTC offset 1985-04-12T23:20:30+04"
+    requirements:
+      - req:date-time-cal-extended-shift-h
+    test_type: parsing
+    given:
+      expression: "1985-04-12T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: 1985
+          month: 4
+          day: 12
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-033
+    description: "Parse ordinal date basic with hours-only UTC offset 1985102T232030+04"
+    requirements:
+      - req:date-time-ord-basic-shift-h
+    test_type: parsing
+    given:
+      expression: "1985102T232030+04"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-034
+    description: "Parse ordinal date extended with hours-only UTC offset 1985-102T23:20:30+04"
+    requirements:
+      - req:date-time-ord-extended-shift-h
+    test_type: parsing
+    given:
+      expression: "1985-102T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        ordinal:
+          year: 1985
+          day_of_year: 102
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-035
+    description: "Parse week date basic with hours-only UTC offset 1985W155T232030+04"
+    requirements:
+      - req:date-time-week-basic-shift-h
+    test_type: parsing
+    given:
+      expression: "1985W155T232030+04"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
+  - id: conf-test:date-time-parse-036
+    description: "Parse week date extended with hours-only UTC offset 1985-W15-5T23:20:30+04"
+    requirements:
+      - req:date-time-week-extended-shift-h
+    test_type: parsing
+    given:
+      expression: "1985-W15-5T23:20:30+04"
+    expect:
+      valid: true
+      components:
+        week:
+          week_year: 1985
+          week: 15
+          day_of_week: 5
+        time:
+          hour: 23
+          minute: 20
+          second: 30
+          utc_offset:
+            sign: "+"
+            hours: 4
+            minutes: 0
+
   # Parsing tests: reduced precision date-time
   - id: conf-test:date-time-parse-025
     description: "Parse calendar date and reduced precision time (HM) basic 19850412T1015"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-cal-basic-reduced-hm
     test_type: parsing
     given:
       expression: "19850412T1015"
@@ -554,7 +691,7 @@ tests:
   - id: conf-test:date-time-parse-026
     description: "Parse calendar date and reduced precision time (HM) extended 1985-04-12T10:15"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-cal-extended-reduced-hm
     test_type: parsing
     given:
       expression: "1985-04-12T10:15"
@@ -572,7 +709,7 @@ tests:
   - id: conf-test:date-time-parse-027
     description: "Parse ordinal date and UTC reduced precision time basic 1985102T1015Z"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-ord-basic-reduced-hm
     test_type: parsing
     given:
       expression: "1985102T1015Z"
@@ -593,7 +730,7 @@ tests:
   - id: conf-test:date-time-parse-028
     description: "Parse ordinal date and UTC reduced precision time extended 1985-102T10:15Z"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-ord-extended-reduced-hm
     test_type: parsing
     given:
       expression: "1985-102T10:15Z"
@@ -614,7 +751,7 @@ tests:
   - id: conf-test:date-time-parse-029
     description: "Parse week date and time with offset reduced precision basic 1985W155T1015+0400"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-week-basic-reduced-hm
     test_type: parsing
     given:
       expression: "1985W155T1015+0400"
@@ -636,7 +773,7 @@ tests:
   - id: conf-test:date-time-parse-030
     description: "Parse week date and time with offset reduced precision extended 1985-W15-5T10:15+04"
     requirements:
-      - req:date-time-reduced-precision
+      - req:date-time-week-extended-reduced-hm
     test_type: parsing
     given:
       expression: "1985-W15-5T10:15+04"
@@ -739,7 +876,7 @@ tests:
   - id: conf-test:date-time-valid-001
     description: "Verify mixed format is invalid (basic date, extended time)"
     requirements:
-      - req:date-time-cal-basic-local
+      - req:date-time-format-consistency
     test_type: validity
     given:
       expression: "19850412T23:20:30"
@@ -749,7 +886,7 @@ tests:
   - id: conf-test:date-time-valid-002
     description: "Verify mixed format is invalid (extended date, basic time)"
     requirements:
-      - req:date-time-cal-extended-local
+      - req:date-time-format-consistency
     test_type: validity
     given:
       expression: "1985-04-12T232030"

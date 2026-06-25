@@ -16,14 +16,14 @@ standardization_target_type: iso-8601-date-time-processor
 traceability:
   - conformance_class: 8601-1:conf-class:fundamentals
     requirements:
-      - req:character-set
       - req:decreasing-order
       - req:gregorian-calendar
       - req:leap-year-rules
       - req:days-per-month
       - req:week-calendar
       - req:24-hour-clock
-      - req:year-representation
+      - req:second-range-59-normal
+      - req:year-range-0000-9999
       - req:month-representation
       - req:week-number-representation
       - req:day-of-week-representation
@@ -39,13 +39,17 @@ traceability:
     requirements:
       - req:time-extended-full
       - req:time-extended-hm
-      - req:time-utc
-      - req:time-offset-extended
+      - req:time-bod-extended-full
+      - req:time-bod-extended-hm
+      - req:time-eod-extended-full
+      - req:time-eod-extended-hm
+      - req:time-utc-extended-full
+      - req:time-offset-extended-hm
   - conformance_class: 8601-1:conf-class:date-and-time
     requirements:
       - req:date-time-cal-extended-local
       - req:date-time-cal-extended-utc
       - req:date-time-cal-extended-offset
-      - req:date-time-reduced-precision
+      - req:date-time-cal-extended-reduced-hm
 additional_requirements: []
 additional_tests: []

@@ -410,11 +410,12 @@ tests:
           value: "X*"
           unspecified: true
 
-  # --- Unspecified anywhere in calendar date (Clause 9.2.2) ---
+  # --- Unspecified at any position in calendar date (Clauses 9.2.6–9.2.10) ---
+  # Year component carrying unspecified digits (Clause 9.2.6)
   - id: conf-test:unspecified-anywhere-parse-001
     description: "Parse unspecified year digit in 1560s date '156X-12-25'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-year-omitted
     test_type: parsing
     given:
       expression: "156X-12-25"
@@ -430,7 +431,7 @@ tests:
   - id: conf-test:unspecified-anywhere-parse-002
     description: "Parse two unspecified year digits '15XX-12-25'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-year-omitted
     test_type: parsing
     given:
       expression: "15XX-12-25"
@@ -443,10 +444,11 @@ tests:
         month: 12
         day: 25
 
+  # Multiple components unspecified (Clause 9.2.9)
   - id: conf-test:unspecified-anywhere-parse-003
     description: "Parse unspecified year and day '1XXX-12-XX'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-combination
     test_type: parsing
     given:
       expression: "1XXX-12-XX"
@@ -464,7 +466,7 @@ tests:
   - id: conf-test:unspecified-anywhere-parse-004
     description: "Parse unspecified year and day in December 'XXXX-12-XX'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-combination
     test_type: parsing
     given:
       expression: "XXXX-12-XX"
@@ -479,10 +481,11 @@ tests:
           value: "XX"
           unspecified: [1, 2]
 
+  # Month component carrying unspecified digits (Clause 9.2.7)
   - id: conf-test:unspecified-anywhere-parse-005
     description: "Parse unspecified month with known day '1560-XX-25'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-month-omitted
     test_type: parsing
     given:
       expression: "1560-XX-25"
@@ -498,7 +501,7 @@ tests:
   - id: conf-test:unspecified-anywhere-parse-006
     description: "Parse partially unspecified month '1560-X2'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-month-omitted
     test_type: parsing
     given:
       expression: "1560-X2"
@@ -510,10 +513,11 @@ tests:
           value: "X2"
           unspecified: [1]
 
+  # Combination of year + month (Clause 9.2.9)
   - id: conf-test:unspecified-anywhere-parse-007
     description: "Parse unspecified month in 1000s '1XXX-XX'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-combination
     test_type: parsing
     given:
       expression: "1XXX-XX"
@@ -527,10 +531,11 @@ tests:
           value: "XX"
           unspecified: [1, 2]
 
+  # Year-only reduced forms (Clause 9.2.6)
   - id: conf-test:unspecified-anywhere-parse-008
     description: "Parse December in 1000s '1XXX-12'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-year-omitted
     test_type: parsing
     given:
       expression: "1XXX-12"
@@ -545,7 +550,7 @@ tests:
   - id: conf-test:unspecified-anywhere-parse-009
     description: "Parse unspecified year in 1000s '1XXX'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-year-omitted
     test_type: parsing
     given:
       expression: "1XXX"
@@ -559,7 +564,7 @@ tests:
   - id: conf-test:unspecified-anywhere-parse-010
     description: "Parse year ending in 3 during 1000s '1XX3'"
     requirements:
-      - req:unspecified-anywhere-calendar-date
+      - req:unspecified-year-omitted
     test_type: parsing
     given:
       expression: "1XX3"
@@ -569,6 +574,43 @@ tests:
         year:
           value: "1XX3"
           unspecified: [2, 3]
+
+  # --- Day-of-month component carrying unspecified digits (Clause 9.2.8) ---
+  - id: conf-test:unspecified-day-omitted-parse-001
+    description: "Parse date with day partially unspecified anywhere '1985-04-2X'"
+    requirements:
+      - req:unspecified-day-omitted
+    test_type: parsing
+    given:
+      expression: "1985-04-2X"
+    expect:
+      valid: true
+      components:
+        year: 1985
+        month: 4
+        day:
+          value: "2X"
+          unspecified: [2]
+
+  # --- Time-of-day component carrying unspecified digits (Clause 9.2.10) ---
+  - id: conf-test:unspecified-time-omitted-parse-001
+    description: "Parse datetime with hour entirely unspecified '2018-03-17TXX:30:00'"
+    requirements:
+      - req:unspecified-time-omitted
+    test_type: parsing
+    given:
+      expression: "2018-03-17TXX:30:00"
+    expect:
+      valid: true
+      components:
+        year: 2018
+        month: 3
+        day: 17
+        hour:
+          value: "XX"
+          unspecified: [1, 2]
+        minute: 30
+        second: 0
 
   # --- Date and time expressions with unspecified digits (Clause 9.3) ---
   - id: conf-test:unspecified-datetime-parse-001

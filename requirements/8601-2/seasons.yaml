@@ -1,4 +1,8 @@
 # yaml-language-server: $schema=../../schema/requirements-class.yaml
+# NOTE: ISO 8601-2:2026 nests seasons under "Sub-year groupings" alongside other
+# forms (unspecified digits, qualification). Kept as a standalone class for
+# conformance declaration simplicity — the other sub-year forms live in their
+# own classes (qualification, unspecified-digits).
 ---
 id: req-class:seasons
 name: Seasons and sub-year groupings

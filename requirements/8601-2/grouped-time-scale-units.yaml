@@ -27,11 +27,19 @@ requirements:
       definition: [i][groupUnit], where [i] selects the specific sub-unit.
     format: any
     pattern: "[i][groupUnit]"
-  - id: req:grouped-application-date
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4:tech:grouped-application-date"
+  - id: req:grouped-application-no-lower-order
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.1:tech:grouped-application-no-lower-order"
     statement: >
-      Grouped time scale units may replace any time scale unit in a date or time
-      expression, provided the resulting expression remains valid.
+      A grouped time scale unit may replace a time scale component in a date
+      or time expression when no lower-order components follow, expressing
+      precision exactly at the grouped unit boundary.
+    format: any
+  - id: req:grouped-application-with-lower-order
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.2:tech:grouped-application-with-lower-order"
+    statement: >
+      A grouped time scale unit may replace a higher-order component while
+      retaining lower-order components that select instances within the
+      grouped unit.
     format: any
   - id: req:grouped-application-order
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4:tech:grouped-application-order"
@@ -39,11 +47,19 @@ requirements:
       Components appearing to the right of a grouped time scale unit describe
       instances within that grouped unit.
     format: any
-  - id: req:grouped-boundary-adherence
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.3"
+  - id: req:grouped-boundary-adherence-valid
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.3:tech:grouped-boundary-adherence-valid"
     statement: >
-      Lower-order component values must remain within the bounds established by
-      the grouped time scale unit definition.
+      A lower-order component value that falls within the bounds established
+      by the grouped time scale unit definition is valid. For example, a
+      day-of-week value of 1 through 7 is valid within a week-grouped unit.
+    format: any
+  - id: req:grouped-boundary-adherence-invalid
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.3:tech:grouped-boundary-adherence-invalid"
+    statement: >
+      A lower-order component value that exceeds the bounds established by
+      the grouped time scale unit definition is invalid. For example, a
+      day-of-week value of 8 within a week-grouped unit is rejected.
     format: any
   - id: req:grouped-representation-with-shift
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:5.4.4"

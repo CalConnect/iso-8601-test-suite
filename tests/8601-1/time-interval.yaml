@@ -192,7 +192,8 @@ tests:
   - id: conf-test:interval-parse-007
     description: "Parse interval with abbreviated end 2018-01-15/02-20"
     requirements:
-      - req:interval-abbreviated-end
+      - req:interval-abbreviated-end-year-omitted
+      - req:interval-abbreviation-ambiguity-rule
     test_type: parsing
     given:
       expression: "2018-01-15/02-20"
@@ -485,3 +486,59 @@ tests:
       expression_b: "2022-04-19T00:00:00/2022-04-20T00:00:00"
     expect:
       equivalent: true
+
+  # Parsing tests: abbreviated end (additional variants)
+  - id: conf-test:interval-parse-014
+    description: "Parse interval with abbreviated end omitting year and month 2018-01-15/20"
+    requirements:
+      - req:interval-abbreviated-end-year-omitted
+      - req:interval-abbreviated-end-month-omitted
+    test_type: parsing
+    given:
+      expression: "2018-01-15/20"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 2018
+              month: 1
+              day: 15
+          end:
+            calendar:
+              year: 2018
+              month: 1
+              day: 20
+
+  - id: conf-test:interval-parse-015
+    description: "Parse interval with abbreviated end omitting all date components 2018-01-15T12:00:00/T14:00:00"
+    requirements:
+      - req:interval-abbreviated-end-year-omitted
+      - req:interval-abbreviated-end-month-omitted
+      - req:interval-abbreviated-end-day-omitted
+    test_type: parsing
+    given:
+      expression: "2018-01-15T12:00:00/T14:00:00"
+    expect:
+      valid: true
+      components:
+        interval:
+          start:
+            calendar:
+              year: 2018
+              month: 1
+              day: 15
+            time:
+              hour: 12
+              minute: 0
+              second: 0
+          end:
+            calendar:
+              year: 2018
+              month: 1
+              day: 15
+            time:
+              hour: 14
+              minute: 0
+              second: 0

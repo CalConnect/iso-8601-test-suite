@@ -21,21 +21,25 @@ traceability:
       - req:time-extended-full
       - req:time-extended-hm
       - req:time-fraction-second
-      - req:time-beginning-of-day
-      - req:time-utc
-      - req:time-offset-extended
+      - req:time-bod-extended-full
+      - req:time-bod-extended-hm
+      - req:time-utc-extended-full
+      - req:time-offset-extended-hm
   - conformance_class: 8601-1:conf-class:date-and-time
     requirements:
       - req:date-time-cal-extended-local
       - req:date-time-cal-extended-utc
       - req:date-time-cal-extended-offset
-      - req:date-time-reduced-precision
+      - req:date-time-cal-extended-reduced-hm
   - conformance_class: 8601-1:conf-class:time-interval
     requirements:
       - req:interval-start-end-extended
       - req:interval-start-dur-extended
       - req:interval-dur-end-extended
-      - req:interval-abbreviated-end
+      - req:interval-abbreviated-end-year-omitted
+      - req:interval-abbreviated-end-month-omitted
+      - req:interval-abbreviated-end-day-omitted
+      - req:interval-abbreviation-ambiguity-rule
       - req:interval-time-shift-inheritance
   - conformance_class: 8601-2:conf-class:qualification
     requirements:

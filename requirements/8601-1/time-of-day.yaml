@@ -51,70 +51,217 @@ requirements:
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-second"
     statement: >
       A decimal fraction may be appended to the second component, separated by
-      a decimal sign (period or comma) with at least one digit. When a fraction
-      is present on the second, no lower-order components appear.
+      a decimal point (period) with at least one digit. When a fraction is
+      present on the second, no lower-order components appear.
     format: any
-    pattern: "[hh][mm][ss][,/.][f]"
+    pattern: "[hh][mm][ss][.][f]"
+  - id: req:time-fraction-second-comma
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-second-comma"
+    statement: >
+      As an alternative to the decimal point, a comma may be used as the
+      decimal sign for a fraction appended to the second component, with at
+      least one digit following it.
+    format: any
+    pattern: "[hh][mm][ss][,][f]"
   - id: req:time-fraction-minute
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-minute"
     statement: >
       A decimal fraction may be appended to the minute component, separated by
-      a decimal sign (period or comma) with at least one digit. When a fraction
-      is present on the minute, the second component is omitted.
+      a decimal point (period) with at least one digit. When a fraction is
+      present on the minute, the second component is omitted.
     format: any
-    pattern: "[hh][mm][,/.][f]"
+    pattern: "[hh][mm][.][f]"
+  - id: req:time-fraction-minute-comma
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-minute-comma"
+    statement: >
+      As an alternative to the decimal point, a comma may be used as the
+      decimal sign for a fraction appended to the minute component, with at
+      least one digit following it.
+    format: any
+    pattern: "[hh][mm][,][f]"
   - id: req:time-fraction-hour
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-hour"
     statement: >
       A decimal fraction may be appended to the hour component, separated by
-      a decimal sign (period or comma) with at least one digit. When a fraction
-      is present on the hour, minute and second components are omitted. Only
+      a decimal point (period) with at least one digit. When a fraction is
+      present on the hour, minute and second components are omitted. Only
       basic format applies.
     format: basic
-    pattern: "[\"T\"][hh][,/.][f]"
-  - id: req:time-beginning-of-day
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-beginning-of-day"
+    pattern: "[\"T\"][hh][.][f]"
+  - id: req:time-fraction-hour-comma
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.1.4:tech:time-fraction-hour-comma"
     statement: >
-      The beginning of a calendar day (midnight, start of day) is encoded as
-      T000000 in basic format or 00:00:00 in extended format, denoting the
-      first instant where no time has elapsed.
-    format: any
-    pattern: "[\"T\"]000000|00:00:00"
-  - id: req:time-ending-of-day
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-ending-of-day"
-    statement: >
-      The ending of a calendar day (midnight, end of day) is encoded as T240000
-      in basic format or 24:00:00 in extended format. The hour value 24 is valid
-      only when representing the last instant of the day.
-    format: any
-    pattern: "[\"T\"]240000|24:00:00"
-  - id: req:time-utc
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3"
-    statement: >
-      UTC time is indicated by appending the UTC designator ["Z"] directly after
-      the time expression, with no intervening space.
-    format: any
-    pattern: "[time][\"Z\"]"
-  - id: req:time-offset-basic
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-basic"
-    statement: >
-      Local time with UTC offset in basic format appends the shift after the
-      time: [time][shift] or [time][shiftH], where shift is [±][hour][min] and
-      shiftH is [±][hour].
+      As an alternative to the decimal point, a comma may be used as the
+      decimal sign for a fraction appended to the hour component, with at
+      least one digit following it. Only basic format applies.
     format: basic
-    pattern: "[time][±][hh][mm]|[time][±][hh]"
-  - id: req:time-offset-extended
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-extended"
+    pattern: "[\"T\"][hh][,][f]"
+  - id: req:time-bod-basic-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-basic-full"
     statement: >
-      Local time with UTC offset in extended format appends the shift after the
-      time: [timeX][shiftX] or [timeX][shiftH], where shiftX is [±][hour][":"][min]
-      and shiftH is [±][hour].
+      The beginning of a calendar day in basic format is encoded as
+      ["T"]000000, denoting the first instant where no time has elapsed.
+    format: basic
+    pattern: "[\"T\"]000000"
+  - id: req:time-bod-extended-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-extended-full"
+    statement: >
+      The beginning of a calendar day in extended format is encoded as
+      00:00:00, denoting the first instant where no time has elapsed.
     format: extended
-    pattern: "[timeX][±][hh][\":\"][mm]|[timeX][±][hh]"
-  - id: req:time-designator-omission
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.5"
+    pattern: "00:00:00"
+  - id: req:time-bod-basic-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-basic-hm"
+    statement: >
+      The beginning of a calendar day in basic hour-minute format is encoded
+      as ["T"]0000.
+    format: basic
+    pattern: "[\"T\"]0000"
+  - id: req:time-bod-extended-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-extended-hm"
+    statement: >
+      The beginning of a calendar day in extended hour-minute format is
+      encoded as 00:00.
+    format: extended
+    pattern: "00:00"
+  - id: req:time-bod-basic-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-basic-h"
+    statement: >
+      The beginning of a calendar day in basic hour-only format is encoded as
+      ["T"]00.
+    format: basic
+    pattern: "[\"T\"]00"
+  - id: req:time-bod-extended-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-bod-extended-h"
+    statement: >
+      The beginning of a calendar day in extended hour-only format is encoded
+      as 00.
+    format: extended
+    pattern: "00"
+  - id: req:time-eod-basic-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-basic-full"
+    statement: >
+      The ending of a calendar day in basic format is encoded as ["T"]240000,
+      representing the last instant of the day.
+    format: basic
+    pattern: "[\"T\"]240000"
+  - id: req:time-eod-extended-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-extended-full"
+    statement: >
+      The ending of a calendar day in extended format is encoded as 24:00:00,
+      representing the last instant of the day.
+    format: extended
+    pattern: "24:00:00"
+  - id: req:time-eod-basic-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-basic-hm"
+    statement: >
+      The ending of a calendar day in basic hour-minute format is encoded as
+      ["T"]2400.
+    format: basic
+    pattern: "[\"T\"]2400"
+  - id: req:time-eod-extended-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-extended-hm"
+    statement: >
+      The ending of a calendar day in extended hour-minute format is encoded
+      as 24:00.
+    format: extended
+    pattern: "24:00"
+  - id: req:time-eod-basic-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-basic-h"
+    statement: >
+      The ending of a calendar day in basic hour-only format is encoded as
+      ["T"]24.
+    format: basic
+    pattern: "[\"T\"]24"
+  - id: req:time-eod-extended-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-eod-extended-h"
+    statement: >
+      The ending of a calendar day in extended hour-only format is encoded as
+      24.
+    format: extended
+    pattern: "24"
+  - id: req:time-24-only-valid-eod
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.2:tech:time-24-only-valid-eod"
+    statement: >
+      The hour value 24 is valid only when representing the last instant of
+      the calendar day. It shall not be used for any other time expression.
+    format: any
+  - id: req:time-utc-basic-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3:tech:time-utc-basic-full"
+    statement: >
+      UTC time in basic full format appends the UTC designator ["Z"] to a
+      complete basic time expression: ["T"][hour][min][sec]["Z"].
+    format: basic
+    pattern: "[\"T\"][hh][mm][ss][\"Z\"]"
+  - id: req:time-utc-basic-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3:tech:time-utc-basic-hm"
+    statement: >
+      UTC time in basic hour-minute format appends ["Z"] to a basic time
+      expression reduced to hour and minute: ["T"][hour][min]["Z"].
+    format: basic
+    pattern: "[\"T\"][hh][mm][\"Z\"]"
+  - id: req:time-utc-basic-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3:tech:time-utc-basic-h"
+    statement: >
+      UTC time in basic hour-only format appends ["Z"] to a basic time
+      expression reduced to the hour: ["T"][hour]["Z"].
+    format: basic
+    pattern: "[\"T\"][hh][\"Z\"]"
+  - id: req:time-utc-extended-full
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3:tech:time-utc-extended-full"
+    statement: >
+      UTC time in extended full format appends ["Z"] to a complete extended
+      time expression: [hour][":"][min][":"][sec]["Z"].
+    format: extended
+    pattern: "[hh][\":\"][mm][\":\"][ss][\"Z\"]"
+  - id: req:time-utc-extended-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.3:tech:time-utc-extended-hm"
+    statement: >
+      UTC time in extended hour-minute format appends ["Z"] to an extended
+      time expression reduced to hour and minute: [hour][":"][min]["Z"].
+    format: extended
+    pattern: "[hh][\":\"][mm][\"Z\"]"
+  - id: req:time-offset-basic-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-basic-hm"
+    statement: >
+      Local time in basic format with a full UTC offset (hours and minutes)
+      appends the shift after the time: [time]["±"][hh][mm].
+    format: basic
+    pattern: "[time][±][hh][mm]"
+  - id: req:time-offset-basic-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-basic-h"
+    statement: >
+      Local time in basic format with an hours-only UTC offset appends the
+      shift after the time: [time]["±"][hh]. When the shift is expressed in
+      hours only, no minutes field appears.
+    format: basic
+    pattern: "[time][±][hh]"
+  - id: req:time-offset-extended-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-extended-hm"
+    statement: >
+      Local time in extended format with a full UTC offset appends the shift
+      after the time using colon separator: [timeX]["±"][hh][":"][mm].
+    format: extended
+    pattern: "[timeX][±][hh][\":\"][mm]"
+  - id: req:time-offset-extended-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.4.2:tech:time-offset-extended-h"
+    statement: >
+      Local time in extended format with an hours-only UTC offset appends the
+      shift after the time: [timeX]["±"][hh]. The hours-only shift uses basic
+      format (no colon) even when the time itself is in extended format.
+    format: extended
+    pattern: "[timeX][±][hh]"
+  - id: req:time-designator-omittable-when-unambiguous
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.5:tech:time-designator-omittable-when-unambiguous"
     statement: >
       In expressions containing only time of day (including UTC and offset
       variants), the time designator ["T"] may be omitted where no ambiguity
       would result.
+    format: any
+  - id: req:time-designator-required-to-disambiguate
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.3.5:tech:time-designator-required-to-disambiguate"
+    statement: >
+      In date-and-time expressions the time designator ["T"] shall be used
+      to separate the date from the time of day, unless the communicating
+      parties have mutually agreed to omit it.
     format: any

@@ -334,7 +334,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-001
     description: "Convert century to decade: 28C = 280D"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-century-decade
     test_type: arithmetic
     given:
       expression: "28C"
@@ -347,7 +347,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-002
     description: "Convert decade to year: 33D = 330Y"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-decade-year
     test_type: arithmetic
     given:
       expression: "33D"
@@ -360,7 +360,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-003
     description: "Convert months to year+month: 20M = 1Y8M"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-year-month
     test_type: arithmetic
     given:
       expression: "20M"
@@ -374,7 +374,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-004
     description: "Convert days to weeks+days: 108D = 15W3D"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-week-day
     test_type: arithmetic
     given:
       expression: "108D"
@@ -388,7 +388,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-005
     description: "Convert hours to day+hour: T26H = 1DT2H"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-day-hour
     test_type: arithmetic
     given:
       expression: "T26H"
@@ -402,7 +402,7 @@ tests:
   - id: conf-test:arithmetic-conversion-equivocal-006
     description: "Convert minutes to hours: T1H120M = T3H"
     requirements:
-      - req:arithmetic-conversion-boundaries
+      - req:arithmetic-conversion-hour-minute
     test_type: arithmetic
     given:
       expression: "T1H120M"
@@ -416,7 +416,7 @@ tests:
   - id: conf-test:arithmetic-canonical-001
     description: "Canonical form of 7Y24M = 9Y"
     requirements:
-      - req:arithmetic-canonical-form
+      - req:arithmetic-canonical-form-concrete-context
     test_type: arithmetic
     given:
       expression: "7Y24M"
@@ -429,7 +429,7 @@ tests:
   - id: conf-test:arithmetic-canonical-002
     description: "Canonical form of 1H90M = 2H30M"
     requirements:
-      - req:arithmetic-canonical-form
+      - req:arithmetic-canonical-form-concrete-context
     test_type: arithmetic
     given:
       expression: "1H90M"
@@ -443,7 +443,7 @@ tests:
   - id: conf-test:arithmetic-canonical-003
     description: "Canonical form of 1H-10M = 50M"
     requirements:
-      - req:arithmetic-canonical-form
+      - req:arithmetic-canonical-form-concrete-context
     test_type: arithmetic
     given:
       expression: "1H-10M"
@@ -456,7 +456,8 @@ tests:
   - id: conf-test:arithmetic-canonical-004
     description: "Canonical form with transitive conversion: 3DT-10M = 2DT23H50M"
     requirements:
-      - req:arithmetic-canonical-form
+      - req:arithmetic-canonical-form-concrete-context
+      - req:arithmetic-canonical-form-algorithm
     test_type: arithmetic
     given:
       expression: "3DT-10M"
