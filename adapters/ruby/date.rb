@@ -82,17 +82,9 @@ class RubyDateAdapter
     result = {}
 
     if parsed.is_a?(Date) && !parsed.is_a?(DateTime)
-      result["calendar"] = { "year" => parsed.year }
-      result["calendar"]["month"] = parsed.month if parsed.respond_to?(:month)
-      result["calendar"]["day"] = parsed.day if parsed.respond_to?(:day)
-
-      if parsed.respond_to?(:cwyear)
-        result["week"] = { "week_year" => parsed.cwyear, "week" => parsed.cweek, "day_of_week" => parsed.cwday }
-      end
-
-      if parsed.respond_to?(:yday)
-        result["ordinal"] = { "year" => parsed.year, "day_of_year" => parsed.yday }
-      end
+      result["calendar"] = { "year" => parsed.year, "month" => parsed.month, "day" => parsed.day }
+      result["week"] = { "week_year" => parsed.cwyear, "week" => parsed.cweek, "day_of_week" => parsed.cwday }
+      result["ordinal"] = { "year" => parsed.year, "day_of_year" => parsed.yday }
     end
 
     if parsed.is_a?(Time)
@@ -330,12 +322,16 @@ class RubyDateAdapter
   def build_time_components(parsed)
     t = { "hour" => parsed.hour, "minute" => parsed.min, "second" => parsed.sec }
 
-    if parsed.respond_to?(:utc_offset) && (parsed.utc_offset != 0 || (parsed.respond_to?(:zone) && parsed.zone == "UTC"))
-      off = parsed.utc_offset
+    offset_seconds = case parsed
+                     when Time     then parsed.utc_offset
+                     when DateTime then (parsed.offset * 86400).to_i
+                     end
+
+    if offset_seconds && (offset_seconds != 0 || parsed.zone == "UTC")
       t["utc_offset"] = {
-        "sign" => off >= 0 ? "+" : "-",
-        "hours" => off.abs / 3600,
-        "minutes" => (off.abs % 3600) / 60
+        "sign" => offset_seconds >= 0 ? "+" : "-",
+        "hours" => offset_seconds.abs / 3600,
+        "minutes" => (offset_seconds.abs % 3600) / 60
       }
     end
 

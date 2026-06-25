@@ -3,15 +3,21 @@
 require_relative "../../lib/test_suite/term"
 
 RSpec.describe Term do
-  describe "color methods" do
-    it "returns plain text when NO_COLOR is set" do
+  describe ".colors_enabled?" do
+    it "returns false when NO_COLOR is set" do
       original = ENV["NO_COLOR"]
-      ENV["NO_COLOR"] = "1"
-      # Reset the constant by reloading (constants are frozen at load time)
-      # Instead, test the method directly
-      result = Term.send(:color?, "\e[31m", "hello")
-      ENV["NO_COLOR"] = original
-      expect(result).to eq("hello")
+      begin
+        ENV["NO_COLOR"] = "1"
+        expect(Term.colors_enabled?).to eq(false)
+      ensure
+        ENV["NO_COLOR"] = original
+      end
+    end
+  end
+
+  describe ".color?" do
+    it "returns plain text when colors are disabled" do
+      expect(Term.color?(Term::RED, "hello")).to eq("hello")
     end
   end
 
