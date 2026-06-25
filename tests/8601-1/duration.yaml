@@ -17,7 +17,7 @@ tests:
     description: "Parse complete duration P1Y2M10DT2H30M"
     requirements:
       - req:dur-complete-datetime
-      - req:dur-reduced
+      - req:dur-reduced-second-omitted
     test_type: parsing
     given:
       expression: "P1Y2M10DT2H30M"
@@ -80,7 +80,11 @@ tests:
   - id: conf-test:dur-parse-005
     description: "Parse time-only duration PT15M (15 minutes)"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-second-omitted
       - req:dur-time-designator
     test_type: parsing
     given:
@@ -94,7 +98,11 @@ tests:
   - id: conf-test:dur-parse-006
     description: "Parse days-only duration P3D"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-minute-omitted
+      - req:dur-reduced-second-omitted
     test_type: parsing
     given:
       expression: "P3D"
@@ -107,7 +115,10 @@ tests:
   - id: conf-test:dur-parse-007
     description: "Parse hours and seconds duration PT5H30S"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-minute-omitted
       - req:dur-time-designator
     test_type: parsing
     given:
@@ -122,7 +133,10 @@ tests:
   - id: conf-test:dur-parse-008
     description: "Parse date-only duration P1Y2M"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-minute-omitted
+      - req:dur-reduced-second-omitted
     test_type: parsing
     given:
       expression: "P1Y2M"
@@ -136,7 +150,11 @@ tests:
   - id: conf-test:dur-parse-009
     description: "Parse seconds-only duration PT30S"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-minute-omitted
       - req:dur-time-designator
     test_type: parsing
     given:
@@ -223,7 +241,7 @@ tests:
     description: "Generate complete duration with selected components"
     requirements:
       - req:dur-complete-datetime
-      - req:dur-reduced
+      - req:dur-reduced-second-omitted
     test_type: generation
     given:
       components:
@@ -251,7 +269,11 @@ tests:
   - id: conf-test:dur-gen-003
     description: "Generate time-only duration"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-second-omitted
       - req:dur-time-designator
     test_type: generation
     given:
@@ -292,7 +314,7 @@ tests:
   - id: conf-test:dur-valid-002
     description: "Verify empty duration is invalid"
     requirements:
-      - req:dur-complete-datetime
+      - req:dur-reduced-at-least-one-required
     test_type: validity
     given:
       expression: "P"
@@ -322,7 +344,7 @@ tests:
   - id: conf-test:dur-valid-005
     description: "Verify zero duration PT0S is valid"
     requirements:
-      - req:dur-reduced
+      - req:dur-reduced-at-least-one-required
       - req:dur-time-designator
     test_type: validity
     given:
@@ -350,7 +372,7 @@ tests:
   - id: conf-test:dur-parse-014
     description: "Parse duration with fractional seconds PT15M30.5S"
     requirements:
-      - req:dur-fraction
+      - req:dur-fraction-period
     test_type: parsing
     given:
       expression: "PT15M30.5S"
@@ -364,7 +386,7 @@ tests:
   - id: conf-test:dur-parse-015
     description: "Parse duration with fractional hours PT1.5H"
     requirements:
-      - req:dur-fraction
+      - req:dur-fraction-period
     test_type: parsing
     given:
       expression: "PT1.5H"
@@ -373,3 +395,29 @@ tests:
       components:
         duration:
           hours: 1.5
+
+  - id: conf-test:dur-parse-016
+    description: "Parse duration with comma decimal fraction PT1,5H"
+    requirements:
+      - req:dur-fraction-comma
+    test_type: parsing
+    given:
+      expression: "PT1,5H"
+    expect:
+      valid: true
+      components:
+        duration:
+          hours: 1.5
+
+  - id: conf-test:dur-parse-017
+    description: "Parse duration with leading-zero fraction PT0.5S"
+    requirements:
+      - req:dur-fraction-leading-zero
+    test_type: parsing
+    given:
+      expression: "PT0.5S"
+    expect:
+      valid: true
+      components:
+        duration:
+          seconds: 0.5

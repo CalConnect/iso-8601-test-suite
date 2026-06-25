@@ -11,21 +11,29 @@ standardization_target_type: iso-8601-date-time-processor
 traceability:
   - conformance_class: 8601-1:conf-class:fundamentals
     requirements:
-      - req:character-set
       - req:decreasing-order
       - req:gregorian-calendar
       - req:leap-year-rules
       - req:days-per-month
       - req:week-calendar
       - req:24-hour-clock
-      - req:year-representation
+      - req:second-range-59-normal
+      - req:leap-second-positive
+      - req:leap-second-negative
+      - req:proleptic-gregorian-mutual-agreement
+      - req:year-range-0000-9999
+      - req:year-minus-sign
       - req:month-representation
       - req:week-number-representation
       - req:day-of-week-representation
       - req:day-of-year-representation
       - req:decade-representation
       - req:century-representation
-      - req:time-shift
+      - req:time-shift-basic-hm
+      - req:time-shift-basic-h
+      - req:time-shift-extended-hm
+      - req:time-shift-utc
+      - req:time-shift-sign-mandatory
       - req:expansion
       - req:leading-zeros
   - conformance_class: 8601-1:conf-class:calendar-date
@@ -66,41 +74,82 @@ traceability:
       - req:time-extended-hm
       - req:time-basic-h
       - req:time-fraction-second
+      - req:time-fraction-second-comma
       - req:time-fraction-minute
+      - req:time-fraction-minute-comma
       - req:time-fraction-hour
-      - req:time-beginning-of-day
-      - req:time-ending-of-day
-      - req:time-utc
-      - req:time-offset-basic
-      - req:time-offset-extended
-      - req:time-designator-omission
+      - req:time-fraction-hour-comma
+      - req:time-bod-basic-full
+      - req:time-bod-extended-full
+      - req:time-bod-basic-hm
+      - req:time-bod-extended-hm
+      - req:time-bod-basic-h
+      - req:time-bod-extended-h
+      - req:time-eod-basic-full
+      - req:time-eod-extended-full
+      - req:time-eod-basic-hm
+      - req:time-eod-extended-hm
+      - req:time-eod-basic-h
+      - req:time-eod-extended-h
+      - req:time-24-only-valid-eod
+      - req:time-utc-basic-full
+      - req:time-utc-basic-hm
+      - req:time-utc-basic-h
+      - req:time-utc-extended-full
+      - req:time-utc-extended-hm
+      - req:time-offset-basic-hm
+      - req:time-offset-basic-h
+      - req:time-offset-extended-hm
+      - req:time-offset-extended-h
+      - req:time-designator-omittable-when-unambiguous
+      - req:time-designator-required-to-disambiguate
   - conformance_class: 8601-1:conf-class:date-and-time
     requirements:
       - req:date-time-cal-basic-local
       - req:date-time-cal-basic-utc
       - req:date-time-cal-basic-offset
+      - req:date-time-cal-basic-shift-h
       - req:date-time-cal-extended-local
       - req:date-time-cal-extended-utc
       - req:date-time-cal-extended-offset
+      - req:date-time-cal-extended-shift-h
       - req:date-time-ord-basic-local
       - req:date-time-ord-basic-utc
       - req:date-time-ord-basic-offset
+      - req:date-time-ord-basic-shift-h
       - req:date-time-ord-extended-local
       - req:date-time-ord-extended-utc
       - req:date-time-ord-extended-offset
+      - req:date-time-ord-extended-shift-h
       - req:date-time-week-basic-local
       - req:date-time-week-basic-utc
       - req:date-time-week-basic-offset
+      - req:date-time-week-basic-shift-h
       - req:date-time-week-extended-local
       - req:date-time-week-extended-utc
       - req:date-time-week-extended-offset
-      - req:date-time-reduced-precision
+      - req:date-time-week-extended-shift-h
+      - req:date-time-cal-basic-reduced-hm
+      - req:date-time-cal-extended-reduced-hm
+      - req:date-time-ord-basic-reduced-hm
+      - req:date-time-ord-extended-reduced-hm
+      - req:date-time-week-basic-reduced-hm
+      - req:date-time-week-extended-reduced-hm
+      - req:date-time-format-consistency
   - conformance_class: 8601-1:conf-class:duration
     requirements:
       - req:dur-complete-datetime
       - req:dur-complete-week
-      - req:dur-reduced
-      - req:dur-fraction
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-minute-omitted
+      - req:dur-reduced-second-omitted
+      - req:dur-reduced-at-least-one-required
+      - req:dur-fraction-period
+      - req:dur-fraction-comma
+      - req:dur-fraction-leading-zero
       - req:dur-time-designator
       - req:dur-alt-calendar-basic
       - req:dur-alt-calendar-extended
@@ -114,7 +163,10 @@ traceability:
       - req:interval-start-dur-extended
       - req:interval-dur-end-basic
       - req:interval-dur-end-extended
-      - req:interval-abbreviated-end
+      - req:interval-abbreviated-end-year-omitted
+      - req:interval-abbreviated-end-month-omitted
+      - req:interval-abbreviated-end-day-omitted
+      - req:interval-abbreviation-ambiguity-rule
       - req:interval-time-shift-inheritance
   - conformance_class: 8601-1:conf-class:recurring-time-interval
     requirements:

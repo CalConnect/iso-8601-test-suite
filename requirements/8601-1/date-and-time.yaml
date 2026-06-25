@@ -30,10 +30,18 @@ requirements:
   - id: req:date-time-cal-basic-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-basic-offset"
     statement: >
-      A calendar date combined with time and UTC offset in basic format appends
-      the offset after the time: [date]["T"][time][shift] or [date]["T"][time][shiftH].
+      A calendar date combined with time and a full UTC offset (hours and minutes)
+      in basic format appends the offset after the time: [date]["T"][time]["±"][hh][mm].
     format: basic
     pattern: "[YYYY][MM][DD][\"T\"][hh][mm][ss][±][hh][mm]"
+  - id: req:date-time-cal-basic-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-basic-shift-h"
+    statement: >
+      A calendar date combined with time and a reduced UTC offset (hours only,
+      minutes omitted as zero) in basic format appends ["±"][hh] after the time:
+      [date]["T"][time]["±"][hh].
+    format: basic
+    pattern: "[YYYY][MM][DD][\"T\"][hh][mm][ss][±][hh]"
   - id: req:date-time-cal-extended-local
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-local"
     statement: >
@@ -52,10 +60,19 @@ requirements:
   - id: req:date-time-cal-extended-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-offset"
     statement: >
-      A calendar date combined with time and UTC offset in extended format appends
-      the offset: [dateX]["T"][timeX][shiftX] or [dateX]["T"][timeX][shiftH].
+      A calendar date combined with time and a full UTC offset (hours and minutes)
+      in extended format appends the offset with colon separator:
+      [dateX]["T"][timeX]["±"][hh][":"][mm].
     format: extended
     pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
+  - id: req:date-time-cal-extended-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.1:tech:date-time-cal-extended-shift-h"
+    statement: >
+      A calendar date combined with time and a reduced UTC offset (hours only,
+      minutes omitted as zero) in extended format appends ["±"][hh] after the time:
+      [dateX]["T"][timeX]["±"][hh].
+    format: extended
+    pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh]"
   - id: req:date-time-ord-basic-local
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-local"
     statement: >
@@ -73,10 +90,17 @@ requirements:
   - id: req:date-time-ord-basic-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-offset"
     statement: >
-      An ordinal date combined with time and UTC offset in basic format appends
-      the offset: [odate]["T"][time][shift] or [odate]["T"][time][shiftH].
+      An ordinal date combined with time and a full UTC offset (hours and minutes)
+      in basic format appends the offset: [odate]["T"][time]["±"][hh][mm].
     format: basic
     pattern: "[YYYY][OOO][\"T\"][hh][mm][ss][±][hh][mm]"
+  - id: req:date-time-ord-basic-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-basic-shift-h"
+    statement: >
+      An ordinal date combined with time and a reduced UTC offset (hours only)
+      in basic format appends ["±"][hh] after the time: [odate]["T"][time]["±"][hh].
+    format: basic
+    pattern: "[YYYY][OOO][\"T\"][hh][mm][ss][±][hh]"
   - id: req:date-time-ord-extended-local
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-local"
     statement: >
@@ -94,10 +118,18 @@ requirements:
   - id: req:date-time-ord-extended-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-offset"
     statement: >
-      An ordinal date combined with time and UTC offset in extended format appends
-      the offset: [odateX]["T"][timeX][shiftX] or [odateX]["T"][timeX][shiftH].
+      An ordinal date combined with time and a full UTC offset (hours and minutes)
+      in extended format appends the offset with colon separator:
+      [odateX]["T"][timeX]["±"][hh][":"][mm].
     format: extended
     pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
+  - id: req:date-time-ord-extended-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.2:tech:date-time-ord-extended-shift-h"
+    statement: >
+      An ordinal date combined with time and a reduced UTC offset (hours only)
+      in extended format appends ["±"][hh] after the time: [odateX]["T"][timeX]["±"][hh].
+    format: extended
+    pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh]"
   - id: req:date-time-week-basic-local
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-local"
     statement: >
@@ -115,10 +147,17 @@ requirements:
   - id: req:date-time-week-basic-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-offset"
     statement: >
-      A week date combined with time and UTC offset in basic format appends the
-      offset: [wdate]["T"][time][shift] or [wdate]["T"][time][shiftH].
+      A week date combined with time and a full UTC offset (hours and minutes)
+      in basic format appends the offset: [wdate]["T"][time]["±"][hh][mm].
     format: basic
     pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm][ss][±][hh][mm]"
+  - id: req:date-time-week-basic-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-basic-shift-h"
+    statement: >
+      A week date combined with time and a reduced UTC offset (hours only)
+      in basic format appends ["±"][hh] after the time: [wdate]["T"][time]["±"][hh].
+    format: basic
+    pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm][ss][±][hh]"
   - id: req:date-time-week-extended-local
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-local"
     statement: >
@@ -136,14 +175,65 @@ requirements:
   - id: req:date-time-week-extended-offset
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-offset"
     statement: >
-      A week date combined with time and UTC offset in extended format appends
-      the offset: [wdateX]["T"][timeX][shiftX] or [wdateX]["T"][timeX][shiftH].
+      A week date combined with time and a full UTC offset (hours and minutes)
+      in extended format appends the offset with colon separator:
+      [wdateX]["T"][timeX]["±"][hh][":"][mm].
     format: extended
     pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh][\":\"][mm]"
-  - id: req:date-time-reduced-precision
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3"
+  - id: req:date-time-week-extended-shift-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.2.3:tech:date-time-week-extended-shift-h"
     statement: >
-      A date expression followed by ["T"] may include a time component with reduced
-      precision (omitting seconds or minutes). The entire expression must use
-      either basic format or extended format consistently.
+      A week date combined with time and a reduced UTC offset (hours only)
+      in extended format appends ["±"][hh] after the time: [wdateX]["T"][timeX]["±"][hh].
+    format: extended
+    pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm][\":\"][ss][±][hh]"
+  - id: req:date-time-cal-basic-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-cal-basic-reduced-hm"
+    statement: >
+      A calendar date in basic format may be combined with a time reduced to
+      hour and minute (no seconds): [date]["T"][hh][mm].
+    format: basic
+    pattern: "[YYYY][MM][DD][\"T\"][hh][mm]"
+  - id: req:date-time-cal-extended-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-cal-extended-reduced-hm"
+    statement: >
+      A calendar date in extended format may be combined with a time reduced to
+      hour and minute (no seconds): [dateX]["T"][hh][":"][mm].
+    format: extended
+    pattern: "[YYYY][\"-\"][MM][\"-\"][DD][\"T\"][hh][\":\"][mm]"
+  - id: req:date-time-ord-basic-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-ord-basic-reduced-hm"
+    statement: >
+      An ordinal date in basic format may be combined with a time reduced to
+      hour and minute: [odate]["T"][hh][mm].
+    format: basic
+    pattern: "[YYYY][OOO][\"T\"][hh][mm]"
+  - id: req:date-time-ord-extended-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-ord-extended-reduced-hm"
+    statement: >
+      An ordinal date in extended format may be combined with a time reduced to
+      hour and minute: [odateX]["T"][hh][":"][mm].
+    format: extended
+    pattern: "[YYYY][\"-\"][OOO][\"T\"][hh][\":\"][mm]"
+  - id: req:date-time-week-basic-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-week-basic-reduced-hm"
+    statement: >
+      A week date in basic format may be combined with a time reduced to
+      hour and minute: [wdate]["T"][hh][mm].
+    format: basic
+    pattern: "[YYYY][\"W\"][WW][K][\"T\"][hh][mm]"
+  - id: req:date-time-week-extended-reduced-hm
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-week-extended-reduced-hm"
+    statement: >
+      A week date in extended format may be combined with a time reduced to
+      hour and minute: [wdateX]["T"][hh][":"][mm].
+    format: extended
+    pattern: "[YYYY][\"-\"][\"W\"][WW][\"-\"][K][\"T\"][hh][\":\"][mm]"
+  - id: req:date-time-format-consistency
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.4.3:tech:date-time-format-consistency"
+    statement: >
+      The date and time components of a date-and-time expression shall use
+      a consistent format: either entirely basic (no separators) or entirely
+      extended (with separators). A mixed expression such as basic date with
+      extended time, or vice versa, is invalid.
     format: any

@@ -29,19 +29,81 @@ requirements:
       a single duration.
     format: any
     pattern: "[\"P\"][i][\"W\"]"
-  - id: req:dur-reduced
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced"
+  - id: req:dur-reduced-year-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-year-omitted"
     statement: >
-      Components with a value of zero may be omitted along with their designator,
-      provided at least one component with its designator remains present.
+      In a duration expression, the year component [n]["Y"] may be omitted
+      when its value is zero. When years are omitted, the duration begins
+      with ["P"] followed by the next present component.
     format: any
-  - id: req:dur-fraction
-    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-fraction"
+    pattern: "[\"P\"](![i][\"Y\"])[i][\"M\"]…"
+  - id: req:dur-reduced-month-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-month-omitted"
     statement: >
-      The lowest-order component may include a decimal fraction, separated from
-      the integer part by a decimal sign (period or comma) with at least one
-      fractional digit.
+      In a duration expression, the month component [n]["M"] may be omitted
+      when its value is zero, provided at least one date-unit component
+      remains or only time-unit components follow.
     format: any
+  - id: req:dur-reduced-day-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-day-omitted"
+    statement: >
+      In a duration expression, the day component [n]["D"] may be omitted
+      when its value is zero. When no date-unit components remain, the time
+      designator ["T"] follows ["P"] directly.
+    format: any
+  - id: req:dur-reduced-hour-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-hour-omitted"
+    statement: >
+      In a duration expression, the hour component [n]["H"] may be omitted
+      when its value is zero. When all time-unit components are absent, the
+      ["T"] designator is also omitted.
+    format: any
+  - id: req:dur-reduced-minute-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-minute-omitted"
+    statement: >
+      In a duration expression, the minute component [n]["M"] may be omitted
+      when its value is zero, provided at least one time-unit component
+      remains present.
+    format: any
+  - id: req:dur-reduced-second-omitted
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-second-omitted"
+    statement: >
+      In a duration expression, the second component [n]["S"] may be omitted
+      when its value is zero. The second is the lowest-order time-unit
+      component and may be omitted without affecting higher components.
+    format: any
+  - id: req:dur-reduced-at-least-one-required
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-reduced-at-least-one-required"
+    statement: >
+      A duration expression shall contain at least one component consisting
+      of a non-negative integer followed by a designator (["Y"], ["M"], ["D"],
+      ["H"], ["M"], ["S"], or ["W"]). A duration with no value-designator
+      pairs is invalid.
+    format: any
+  - id: req:dur-fraction-period
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-fraction-period"
+    statement: >
+      The lowest-order component of a duration may include a decimal fraction
+      separated from the integer part by a period (decimal point) with at
+      least one fractional digit, e.g. ["P"][i]["."][f]["Y"].
+    format: any
+    pattern: "[i][\".\"][f][unit]"
+  - id: req:dur-fraction-comma
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-fraction-comma"
+    statement: >
+      As an alternative to the decimal point, the lowest-order component of
+      a duration may include a decimal fraction separated by a comma with at
+      least one fractional digit, e.g. ["P"][i][","][f]["Y"].
+    format: any
+    pattern: "[i][\",\"][f][unit]"
+  - id: req:dur-fraction-leading-zero
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-fraction-leading-zero"
+    statement: >
+      When the integer part of the lowest-order component of a duration is
+      zero and the component is expressed with a decimal fraction, the
+      leading zero shall be written, e.g. ["P"]["T"]["0"]["."][f]["S"].
+    format: any
+    pattern: "[\"0\"][\".\"][f][unit]"
   - id: req:dur-time-designator
     clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:5.5.2.3:tech:dur-time-designator"
     statement: >

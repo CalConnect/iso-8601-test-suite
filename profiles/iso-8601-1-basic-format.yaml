@@ -41,28 +41,50 @@ traceability:
       - req:time-fraction-second
       - req:time-fraction-minute
       - req:time-fraction-hour
-      - req:time-beginning-of-day
-      - req:time-ending-of-day
-      - req:time-utc
-      - req:time-offset-basic
+      - req:time-bod-basic-full
+      - req:time-bod-basic-hm
+      - req:time-bod-basic-h
+      - req:time-eod-basic-full
+      - req:time-eod-basic-hm
+      - req:time-eod-basic-h
+      - req:time-24-only-valid-eod
+      - req:time-utc-basic-full
+      - req:time-utc-basic-hm
+      - req:time-utc-basic-h
+      - req:time-offset-basic-hm
+      - req:time-offset-basic-h
   - conformance_class: 8601-1:conf-class:date-and-time
     requirements:
       - req:date-time-cal-basic-local
       - req:date-time-cal-basic-utc
       - req:date-time-cal-basic-offset
+      - req:date-time-cal-basic-shift-h
       - req:date-time-ord-basic-local
       - req:date-time-ord-basic-utc
       - req:date-time-ord-basic-offset
+      - req:date-time-ord-basic-shift-h
       - req:date-time-week-basic-local
       - req:date-time-week-basic-utc
       - req:date-time-week-basic-offset
-      - req:date-time-reduced-precision
+      - req:date-time-week-basic-shift-h
+      - req:date-time-cal-basic-reduced-hm
+      - req:date-time-ord-basic-reduced-hm
+      - req:date-time-week-basic-reduced-hm
+      - req:date-time-format-consistency
   - conformance_class: 8601-1:conf-class:duration
     requirements:
       - req:dur-complete-datetime
       - req:dur-complete-week
-      - req:dur-reduced
-      - req:dur-fraction
+      - req:dur-reduced-year-omitted
+      - req:dur-reduced-month-omitted
+      - req:dur-reduced-day-omitted
+      - req:dur-reduced-hour-omitted
+      - req:dur-reduced-minute-omitted
+      - req:dur-reduced-second-omitted
+      - req:dur-reduced-at-least-one-required
+      - req:dur-fraction-period
+      - req:dur-fraction-comma
+      - req:dur-fraction-leading-zero
       - req:dur-time-designator
       - req:dur-alt-calendar-basic
       - req:dur-alt-ordinal-basic

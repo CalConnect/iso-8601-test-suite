@@ -266,3 +266,40 @@ tests:
         duration:
           year: 4
           day: 3
+
+  # --- Year before one (Clause 4.3.7) ---
+  - id: conf-test:negative-year-expanded-parse-001
+    description: "Parse expanded-form negative year '-10000'"
+    requirements:
+      - req:negative-year-expanded-form
+      - req:negative-year-sign-mandatory
+    test_type: parsing
+    given:
+      expression: "-10000"
+    expect:
+      valid: true
+      components:
+        year: -10000
+
+  - id: conf-test:negative-year-sign-mandatory-valid-001
+    description: "Unsigned year is interpreted as non-negative even when context might imply otherwise"
+    requirements:
+      - req:negative-year-sign-mandatory
+    test_type: validity
+    given:
+      expression: "10000"
+    expect:
+      valid: true
+
+  - id: conf-test:negative-year-precision-parse-001
+    description: "Parse negative expanded year with zero padding '-00001'"
+    requirements:
+      - req:negative-year-expanded-form
+      - req:negative-year-precision
+    test_type: parsing
+    given:
+      expression: "-00001"
+    expect:
+      valid: true
+      components:
+        year: -1

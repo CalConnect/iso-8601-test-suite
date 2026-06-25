@@ -1,0 +1,180 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:explicit-duration-and-extensions
+name: Explicit duration and extensions
+description: >
+  Tests for parsing, generation, and validity of explicit duration
+  representations using the P, Y, M, D, T, H, M, S designator symbols.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:conf-class:duration
+requirements_class: req-class:explicit-duration-and-extensions
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:11
+tests:
+  - id: conf-test:explicit-duration-parse-001
+    description: "Parse full explicit duration 'P1Y2M3DT4H5M6S'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-date-time-divider
+      - req:explicit-duration-year-designator-y
+      - req:explicit-duration-month-designator-m-date
+      - req:explicit-duration-day-designator-d
+      - req:explicit-duration-time-designators-h-m-s
+    test_type: parsing
+    given:
+      expression: "P1Y2M3DT4H5M6S"
+    expect:
+      valid: true
+      components:
+        year: 1
+        month: 2
+        day: 3
+        hour: 4
+        minute: 5
+        second: 6
+
+  - id: conf-test:explicit-duration-valid-001
+    description: "Duration without leading P designator is invalid"
+    requirements:
+      - req:explicit-duration-designator-required
+    test_type: validity
+    given:
+      expression: "1Y2M3DT4H5M6S"
+    expect:
+      valid: false
+
+  - id: conf-test:explicit-duration-valid-002
+    description: "Duration with time components but no T divider is invalid"
+    requirements:
+      - req:explicit-duration-date-time-divider
+    test_type: validity
+    given:
+      expression: "P1Y2M3D4H5M6S"
+    expect:
+      valid: false
+
+  - id: conf-test:explicit-duration-parse-002
+    description: "Parse date-only explicit duration 'P1Y2M3D'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-year-designator-y
+      - req:explicit-duration-month-designator-m-date
+      - req:explicit-duration-day-designator-d
+    test_type: parsing
+    given:
+      expression: "P1Y2M3D"
+    expect:
+      valid: true
+      components:
+        year: 1
+        month: 2
+        day: 3
+
+  - id: conf-test:explicit-duration-parse-003
+    description: "Parse time-only explicit duration 'PT4H5M6S'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-date-time-divider
+      - req:explicit-duration-time-designators-h-m-s
+    test_type: parsing
+    given:
+      expression: "PT4H5M6S"
+    expect:
+      valid: true
+      components:
+        hour: 4
+        minute: 5
+        second: 6
+
+  - id: conf-test:explicit-duration-gen-001
+    description: "Generate explicit duration 'P1Y2M3DT4H5M6S'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-date-time-divider
+      - req:explicit-duration-year-designator-y
+      - req:explicit-duration-month-designator-m-date
+      - req:explicit-duration-day-designator-d
+      - req:explicit-duration-time-designators-h-m-s
+    test_type: generation
+    given:
+      components:
+        year: 1
+        month: 2
+        day: 3
+        hour: 4
+        minute: 5
+        second: 6
+    expect:
+      expression: "P1Y2M3DT4H5M6S"
+
+  # --- Week-only duration (Clause 11.2) ---
+  - id: conf-test:explicit-duration-week-parse-001
+    description: "Parse week-only explicit duration 'P3W'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-week-designator-w
+    test_type: parsing
+    given:
+      expression: "P3W"
+    expect:
+      valid: true
+      components:
+        week: 3
+
+  # --- Decimal fraction on lowest-order component (Clause 11.3) ---
+  - id: conf-test:explicit-duration-fraction-parse-001
+    description: "Parse explicit duration with fraction on lowest order 'P1.5D'"
+    requirements:
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-day-designator-d
+      - req:explicit-duration-fraction-lowest-order
+    test_type: parsing
+    given:
+      expression: "P1.5D"
+    expect:
+      valid: true
+      components:
+        day: 1.5
+
+  # --- Zero-value component omission (Clause 11.4) ---
+  - id: conf-test:explicit-duration-zero-omission-parse-001
+    description: "Parse explicit duration with explicit zero components 'P1Y0M3DT0H0M0S'"
+    requirements:
+      - req:explicit-duration-zero-value-omission
+      - req:explicit-duration-designator-required
+      - req:explicit-duration-date-time-divider
+    test_type: parsing
+    given:
+      expression: "P1Y0M3DT0H0M0S"
+    expect:
+      valid: true
+      components:
+        year: 1
+        month: 0
+        day: 3
+        hour: 0
+        minute: 0
+        second: 0
+
+  # --- Date section only — no time components without T (Clause 11.5) ---
+  - id: conf-test:explicit-duration-date-component-absence-valid-001
+    description: "Time components appearing after date components without T are invalid 'P1Y3H'"
+    requirements:
+      - req:explicit-duration-date-component-absence
+    test_type: validity
+    given:
+      expression: "P1Y3H"
+    expect:
+      valid: false
+
+  # --- Time-of-day components require T (Clause 11.5) ---
+  - id: conf-test:explicit-duration-time-without-t-valid-001
+    description: "Time-of-day components without preceding T are invalid 'P3H'"
+    requirements:
+      - req:explicit-duration-time-component-presence
+    test_type: validity
+    given:
+      expression: "P3H"
+    expect:
+      valid: false

@@ -52,6 +52,7 @@ tests:
     description: "Parse position selection 'L1K1IN' (first Monday)"
     requirements:
       - req:selection-position
+      - req:selection-position-i-single
     test_type: parsing
     given:
       expression: "L1K1IN"
@@ -89,6 +90,7 @@ tests:
     description: "Parse last work day of month 'L{1..31}D{1..5}K-1IN'"
     requirements:
       - req:selection-position
+      - req:selection-position-i-last
     test_type: parsing
     given:
       expression: "L{1..31}D{1..5}K-1IN"
@@ -548,3 +550,55 @@ tests:
           rules:
             - type: second
               value: 60
+
+  # --- Position out of range (Clause 12.9) ---
+  - id: conf-test:selection-position-out-of-range-valid-001
+    description: "Position 99 in a week exceeds the maximum of 7 and is invalid"
+    requirements:
+      - req:selection-position-i-out-of-range
+    test_type: validity
+    given:
+      expression: "L1K99IN"
+    expect:
+      valid: false
+
+  # --- Nested selection (Clause 12.3.11) ---
+  - id: conf-test:selection-nested-parse-001
+    description: "Parse nested selection 'L(L1KN)5IN' (5th occurrence of (every Monday))"
+    requirements:
+      - req:selection-nested-arbitrary-depth
+      - req:selection-nested-parenthesization
+    test_type: parsing
+    given:
+      expression: "L(L1KN)5IN"
+    expect:
+      valid: true
+      components:
+        selection:
+          rules:
+            - type: position
+              value: 5
+              nested:
+                rules:
+                  - type: week_day
+                    value: 1
+
+  - id: conf-test:selection-nested-valid-001
+    description: "Nested selection with unparenthesized inner expression is invalid"
+    requirements:
+      - req:selection-nested-parenthesization
+    test_type: validity
+    given:
+      expression: "L1KN5IN"
+    expect:
+      valid: false
+
+  - id: conf-test:selection-nested-valid-002
+    description: "Nested selection with invalid outer expression is invalid"
+    requirements:
+      - req:selection-nested-valid-only-if-outer-valid
+    test_type: validity
+    given:
+      expression: "L(L99KN)5IN"
+    expect:
+      valid: false

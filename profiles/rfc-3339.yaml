@@ -19,8 +19,10 @@ traceability:
     requirements:
       - req:time-extended-full
       - req:time-fraction-second
-      - req:time-utc
-      - req:time-offset-extended
+      - req:time-bod-extended-full
+      - req:time-eod-extended-full
+      - req:time-utc-extended-full
+      - req:time-offset-extended-hm
   - conformance_class: 8601-1:conf-class:date-and-time
     requirements:
       - req:date-time-cal-extended-utc

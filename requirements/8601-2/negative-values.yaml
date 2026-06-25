@@ -93,3 +93,26 @@ requirements:
       duration remain positive.
     format: any
     pattern: '[!]["-"][positiveDuration]'
+  - id: req:negative-year-expanded-form
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.7:tech:negative-year-expanded-form"
+    statement: >
+      Years before year 0001 may be represented in expanded form by prefixing
+      a minus sign and using more than four year digits when needed:
+      ["-"][YYYY...]. The expanded form supports arbitrarily large magnitudes
+      beyond the four-digit baseline.
+    format: any
+    pattern: '["-"][YYYY]+'
+  - id: req:negative-year-sign-mandatory
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.7:tech:negative-year-sign-mandatory"
+    statement: >
+      The minus sign shall never be omitted when representing a negative year.
+      An unsigned year component is always interpreted as a non-negative value.
+    format: any
+  - id: req:negative-year-precision
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:4.3.7:tech:negative-year-precision"
+    statement: >
+      The expanded form of a negative year shall use the same number of digits
+      as a positive expanded year in the same expression, with the minus sign
+      prepended outside the digit count. Trailing or leading zero padding shall
+      not change the represented value.
+    format: any

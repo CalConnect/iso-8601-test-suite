@@ -3,87 +3,16 @@
 id: conf-class:fundamentals
 name: Fundamentals conformance tests
 description: >
-  Tests for fundamental principles of ISO 8601, including character set validity,
-  Gregorian calendar rules, leap year determination, year/century/decade
-  representation, and leading zero requirements.
+  Tests for fundamental principles of ISO 8601, including Gregorian calendar
+  rules, leap year determination, year/century/decade representation, and
+  leading zero requirements. Character-set validity is not tested here — it
+  is implicit in every parse test across the other conformance classes.
 standardization_target_type: iso-8601-date-time-processor
 requirements_class: req-class:fundamentals
 source:
   - urn:iso:std:iso:8601:-1:ed-1:en:clause:4
   - urn:iso:std:iso:8601:-1:ed-1:en:clause:5.1
 tests:
-  # Validity tests: valid character usage
-  - id: conf-test:fundamentals-valid-001
-    description: "Verify that valid ISO 8601 characters are accepted"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "1985-04-12"
-    expect:
-      valid: true
-
-  - id: conf-test:fundamentals-valid-002
-    description: "Verify that digits 0-9 are valid characters"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "20230101"
-    expect:
-      valid: true
-
-  - id: conf-test:fundamentals-valid-003
-    description: "Verify that separators and designators are valid characters"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "P1Y2M10DT2H30M"
-    expect:
-      valid: true
-
-  - id: conf-test:fundamentals-valid-004
-    description: "Verify Z designator is valid"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "T232030Z"
-    expect:
-      valid: true
-
-  - id: conf-test:fundamentals-valid-005
-    description: "Verify R designator is valid"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "R5/19850412/19850425"
-    expect:
-      valid: true
-
-  # Validity tests: invalid character usage
-  - id: conf-test:fundamentals-valid-006
-    description: "Verify that invalid characters are rejected (space)"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "1985 04 12"
-    expect:
-      valid: false
-
-  - id: conf-test:fundamentals-valid-007
-    description: "Verify that invalid characters are rejected (letters in date)"
-    requirements:
-      - req:character-set
-    test_type: validity
-    given:
-      expression: "AB85-04-12"
-    expect:
-      valid: false
-
   # Leap year validity tests
   - id: conf-test:fundamentals-valid-008
     description: "Verify that year divisible by 4 is a leap year (2000)"
@@ -230,7 +159,7 @@ tests:
   - id: conf-test:fundamentals-parse-001
     description: "Parse a 4-digit calendar year"
     requirements:
-      - req:year-representation
+      - req:year-range-0000-9999
     test_type: parsing
     given:
       expression: "1985"
@@ -243,7 +172,7 @@ tests:
   - id: conf-test:fundamentals-parse-002
     description: "Parse year zero"
     requirements:
-      - req:year-representation
+      - req:year-range-0000-9999
     test_type: parsing
     given:
       expression: "0000"
@@ -256,7 +185,7 @@ tests:
   - id: conf-test:fundamentals-parse-003
     description: "Parse year 9999"
     requirements:
-      - req:year-representation
+      - req:year-range-0000-9999
     test_type: parsing
     given:
       expression: "9999"
@@ -265,6 +194,29 @@ tests:
       components:
         calendar:
           year: 9999
+
+  - id: conf-test:fundamentals-parse-003b
+    description: "Parse a negative year (year -1)"
+    requirements:
+      - req:year-minus-sign
+    test_type: parsing
+    given:
+      expression: "-0001"
+    expect:
+      valid: true
+      components:
+        calendar:
+          year: -1
+
+  - id: conf-test:fundamentals-parse-003c
+    description: "Reject a 5-digit year without expansion agreement (10000)"
+    requirements:
+      - req:year-range-0000-9999
+    test_type: validity
+    given:
+      expression: "10000"
+    expect:
+      valid: false
 
   # Century representation parsing tests
   - id: conf-test:fundamentals-parse-004
@@ -311,7 +263,7 @@ tests:
   - id: conf-test:fundamentals-gen-001
     description: "Generate a 4-digit calendar year"
     requirements:
-      - req:year-representation
+      - req:year-range-0000-9999
     test_type: generation
     given:
       components:
@@ -348,7 +300,7 @@ tests:
   - id: conf-test:fundamentals-valid-022
     description: "Verify UTC designator Z is valid"
     requirements:
-      - req:time-shift
+      - req:time-shift-utc
     test_type: validity
     given:
       expression: "Z"
@@ -356,9 +308,9 @@ tests:
       valid: true
 
   - id: conf-test:fundamentals-valid-023
-    description: "Verify positive time shift is valid (+01:00)"
+    description: "Verify positive extended time shift is valid (+01:00)"
     requirements:
-      - req:time-shift
+      - req:time-shift-extended-hm
     test_type: validity
     given:
       expression: "+01:00"
@@ -366,9 +318,10 @@ tests:
       valid: true
 
   - id: conf-test:fundamentals-valid-024
-    description: "Verify negative time shift is valid (-05:00)"
+    description: "Verify negative extended time shift requires sign (-05:00)"
     requirements:
-      - req:time-shift
+      - req:time-shift-extended-hm
+      - req:time-shift-sign-mandatory
     test_type: validity
     given:
       expression: "-05:00"
@@ -378,12 +331,32 @@ tests:
   - id: conf-test:fundamentals-valid-025
     description: "Verify basic format time shift is valid (+0500)"
     requirements:
-      - req:time-shift
+      - req:time-shift-basic-hm
     test_type: validity
     given:
       expression: "+0500"
     expect:
       valid: true
+
+  - id: conf-test:fundamentals-valid-025b
+    description: "Verify basic format hours-only time shift is valid (+05)"
+    requirements:
+      - req:time-shift-basic-h
+    test_type: validity
+    given:
+      expression: "+05"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-025c
+    description: "Verify time shift without sign is invalid (0500)"
+    requirements:
+      - req:time-shift-sign-mandatory
+    test_type: validity
+    given:
+      expression: "0500"
+    expect:
+      valid: false
 
   # 24-hour clock validity tests
   - id: conf-test:fundamentals-valid-026
@@ -415,6 +388,48 @@ tests:
       expression: "T243061"
     expect:
       valid: false
+
+  # Leap second tests
+  - id: conf-test:fundamentals-valid-028a
+    description: "Verify positive leap second value 60 is valid (2016 had one)"
+    requirements:
+      - req:leap-second-positive
+    test_type: validity
+    given:
+      expression: "2016-12-31T23:59:60"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-028b
+    description: "Verify normal second 59 is valid"
+    requirements:
+      - req:second-range-59-normal
+    test_type: validity
+    given:
+      expression: "T23:59:59"
+    expect:
+      valid: true
+
+  - id: conf-test:fundamentals-valid-028c
+    description: "Verify negative leap second value 58 as last second is valid"
+    requirements:
+      - req:leap-second-negative
+    test_type: validity
+    given:
+      expression: "T23:59:58"
+    expect:
+      valid: true
+
+  # Proleptic Gregorian tests
+  - id: conf-test:fundamentals-valid-028d
+    description: "Verify pre-1582 date is valid under proleptic Gregorian agreement"
+    requirements:
+      - req:proleptic-gregorian-mutual-agreement
+    test_type: validity
+    given:
+      expression: "1500-01-01"
+    expect:
+      valid: true
 
   # Leading zeros tests
   - id: conf-test:fundamentals-valid-029

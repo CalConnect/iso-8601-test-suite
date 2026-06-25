@@ -113,7 +113,7 @@ tests:
   - id: conf-test:grouped-date-parse-001
     description: "Parse date with grouped unit '2018Y4G60DU6D'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-with-lower-order
     test_type: parsing
     given:
       expression: "2018Y4G60DU6D"
@@ -130,7 +130,7 @@ tests:
   - id: conf-test:grouped-datetime-parse-001
     description: "Parse datetime with grouped time unit '2018Y9M2DT3GT8HU0H30M'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-with-lower-order
     test_type: parsing
     given:
       expression: "2018Y9M2DT3GT8HU0H30M"
@@ -150,7 +150,7 @@ tests:
   - id: conf-test:grouped-implicit-parse-001
     description: "Parse implicit date with grouped unit '2018-02-2G14DU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "2018-02-2G14DU"
@@ -167,7 +167,7 @@ tests:
   - id: conf-test:grouped-implicit-parse-002
     description: "Parse implicit date with 10-day grouping '2018-03-3G10DU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "2018-03-3G10DU"
@@ -184,7 +184,7 @@ tests:
   - id: conf-test:grouped-time-implicit-parse-001
     description: "Parse implicit time with grouped unit '16:1GT15MU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "16:1GT15MU"
@@ -200,7 +200,7 @@ tests:
   - id: conf-test:grouped-6month-parse-001
     description: "Parse 6-month grouping '2018-1G6MU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "2018-1G6MU"
@@ -229,7 +229,7 @@ tests:
   - id: conf-test:grouped-precision-parse-001
     description: "Parse 80-day group precision '1933Y1G80DU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "1933Y1G80DU"
@@ -245,7 +245,7 @@ tests:
   - id: conf-test:grouped-precision-parse-002
     description: "Parse 5-day group in month '1543Y1M3G5DU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "1543Y1M3G5DU"
@@ -262,7 +262,7 @@ tests:
   - id: conf-test:grouped-precision-parse-003
     description: "Parse 3-month group in year '110Y2G3MU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "110Y2G3MU"
@@ -278,7 +278,7 @@ tests:
   - id: conf-test:grouped-precision-parse-004
     description: "Parse 2-hour group '6GT2HU'"
     requirements:
-      - req:grouped-application-date
+      - req:grouped-application-no-lower-order
     test_type: parsing
     given:
       expression: "6GT2HU"
@@ -369,7 +369,7 @@ tests:
   - id: conf-test:grouped-boundary-valid-parse-001
     description: "Parse valid day within 2-month group '2018Y1G2MU30D'"
     requirements:
-      - req:grouped-boundary-adherence
+      - req:grouped-boundary-adherence-valid
     test_type: parsing
     given:
       expression: "2018Y1G2MU30D"
@@ -386,7 +386,7 @@ tests:
   - id: conf-test:grouped-boundary-invalid-valid-001
     description: "Verify invalid day exceeding 2-month group '2018Y1G2MU60D'"
     requirements:
-      - req:grouped-boundary-adherence
+      - req:grouped-boundary-adherence-invalid
     test_type: validity
     given:
       expression: "2018Y1G2MU60D"

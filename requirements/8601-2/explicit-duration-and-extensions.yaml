@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:explicit-duration-and-extensions
+name: Explicit duration and extensions
+description: >
+  Defines the explicit form of duration representation using designator
+  symbols for each time scale component (P, Y, M, D, T, H, M, S), and the
+  extensions to duration representation introduced by ISO 8601-2.
+standardization_target_type: iso-8601-date-time-processor
+dependencies:
+  - 8601-1:req-class:duration
+source:
+  - urn:iso:std:iso:8601:-2:ed-1:en:clause:11
+requirements:
+  - id: req:explicit-duration-designator-required
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-designator-required"
+    statement: >
+      An explicit duration expression shall begin with the duration designator
+      ["P"], which prefixes all subsequent time scale components.
+    format: any
+    pattern: '["P"]...'
+  - id: req:explicit-duration-date-time-divider
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-date-time-divider"
+    statement: >
+      The time designator ["T"] shall separate the date components (year, month,
+      day) from the time components (hour, minute, second) in an explicit
+      duration expression. The ["T"] shall be omitted when no time components
+      follow.
+    format: any
+    pattern: '["P"][dateUnits]["T"][timeUnits]'
+  - id: req:explicit-duration-year-designator-y
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-year-designator-y"
+    statement: >
+      The year component of an explicit duration shall be suffixed with the
+      year designator ["Y"]: [n]["Y"].
+    format: any
+    pattern: '[n]["Y"]'
+  - id: req:explicit-duration-month-designator-m-date
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-month-designator-m-date"
+    statement: >
+      The month component of an explicit duration (in the date section, before
+      ["T"]) shall be suffixed with the month designator ["M"]: [n]["M"].
+    format: any
+    pattern: '[n]["M"]'
+  - id: req:explicit-duration-day-designator-d
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-day-designator-d"
+    statement: >
+      The day component of an explicit duration shall be suffixed with the
+      day designator ["D"]: [n]["D"].
+    format: any
+    pattern: '[n]["D"]'
+  - id: req:explicit-duration-time-designators-h-m-s
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-time-designators-h-m-s"
+    statement: >
+      The time components of an explicit duration shall be suffixed with their
+      respective designators: hour ["H"], minute ["M"], and second ["S"], all
+      appearing after the ["T"] divider.
+    format: any
+    pattern: '["T"][n]["H"][n]["M"][n]["S"]'
+  - id: req:explicit-duration-week-designator-w
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.2:tech:explicit-duration-week-designator-w"
+    statement: >
+      A week-only explicit duration uses the week designator ["W"] as the sole
+      unit: ["P"][n]["W"]. No other time scale components shall accompany the
+      week designator in the same expression.
+    format: any
+    pattern: '["P"][n]["W"]'
+  - id: req:explicit-duration-fraction-lowest-order
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.3:tech:explicit-duration-fraction-lowest-order"
+    statement: >
+      A decimal fraction (using ["."] or [","] as separator) may be suffixed to
+      the lowest-order time scale component present in an explicit duration,
+      applying ISO 8601-1 fraction rules to that component.
+    format: any
+  - id: req:explicit-duration-zero-value-omission
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.4:tech:explicit-duration-zero-value-omission"
+    statement: >
+      Time scale components whose value is zero may be omitted from an explicit
+      duration expression. The omitted component contributes nothing to the
+      represented duration.
+    format: any
+  - id: req:explicit-duration-date-component-absence
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.5:tech:explicit-duration-date-component-absence"
+    statement: >
+      When the time designator ["T"] is absent from an explicit duration, no
+      time-of-day components (hour, minute, second) shall appear in the
+      expression.
+    format: any
+  - id: req:explicit-duration-time-component-presence
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:11.5:tech:explicit-duration-time-component-presence"
+    statement: >
+      Time-of-day components (hour, minute, second) shall appear in an explicit
+      duration only after the time designator ["T"]. A duration expression with
+      time-of-day components but no ["T"] is invalid.
+    format: any
