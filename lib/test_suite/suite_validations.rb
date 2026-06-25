@@ -112,6 +112,91 @@ module SuiteValidations
     [checked, bad]
   end
 
+  def check_unreferenced_requirements(index, stats)
+    referenced = index.test_reqs.values.flatten.to_set
+    all_reqs = index.all_req_ids
+    unreferenced = all_reqs - referenced.to_a
+    unreferenced.each do |r|
+      source = index.req_ids[r] || index.profile_req_ids[r]
+      stats.warn(source, "#{r}: not referenced by any test")
+    end
+    [all_reqs.length, unreferenced.length]
+  end
+
+  def check_profile_references(index, store, stats)
+    checked = 0
+    errors = 0
+    store.files_in("profiles/**/*.yaml").each do |f|
+      next if File.basename(f) == "TEMPLATE.yaml"
+      result = store.load(f)
+      next if result.failure?
+
+      data = result.data
+      before = stats.error_count_snapshot
+
+      (data["conformance_classes"] || []).each do |cc|
+        unless index.conf_class_ids.key?(cc)
+          stats.error(f, "references unknown conformance class '#{cc}'")
+        end
+      end
+
+      (data["additional_tests"] || []).each do |t|
+        tid = t["id"]
+        (t["requirements"] || []).each do |r|
+          unless index.req_ids.key?(r) || index.profile_req_ids.key?(r)
+            stats.error(f, "test #{tid}: references undefined requirement '#{r}' (not in requirements/ or profile additional_requirements)")
+          end
+        end
+        if index.conf_test_ids.key?(tid) && index.conf_test_ids[tid] != f
+          prev = index.conf_test_ids[tid]
+          stats.error(f, "duplicate test ID '#{tid}' (also in #{prev})")
+        end
+      end
+
+      checked += 1
+      errors += stats.error_count_snapshot - before
+    end
+    [checked, errors]
+  end
+
+  def check_result_references(index, store, stats)
+    checked = 0
+    errors = 0
+    store.files_in("results/**/*.yaml")
+      .reject { |f| File.basename(f) == "TEMPLATE.yaml" }
+      .each do |f|
+        result = store.load(f)
+        next if result.failure?
+
+        data = result.data
+        before = stats.error_count_snapshot
+
+        (data["conformance_class_results"] || []).each do |cc|
+          cc_ref = cc["conformance_class"]
+          unless index.conf_class_ids.key?(cc_ref)
+            stats.error(f, "references unknown conformance class '#{cc_ref}'")
+          end
+          (cc["test_results"] || []).each do |tr|
+            unless index.conf_test_ids.key?(tr["test"])
+              stats.error(f, "references undefined test '#{tr['test']}'")
+            end
+          end
+        end
+
+        (data["profile_results"] || []).each do |pr|
+          (pr["test_results"] || []).each do |tr|
+            unless index.conf_test_ids.key?(tr["test"])
+              stats.error(f, "references undefined profile test '#{tr['test']}'")
+            end
+          end
+        end
+
+        checked += 1
+        errors += stats.error_count_snapshot - before
+      end
+    [checked, errors]
+  end
+
   def check_component_keys(vocab, stats, file, test_id, components)
     return unless components.is_a?(Hash)
 
