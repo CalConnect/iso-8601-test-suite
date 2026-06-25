@@ -62,6 +62,13 @@ function pctBarTone(pct) {
   if (pct >= 30) return "partial";
   return "fail";
 }
+
+const qualificationNotes = computed(() => props.lib.qualification_notes || []);
+
+const noteCategoryLabel = (cat) =>
+  cat === "output-postprocessing" ? "Output post-processing"
+  : cat === "input-preprocessing" ? "Input pre-processing"
+  : cat;
 </script>
 
 <template>
@@ -96,6 +103,31 @@ function pctBarTone(pct) {
           </a>
         </div>
       </div>
+    </div>
+
+    <!-- Qualification notes (Tier 2 workarounds) -->
+    <div v-if="qualificationNotes.length > 0" class="mb-10 surface p-5 md:p-6">
+      <div class="flex items-baseline gap-3 mb-4">
+        <span class="clause-label clause-label-accent">Qualification notes</span>
+        <span class="font-mono text-xs text-ink-faint tabular-nums">{{ qualificationNotes.length }}</span>
+      </div>
+      <p class="text-sm text-ink-muted mb-4 max-w-3xl leading-relaxed">
+        These are workarounds the adapter applies around the library to compensate
+        for upstream gaps (e.g. rewriting <code class="font-mono text-ink">Z</code>
+        to a numeric UTC offset before parsing). They are declared transparently —
+        the library itself is not modified, only the input/output flowing through it.
+      </p>
+      <ul class="space-y-4">
+        <li v-for="(note, idx) in qualificationNotes" :key="idx" class="grid grid-cols-[auto,1fr] gap-x-4">
+          <div class="pt-0.5">
+            <span class="pill pill-info whitespace-nowrap">{{ noteCategoryLabel(note.category) }}</span>
+          </div>
+          <div class="min-w-0">
+            <div class="font-display text-base text-ink mb-1">{{ note.summary }}</div>
+            <p class="text-sm text-ink-muted leading-relaxed">{{ note.detail }}</p>
+          </div>
+        </li>
+      </ul>
     </div>
 
     <!-- Stats -->

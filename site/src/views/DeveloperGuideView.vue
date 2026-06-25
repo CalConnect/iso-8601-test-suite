@@ -40,6 +40,34 @@ const emit = defineEmits(["navigate"]);
         <span class="section-number">§ 01</span>
         <h2 class="section-title">Quick start — five minutes to first result</h2>
       </div>
+
+      <!-- Adapter purity callout -->
+      <button @click="emit('navigate', '/adapter-rules')"
+        class="surface w-full text-left p-5 mb-5 hover:border-accent transition-colors group cursor-pointer">
+        <div class="flex items-start gap-4">
+          <div class="shrink-0 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="clause-label clause-label-accent">Read first</span>
+              <span class="font-display text-base text-ink group-hover:text-accent transition-colors">Adapter purity rules →</span>
+            </div>
+            <p class="text-sm text-ink-soft leading-relaxed">
+              An adapter only translates between the JSON protocol and the library's
+              native public API. Three tiers cover everything an adapter may do:
+              <strong class="text-jade">Native</strong> (documented library APIs),
+              <strong class="text-accent">Qualification note</strong> (minor I/O
+              edits around library calls — must be declared), and
+              <strong class="text-rust">Prohibited</strong> (manual parsing,
+              invented types, re-validation). Before writing an adapter, read the
+              rules — and remember that fixing the underlying library is more
+              effective than wrapping it.
+            </p>
+          </div>
+        </div>
+      </button>
+
       <div class="surface p-6">
         <p class="text-ink-soft text-base leading-relaxed mb-4">
           The test suite uses a <strong class="text-ink">pluggable adapter</strong> architecture.
