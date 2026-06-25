@@ -9,6 +9,28 @@ source:
   - urn:iso:std:iso:8601:-1:ed-1:en
 standardization_target_type: iso-8601-date-time-processor
 traceability:
+  - conformance_class: 8601-1:conf-class:symbols
+    requirements:
+      - req:designator-p
+      - req:designator-t
+      - req:designator-y
+      - req:designator-m
+      - req:designator-w
+      - req:designator-d
+      - req:designator-h
+      - req:designator-s
+      - req:designator-r
+      - req:designator-z
+      - req:separator-hyphen
+      - req:separator-colon
+      - req:separator-solidus
+      - req:separator-double-hyphen
+      - req:separator-decimal-period
+      - req:separator-decimal-comma
+      - req:char-repertoire
+      - req:char-no-space
+      - req:char-hyphen-minus-unification
+      - req:char-bracket-omission
   - conformance_class: 8601-1:conf-class:fundamentals
     requirements:
       - req:decreasing-order

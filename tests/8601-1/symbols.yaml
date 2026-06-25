@@ -1,0 +1,225 @@
+# yaml-language-server: $schema=../../schema/conformance-class.yaml
+---
+id: conf-class:symbols
+name: Symbols and character rules conformance tests
+description: >
+  Tests that the designator and separator symbols defined by ISO 8601-1:2026
+  Clause 3.2 are recognized when they appear in well-formed expressions, and
+  that the character repertoire rules are enforced.
+standardization_target_type: iso-8601-date-time-processor
+requirements_class: req-class:symbols
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2
+tests:
+  # ── Designator recognition (positive) ────────────────────────────────
+  - id: conf-test:symbols-valid-001
+    description: "Duration designator P is recognized introducing a duration"
+    requirements:
+      - req:designator-p
+    test_type: validity
+    given:
+      expression: "P1D"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-002
+    description: "Time designator T is recognized separating date and time"
+    requirements:
+      - req:designator-t
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-003
+    description: "Year designator Y recognized in a duration"
+    requirements:
+      - req:designator-y
+    test_type: validity
+    given:
+      expression: "P1Y"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-004
+    description: "Month designator M recognized in date-unit position of a duration"
+    requirements:
+      - req:designator-m
+    test_type: validity
+    given:
+      expression: "P1M"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-005
+    description: "Minute designator M recognized in time-unit position of a duration"
+    requirements:
+      - req:designator-m
+    test_type: validity
+    given:
+      expression: "PT1M"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-006
+    description: "Week designator W recognized in a week-date expression"
+    requirements:
+      - req:designator-w
+    test_type: validity
+    given:
+      expression: "1985-W15-5"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-007
+    description: "Day designator D recognized in a duration"
+    requirements:
+      - req:designator-d
+    test_type: validity
+    given:
+      expression: "P1D"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-008
+    description: "Hour designator H recognized in a duration"
+    requirements:
+      - req:designator-h
+    test_type: validity
+    given:
+      expression: "PT1H"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-009
+    description: "Second designator S recognized in a duration"
+    requirements:
+      - req:designator-s
+    test_type: validity
+    given:
+      expression: "PT1S"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-010
+    description: "Recurring-interval designator R recognized introducing a recurrence"
+    requirements:
+      - req:designator-r
+    test_type: validity
+    given:
+      expression: "R5/1985-04-12/P1Y"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-011
+    description: "UTC designator Z recognized appended to a time-of-day"
+    requirements:
+      - req:designator-z
+    test_type: validity
+    given:
+      expression: "23:20:50Z"
+    expect:
+      valid: true
+
+  # ── Separator recognition (positive) ─────────────────────────────────
+  - id: conf-test:symbols-valid-012
+    description: "Hyphen separator recognized in extended calendar date"
+    requirements:
+      - req:separator-hyphen
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-013
+    description: "Colon separator recognized in extended time-of-day"
+    requirements:
+      - req:separator-colon
+    test_type: validity
+    given:
+      expression: "23:20:50"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-014
+    description: "Solidus separator recognized in a start/end interval"
+    requirements:
+      - req:separator-solidus
+    test_type: validity
+    given:
+      expression: "1985-04-12/1985-04-13"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-015
+    description: "Double-hyphen alternative separator recognized in a start/end interval"
+    requirements:
+      - req:separator-double-hyphen
+    test_type: validity
+    given:
+      expression: "1985-04-12--1985-04-13"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-016
+    description: "Period decimal sign recognized on the lowest-order component"
+    requirements:
+      - req:separator-decimal-period
+    test_type: validity
+    given:
+      expression: "PT0.5H"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-valid-017
+    description: "Comma decimal sign recognized as alternative on the lowest-order component"
+    requirements:
+      - req:separator-decimal-comma
+    test_type: validity
+    given:
+      expression: "PT0,5H"
+    expect:
+      valid: true
+
+  # ── Character rules ──────────────────────────────────────────────────
+  - id: conf-test:symbols-valid-018
+    description: "ASCII-only expression accepted"
+    requirements:
+      - req:char-repertoire
+    test_type: validity
+    given:
+      expression: "1985-04-12T23:20:50Z"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-invalid-001
+    description: "Space within an expression is rejected"
+    requirements:
+      - req:char-no-space
+    test_type: validity
+    given:
+      expression: "1985-04-12 23:20:50"
+    expect:
+      valid: false
+
+  - id: conf-test:symbols-valid-019
+    description: "Hyphen-minus character accepted as separator"
+    requirements:
+      - req:char-hyphen-minus-unification
+    test_type: validity
+    given:
+      expression: "1985-04-12"
+    expect:
+      valid: true
+
+  - id: conf-test:symbols-invalid-002
+    description: "Surrounding square brackets rejected even if inner expression is valid"
+    requirements:
+      - req:char-bracket-omission
+    test_type: validity
+    given:
+      expression: "[1985-04-12]"
+    expect:
+      valid: false
