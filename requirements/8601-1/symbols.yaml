@@ -1,0 +1,150 @@
+# yaml-language-server: $schema=../../schema/requirements-class.yaml
+---
+id: req-class:symbols
+name: Symbols and character rules
+description: >
+  Atomic requirements for the lexical symbols defined by ISO 8601-1:2026
+  Clause 3.2 — designators, separators, and the character repertoire rules.
+  Each symbol and rule is modelled as its own requirement so that an
+  implementation can declare conformance at the symbol level.
+standardization_target_type: iso-8601-date-time-processor
+source:
+  - urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2
+requirements:
+  # ── Designator symbols (Clause 3.2.5) ─────────────────────────────────
+  - id: req:designator-p
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-p"
+    statement: >
+      The designator ["P"] marks the leading character of a duration
+      expression and shall appear only in that role.
+    format: any
+  - id: req:designator-t
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-t"
+    statement: >
+      The designator ["T"] separates the date portion from the time portion
+      in a date-and-time expression, and separates date-unit from time-unit
+      components within a duration. In time-only expressions it prefixes the
+      time-of-day fields.
+    format: any
+  - id: req:designator-y
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-y"
+    statement: >
+      The designator ["Y"] designates the year component within a duration
+      expression.
+    format: any
+  - id: req:designator-m
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-m"
+    statement: >
+      The designator ["M"] designates either the month component (when it
+      appears in the date-unit portion of a duration) or the minute component
+      (when it appears in the time-unit portion, after the ["T"]
+      designator). The position determines the meaning.
+    format: any
+  - id: req:designator-w
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-w"
+    statement: >
+      The designator ["W"] designates the week component in week-date
+      expressions and the week unit in a week-based duration.
+    format: any
+  - id: req:designator-d
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-d"
+    statement: >
+      The designator ["D"] designates the day component within a duration
+      expression and the day-of-year component in ordinal dates.
+    format: any
+  - id: req:designator-h
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-h"
+    statement: >
+      The designator ["H"] designates the hour component within the
+      time-unit portion of a duration expression.
+    format: any
+  - id: req:designator-s
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-s"
+    statement: >
+      The designator ["S"] designates the second component within the
+      time-unit portion of a duration expression.
+    format: any
+  - id: req:designator-r
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-r"
+    statement: >
+      The designator ["R"] prefixes a recurring time interval expression,
+      optionally followed by a recurrence count.
+    format: any
+  - id: req:designator-z
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.5:tech:designator-z"
+    statement: >
+      The designator ["Z"] is the UTC designator, appended directly to a
+      time-of-day expression to indicate a UTC offset of zero.
+    format: any
+
+  # ── Separator symbols (Clause 3.2.6) ──────────────────────────────────
+  - id: req:separator-hyphen
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-hyphen"
+    statement: >
+      The hyphen ["-"] separates the components of an extended-format date
+      or time-of-day expression.
+    format: extended
+    pattern: '["-"]'
+  - id: req:separator-colon
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-colon"
+    statement: >
+      The colon [":"] separates the components of an extended-format
+      time-of-day expression and may separate the hour from the minute in a
+      UTC offset.
+    format: extended
+    pattern: '[":"]'
+  - id: req:separator-solidus
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-solidus"
+    statement: >
+      The solidus ["/"] separates the start and end (or duration) of a time
+      interval, separates the components of a recurring interval, and
+      separates the operands of a date-time selection expression.
+    format: any
+  - id: req:separator-double-hyphen
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-double-hyphen"
+    statement: >
+      By mutual agreement, the double-hyphen ["--"] may be used as the
+      separator in place of the solidus for start/end intervals.
+    format: any
+  - id: req:separator-decimal-period
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-decimal-period"
+    statement: >
+      The period ["."] is the preferred decimal sign separating the integer
+      and fractional parts of a component value.
+    format: any
+  - id: req:separator-decimal-comma
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.6:tech:separator-decimal-comma"
+    statement: >
+      The comma [","] is an alternative decimal sign separating the integer
+      and fractional parts of a component value.
+    format: any
+
+  # ── Character rules (Clause 3.2.1) ───────────────────────────────────
+  - id: req:char-repertoire
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.1:tech:char-repertoire"
+    statement: >
+      The character repertoire used in ISO 8601 expressions shall be
+      restricted to the graphic characters of ISO/IEC 646 (ASCII). Characters
+      outside that repertoire shall not appear in any field.
+    format: any
+  - id: req:char-no-space
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.1:tech:char-no-space"
+    statement: >
+      The space character shall not appear within an ISO 8601 expression.
+      Separation between fields shall use only the designators and
+      separators defined by Clause 3.2.
+    format: any
+  - id: req:char-hyphen-minus-unification
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.1:tech:char-hyphen-minus-unification"
+    statement: >
+      The hyphen character and the minus character of ISO/IEC 646 are
+      treated as the same character (hyphen-minus) wherever they appear as
+      separators or as the leading sign of a year or UTC offset.
+    format: any
+  - id: req:char-bracket-omission
+    clause: "urn:iso:std:iso:8601:-1:ed-1:en:clause:3.2.1:tech:char-bracket-omission"
+    statement: >
+      Square brackets, parentheses, quotation marks, and other enclosing
+      punctuation shall not appear in the exchanged expression, even when an
+      implementation uses them internally for grouping.
+    format: any
