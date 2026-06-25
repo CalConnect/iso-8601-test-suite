@@ -95,6 +95,23 @@ module SuiteValidations
     [checked, bad]
   end
 
+  def check_test_req_references(index, stats)
+    known = index.all_req_ids.to_set
+    checked = 0
+    bad = 0
+    index.test_reqs.each do |tid, reqs|
+      file = index.file_for_test(tid) || "tests"
+      Array(reqs).each do |r|
+        checked += 1
+        unless known.include?(r)
+          stats.error(file, "#{tid}: references undefined requirement '#{r}'")
+          bad += 1
+        end
+      end
+    end
+    [checked, bad]
+  end
+
   def check_component_keys(vocab, stats, file, test_id, components)
     return unless components.is_a?(Hash)
 
