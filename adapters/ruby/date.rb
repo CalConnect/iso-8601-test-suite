@@ -14,8 +14,6 @@
 require 'date'
 require 'time'
 
-ReducedPrecisionDate = Struct.new(:type, :value)
-
 class RubyDateAdapter
   def name
     "Ruby Date/DateTime/Time"
@@ -47,17 +45,13 @@ class RubyDateAdapter
   def try_parse(expression, options = {})
     mode = options[:parse_mode] || "dedicated"
 
-    # 1. Reduced-precision dates (decade, century — strptime can't distinguish these)
-    result = try_reduced_precision(expression)
-    return result if result
-
-    # 2. Dedicated format: strptime with detected format
+    # 1. Dedicated format: strptime with detected format
     if mode == "dedicated"
       result = try_strptime(expression)
       return result if result
     end
 
-    # 3. General/lenient parsers (used directly for undifferentiated mode)
+    # 2. General/lenient parsers (used directly for undifferentiated mode)
     apis = select_fallback_apis(expression)
     apis.each do |api|
       begin
@@ -81,10 +75,6 @@ class RubyDateAdapter
   # ── Extract components from a parsed object ────────────────────────────
 
   def extract_components(parsed)
-    if parsed.is_a?(ReducedPrecisionDate)
-      return { "calendar" => { parsed.type.to_s => parsed.value } }
-    end
-
     result = {}
 
     if parsed.is_a?(Date) && !parsed.is_a?(DateTime)
@@ -277,20 +267,6 @@ class RubyDateAdapter
     [/\A\d{4}\z/,                                                     "%Y",                      Date],
   ].freeze
 
-  def try_reduced_precision(expr)
-    # Decade: 3 digits (e.g. "198" = years 1980–1989)
-    if expr.match?(/\A\d{3}\z/)
-      return { "valid" => true, "parsed" => ReducedPrecisionDate.new(:decade, expr.to_i), "api" => "reduced-precision" }
-    end
-
-    # Century: 2 digits (e.g. "19" = years 1900–1999)
-    if expr.match?(/\A\d{2}\z/)
-      return { "valid" => true, "parsed" => ReducedPrecisionDate.new(:century, expr.to_i), "api" => "reduced-precision" }
-    end
-
-    nil
-  end
-
   def try_strptime(expr)
     STRPTIME_FORMATS.each do |pattern, fmt, klass|
       next unless expr.match?(pattern)
@@ -369,15 +345,9 @@ class RubyDateAdapter
     year      = h[:year]
     month     = h[:month]
     day       = h[:day]
-    decade    = h[:decade]
-    century   = h[:century]
     expanded  = components[:expanded]
 
-    if decade
-      { "expression" => decade.to_s }
-    elsif century
-      { "expression" => century.to_s }
-    elsif year && month && day
+    if year && month && day
       d = Date.new(year, month, day)
 
       if time

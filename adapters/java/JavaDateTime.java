@@ -7,12 +7,15 @@
 //   Parsing:  LocalDate/LocalDateTime/OffsetDateTime.parse with DateTimeFormatter
 //   Generation: DateTimeFormatter.format
 //
-// java.time has comprehensive ISO 8601 support including:
+// java.time supports most of ISO 8601-1 core, including:
 //   - Extended and basic format dates
 //   - Ordinal dates (yyyy-DDD)
 //   - Week dates (yyyy-'W'ww-e, IsoFields)
 //   - Time with UTC/offset (Z, ±HH:MM)
-//   - Reduced precision dates
+//
+// Not supported (returned as not-supported — java.time has no native type):
+//   - Reduced precision dates (century, decade)
+//   - Fractional minute/hour (java.time normalizes to nanos, loses precision)
 
 import java.io.*;
 import java.time.*;
@@ -36,14 +39,19 @@ public class JavaDateTime {
         return cache.get(handle);
     }
 
-    // Reduced-precision representation: e.g. decade "198" or century "19"
-    static class ReducedPrecisionDate {
-        final String type;   // "decade" or "century"
-        final int value;
-        ReducedPrecisionDate(String type, int value) {
-            this.type = type;
-            this.value = value;
+    // ── Wrapper types ───────────────────────────────────────────────────────────
+
+    static class DateEntry {
+        final LocalDate date;
+        final ZoneOffset offset;
+        DateEntry(LocalDate date, ZoneOffset offset) {
+            this.date = date;
+            this.offset = offset;
         }
+    }
+
+    static String store(LocalDate date, ZoneOffset offset) {
+        return store(new DateEntry(date, offset));
     }
 
     // ── DateTimeFormatter registry ──────────────────────────────────────────────
@@ -87,53 +95,61 @@ public class JavaDateTime {
             .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
             .toFormatter();
 
-    static final DateTimeFormatter[] DATETIME_FORMATTERS = {
-        // Extended datetime with optional offset (ISO_OFFSET_DATE_TIME handles Z, ±HH:MM)
-        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-        DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-        // Basic datetime
-        new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                .appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral("T")
-                .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2).toFormatter().withResolverStyle(ResolverStyle.STRICT),
-        new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                .appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral("T")
-                .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .toFormatter().withResolverStyle(ResolverStyle.STRICT),
-        // Ordinal datetime
-        DateTimeFormatter.ofPattern("yyyy-DDD'T'HH:mm:ss"),
-        DateTimeFormatter.ofPattern("yyyyDDD'T'HHmmss"),
-    };
+    static final DateTimeFormatter BASIC_DATETIME_FULL = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
+            .appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral("T")
+            .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
+
+    static final DateTimeFormatter BASIC_DATETIME_HM = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
+            .appendValue(ChronoField.DAY_OF_MONTH, 2).appendLiteral("T")
+            .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
+
+    static final DateTimeFormatter BASIC_HHMMSS = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
+
+    static final DateTimeFormatter BASIC_HHMM = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
+
+    static final DateTimeFormatter BASIC_HH = new DateTimeFormatterBuilder()
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .toFormatter().withResolverStyle(ResolverStyle.STRICT);
 
     static final DateTimeFormatter BASIC_DATE = new DateTimeFormatterBuilder()
             .appendValue(ChronoField.YEAR, 4).appendValue(ChronoField.MONTH_OF_YEAR, 2)
             .appendValue(ChronoField.DAY_OF_MONTH, 2).toFormatter().withResolverStyle(ResolverStyle.STRICT);
 
+    static final DateTimeFormatter[] DATETIME_FORMATTERS = {
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+        BASIC_DATETIME_FULL,
+        BASIC_DATETIME_HM,
+        DateTimeFormatter.ofPattern("yyyy-DDD'T'HH:mm:ss"),
+        DateTimeFormatter.ofPattern("yyyyDDD'T'HHmmss"),
+    };
+
     static final DateTimeFormatter[] DATE_FORMATTERS = {
-        DateTimeFormatter.ISO_LOCAL_DATE,             // yyyy-MM-dd
-        BASIC_DATE,                                   // basic date
-        ORDINAL_DATE_EXT,                             // ordinal extended
-        ORDINAL_DATE_BASIC,                           // ordinal basic
-        WEEK_DATE_EXT,                                // week date extended
-        WEEK_DATE_BASIC,                              // week date basic
-        YEAR_MONTH,                                   // year-month
-        YEAR_ONLY,                                    // year only
+        DateTimeFormatter.ISO_LOCAL_DATE,
+        BASIC_DATE,
+        ORDINAL_DATE_EXT,
+        ORDINAL_DATE_BASIC,
+        WEEK_DATE_EXT,
+        WEEK_DATE_BASIC,
+        YEAR_MONTH,
+        YEAR_ONLY,
     };
 
     static final DateTimeFormatter[] TIME_FORMATTERS = {
-        DateTimeFormatter.ISO_LOCAL_TIME,              // HH:mm:ss
-        new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .toFormatter().withResolverStyle(ResolverStyle.STRICT),
-        new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-                .toFormatter().withResolverStyle(ResolverStyle.STRICT),
-        new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.HOUR_OF_DAY, 2).appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .toFormatter().withResolverStyle(ResolverStyle.STRICT),
+        DateTimeFormatter.ISO_LOCAL_TIME,
+        BASIC_HHMMSS,
+        BASIC_HHMM,
+        BASIC_HH,
     };
 
     // ── Parse logic ─────────────────────────────────────────────────────────────
@@ -220,20 +236,11 @@ public class JavaDateTime {
             } catch (DateTimeParseException ignored) {}
         }
 
-        // Reduced-precision dates (decade, century) — java.time has no native support
-        // Century: exactly 2 digits. Decade: exactly 3 digits.
-        if (core.matches("^[0-9]{2}$")) {
-            return ParseResult.ok(store(new ReducedPrecisionDate("century", Integer.parseInt(core))), "reduced-precision");
-        }
-        if (core.matches("^[0-9]{3}$")) {
-            return ParseResult.ok(store(new ReducedPrecisionDate("decade", Integer.parseInt(core))), "reduced-precision");
-        }
-
-        // Try time-only formatters (strip T prefix if present)
-        String timeStr = core.startsWith("T") ? core.substring(1) : core;
+        // Try time-only formatters. Strip a leading 'T' if present.
+        String parseTimeStr = core.startsWith("T") ? core.substring(1) : core;
         for (DateTimeFormatter fmt : TIME_FORMATTERS) {
             try {
-                LocalTime lt = LocalTime.parse(timeStr, fmt);
+                LocalTime lt = LocalTime.parse(parseTimeStr, fmt);
                 return ParseResult.ok(store(lt), "LocalTime.parse");
             } catch (DateTimeParseException ignored) {}
         }
@@ -243,11 +250,9 @@ public class JavaDateTime {
 
     // ── Extract components ──────────────────────────────────────────────────────
 
-    static String extractComponents(String handle) {
+    static Map<String, Object> extractComponents(String handle) {
         Object obj = lookup(handle);
-        if (obj == null) return "{}";
-
-        StringBuilder sb = new StringBuilder("{");
+        if (obj == null) return new LinkedHashMap<>();
 
         LocalDate date = null;
         LocalTime time = null;
@@ -270,292 +275,151 @@ public class JavaDateTime {
             DateEntry de = (DateEntry) obj;
             date = de.date;
             offset = de.offset;
-        } else if (obj instanceof ReducedPrecisionDate) {
-            ReducedPrecisionDate rp = (ReducedPrecisionDate) obj;
-            sb.append("\"calendar\":{\"").append(rp.type).append("\":").append(rp.value).append("}");
-            sb.append("}");
-            return sb.toString();
         }
 
+        Map<String, Object> result = new LinkedHashMap<>();
+
         if (date != null) {
-            sb.append("\"calendar\":{")
-              .append("\"year\":").append(date.getYear()).append(",")
-              .append("\"month\":").append(date.getMonthValue()).append(",")
-              .append("\"day\":").append(date.getDayOfMonth())
-              .append("}");
+            Map<String, Object> cal = new LinkedHashMap<>();
+            cal.put("year", date.getYear());
+            cal.put("month", date.getMonthValue());
+            cal.put("day", date.getDayOfMonth());
+            result.put("calendar", cal);
 
-            // Week date via IsoFields
-            int weekYear = date.get(IsoFields.WEEK_BASED_YEAR);
-            int weekNum = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-            int dayOfWeek = date.get(ChronoField.DAY_OF_WEEK); // 1=Monday, 7=Sunday
-            sb.append(",\"week\":{")
-              .append("\"week_year\":").append(weekYear).append(",")
-              .append("\"week\":").append(weekNum).append(",")
-              .append("\"day_of_week\":").append(dayOfWeek)
-              .append("}");
+            Map<String, Object> week = new LinkedHashMap<>();
+            week.put("week_year", date.get(IsoFields.WEEK_BASED_YEAR));
+            week.put("week", date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+            week.put("day_of_week", date.get(ChronoField.DAY_OF_WEEK));
+            result.put("week", week);
 
-            // Ordinal date
-            int dayOfYear = date.getDayOfYear();
-            sb.append(",\"ordinal\":{")
-              .append("\"year\":").append(date.getYear()).append(",")
-              .append("\"day_of_year\":").append(dayOfYear)
-              .append("}");
+            Map<String, Object> ord = new LinkedHashMap<>();
+            ord.put("year", date.getYear());
+            ord.put("day_of_year", date.getDayOfYear());
+            result.put("ordinal", ord);
         }
 
         if (time != null) {
-            if (sb.length() > 1) sb.append(",");
-            sb.append("\"time\":{")
-              .append("\"hour\":").append(time.getHour()).append(",")
-              .append("\"minute\":").append(time.getMinute()).append(",")
-              .append("\"second\":").append(time.getSecond());
+            Map<String, Object> t = new LinkedHashMap<>();
+            t.put("hour", time.getHour());
+            t.put("minute", time.getMinute());
+            t.put("second", time.getSecond());
             if (offset != null) {
                 int totalSec = offset.getTotalSeconds();
                 String sign = totalSec >= 0 ? "+" : "-";
                 int absSec = Math.abs(totalSec);
-                sb.append(",\"utc_offset\":{\"sign\":\"").append(sign)
-                  .append("\",\"hours\":").append(absSec / 3600)
-                  .append(",\"minutes\":").append((absSec % 3600) / 60)
-                  .append("}");
+                Map<String, Object> off = new LinkedHashMap<>();
+                off.put("sign", sign);
+                off.put("hours", absSec / 3600);
+                off.put("minutes", (absSec % 3600) / 60);
+                t.put("utc_offset", off);
             }
-            sb.append("}");
+            result.put("time", t);
         }
 
-        sb.append("}");
-        return sb.toString();
+        return result;
     }
 
     // ── Generate ────────────────────────────────────────────────────────────────
 
-    static String generate(String components) {
-        // Parse components (minimal JSON)
-        Map<String, String> cal = parseObject(components, "calendar");
-        Map<String, String> time = parseObject(components, "time");
-        String fmt = parseString(components, "format");
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> generate(Object componentsObj) {
+        if (!(componentsObj instanceof Map)) return null;
+        Map<String, Object> components = (Map<String, Object>) componentsObj;
+
+        Map<String, Object> cal = (Map<String, Object>) components.get("calendar");
+        Map<String, Object> time = (Map<String, Object>) components.get("time");
+        String fmt = (String) components.get("format");
         boolean basic = "basic".equals(fmt);
 
         if (cal != null) {
-            int year = parseInt(cal.get("year"));
-            int month = parseInt(cal.get("month"));
-            int day = parseInt(cal.get("day"));
-            if (year == 0) return null;
+            int year = toInt(cal.get("year"));
+            int month = toInt(cal.get("month"));
+            int day = toInt(cal.get("day"));
+            if (year <= 0) return null;
 
             if (time != null) {
                 return generateDateTime(year, month, day, time, basic);
             }
 
-            // Date only
+            if (month <= 0 || day <= 0) return null;
+
             LocalDate date = LocalDate.of(year, month, day);
-            if (basic) {
-                return date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            }
-            return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String expr = basic
+                ? date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                : date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            return expressionMap(expr);
         }
 
-        // Time only
         if (time != null) {
-            int hour = parseInt(time.get("hour"));
-            int minute = parseInt(time.get("minute"));
-            int second = parseInt(time.get("second"));
-            if (hour == -1) return null;
-
-            LocalTime lt = LocalTime.of(hour, minute == -1 ? 0 : minute, second == -1 ? 0 : second);
+            int hour = toInt(time.get("hour"));
+            if (hour < 0) return null;
+            int minute = toInt(time.get("minute"));
+            int second = toInt(time.get("second"));
+            LocalTime lt = LocalTime.of(hour, minute < 0 ? 0 : minute, second < 0 ? 0 : second);
             String pattern = basic
                 ? (minute >= 0 ? (second >= 0 ? "HHmmss" : "HHmm") : "HH")
                 : (minute >= 0 ? (second >= 0 ? "HH:mm:ss" : "HH:mm") : "HH");
-            String result = lt.format(DateTimeFormatter.ofPattern(pattern));
-
+            String body = lt.format(DateTimeFormatter.ofPattern(pattern));
             String offStr = formatOffset(time, basic);
-            return offStr != null ? result + offStr : result;
+            return expressionMap(offStr != null ? body + offStr : body);
         }
 
         return null;
     }
 
-    static String generateDateTime(int year, int month, int day, Map<String, String> time, boolean basic) {
-        int hour = parseInt(time.get("hour"));
-        int minute = parseInt(time.get("minute"));
-        int second = parseInt(time.get("second"));
-        hour = hour == -1 ? 0 : hour;
-        minute = minute == -1 ? 0 : minute;
-        second = second == -1 ? 0 : second;
-
+    static Map<String, Object> generateDateTime(int year, int month, int day,
+                                                Map<String, Object> time, boolean basic) {
+        int hour = toIntOrZero(time.get("hour"));
+        int minute = toIntOrZero(time.get("minute"));
+        int second = toIntOrZero(time.get("second"));
         String offStr = formatOffset(time, basic);
-
-        if (basic) {
-            String dt = String.format("%04d%02d%02dT%02d%02d%02d", year, month, day, hour, minute, second);
-            return offStr != null ? dt + offStr : dt;
-        }
-
-        String dt = String.format("%04d-%02d-%02dT%02d:%02d:%02d", year, month, day, hour, minute, second);
-        return offStr != null ? dt + offStr : dt;
+        String body = basic
+            ? String.format("%04d%02d%02dT%02d%02d%02d", year, month, day, hour, minute, second)
+            : String.format("%04d-%02d-%02dT%02d:%02d:%02d", year, month, day, hour, minute, second);
+        return expressionMap(offStr != null ? body + offStr : body);
     }
 
-    static String formatOffset(Map<String, String> time, boolean basic) {
-        // extractPairs stores nested objects as raw JSON, so time.get("utc_offset")
-        // returns e.g. {"sign":"+","hours":2,"minutes":0}
-        String offRaw = time.get("utc_offset");
-        if (offRaw == null) return null;
-        String sign = parseString(offRaw, "sign");
-        if (sign == null) return null;
-        int hours = parseIntInJson(offRaw, "hours");
-        int minutes = parseIntInJson(offRaw, "minutes");
-        if (hours < 0 || minutes < 0) return null;
+    static Map<String, Object> expressionMap(String expr) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("expression", expr);
+        return m;
+    }
+
+    @SuppressWarnings("unchecked")
+    static String formatOffset(Map<String, Object> time, boolean basic) {
+        Object offObj = time.get("utc_offset");
+        if (!(offObj instanceof Map)) return null;
+        Map<String, Object> off = (Map<String, Object>) offObj;
+        Object signObj = off.get("sign");
+        if (!(signObj instanceof String)) return null;
+        String sign = (String) signObj;
+        int hours = toIntOrZero(off.get("hours"));
+        int minutes = toIntOrZero(off.get("minutes"));
         if (hours == 0 && minutes == 0) return "Z";
-        if (basic) return String.format("%s%02d%02d", sign, hours, minutes);
-        return String.format("%s%02d:%02d", sign, hours, minutes);
+        return basic
+            ? String.format("%s%02d%02d", sign, hours, minutes)
+            : String.format("%s%02d:%02d", sign, hours, minutes);
     }
 
-    // ── Minimal JSON helpers ────────────────────────────────────────────────────
-
-    static String jsonString(String s) {
-        StringBuilder sb = new StringBuilder("\"");
-        for (char c : s.toCharArray()) {
-            switch (c) {
-                case '"': sb.append("\\\""); break;
-                case '\\': sb.append("\\\\"); break;
-                case '\n': sb.append("\\n"); break;
-                case '\t': sb.append("\\t"); break;
-                default: sb.append(c);
-            }
-        }
-        sb.append("\"");
-        return sb.toString();
+    static int toInt(Object v) {
+        if (v == null) return -1;
+        if (v instanceof Number) return ((Number) v).intValue();
+        try { return Integer.parseInt(String.valueOf(v).trim()); }
+        catch (NumberFormatException e) { return -1; }
     }
 
-    static String parseString(String json, String key) {
-        String pattern = "\"" + key + "\"";
-        int idx = json.indexOf(pattern);
-        if (idx < 0) return null;
-        idx += pattern.length();
-        idx = json.indexOf(':', idx);
-        if (idx < 0) return null;
-        idx++;
-        while (idx < json.length() && (json.charAt(idx) == ' ' || json.charAt(idx) == '\t')) idx++;
-        if (idx >= json.length() || json.charAt(idx) != '"') return null;
-        idx++;
-        int end = idx;
-        while (end < json.length() && json.charAt(end) != '"') {
-            if (json.charAt(end) == '\\' && end + 1 < json.length()) end++;
-            end++;
-        }
-        return json.substring(idx, end);
-    }
-
-    static int parseInt(String s) {
-        if (s == null) return -1;
-        try { return Integer.parseInt(s.trim()); } catch (NumberFormatException e) { return -1; }
-    }
-
-    static int parseIntInJson(String json, String key) {
-        String pattern = "\"" + key + "\"";
-        int idx = json.indexOf(pattern);
-        if (idx < 0) return -1;
-        idx += pattern.length();
-        idx = json.indexOf(':', idx);
-        if (idx < 0) return -1;
-        idx++;
-        while (idx < json.length() && (json.charAt(idx) == ' ' || json.charAt(idx) == '\t')) idx++;
-        int start = idx;
-        if (idx < json.length() && json.charAt(idx) == '-') idx++;
-        while (idx < json.length() && Character.isDigit(json.charAt(idx))) idx++;
-        if (start == idx) return -1;
-        try { return Integer.parseInt(json.substring(start, idx)); } catch (NumberFormatException e) { return -1; }
-    }
-
-    static Map<String, String> parseObject(String json, String key) {
-        String pattern = "\"" + key + "\"";
-        int idx = json.indexOf(pattern);
-        if (idx < 0) return null;
-        idx = json.indexOf('{', idx);
-        if (idx < 0) return null;
-        int depth = 1;
-        int start = idx + 1;
-        int end = start;
-        while (end < json.length() && depth > 0) {
-            char c = json.charAt(end);
-            if (c == '{') depth++;
-            else if (c == '}') depth--;
-            if (depth == 0) break;
-            end++;
-        }
-        String objStr = json.substring(start, end);
-        Map<String, String> result = new HashMap<>();
-        // Extract key-value pairs
-        extractPairs(objStr, result);
-        return result;
-    }
-
-    static void extractPairs(String json, Map<String, String> result) {
-        int i = 0;
-        while (i < json.length()) {
-            // Find key
-            while (i < json.length() && json.charAt(i) != '"') i++;
-            if (i >= json.length()) break;
-            int keyStart = i + 1;
-            int keyEnd = keyStart;
-            while (keyEnd < json.length() && json.charAt(keyEnd) != '"') keyEnd++;
-            String key = json.substring(keyStart, keyEnd);
-            i = keyEnd + 1;
-            // Find value
-            while (i < json.length() && json.charAt(i) != ':') i++;
-            i++; // skip colon
-            while (i < json.length() && (json.charAt(i) == ' ' || json.charAt(i) == '\t')) i++;
-            if (i >= json.length()) break;
-            String value;
-            if (json.charAt(i) == '"') {
-                int valStart = i + 1;
-                int valEnd = valStart;
-                while (valEnd < json.length() && json.charAt(valEnd) != '"') {
-                    if (json.charAt(valEnd) == '\\') valEnd++;
-                    valEnd++;
-                }
-                value = json.substring(valStart, valEnd);
-                i = valEnd + 1;
-            } else if (json.charAt(i) == '{') {
-                // Nested object — store raw
-                int depth = 1;
-                int valStart = i;
-                i++;
-                while (i < json.length() && depth > 0) {
-                    if (json.charAt(i) == '{') depth++;
-                    else if (json.charAt(i) == '}') depth--;
-                    i++;
-                }
-                value = json.substring(valStart, i);
-            } else {
-                int valStart = i;
-                while (i < json.length() && json.charAt(i) != ',' && json.charAt(i) != '}') i++;
-                value = json.substring(valStart, i).trim();
-            }
-            result.put(key, value);
-            // Skip to next comma
-            while (i < json.length() && json.charAt(i) != ',') i++;
-            i++;
-        }
-    }
-
-    // ── DateEntry helper for dates with offset ──────────────────────────────────
-
-    static class DateEntry {
-        LocalDate date;
-        ZoneOffset offset;
-        DateEntry(LocalDate date, ZoneOffset offset) {
-            this.date = date;
-            this.offset = offset;
-        }
-    }
-
-    static String store(LocalDate date, ZoneOffset offset) {
-        return store(new DateEntry(date, offset));
+    static int toIntOrZero(Object v) {
+        int i = toInt(v);
+        return i < 0 ? 0 : i;
     }
 
     // ── Equivalence ─────────────────────────────────────────────────────────────
 
-    static String equivalent(String h1, String h2) {
+    static Object equivalent(String h1, String h2) {
         Object a = lookup(h1);
         Object b = lookup(h2);
-        if (a == null || b == null) return "null";
-        return String.valueOf(a.equals(b));
+        if (a == null || b == null) return null;
+        return a.equals(b);
     }
 
     // ── Declared conformance classes ────────────────────────────────────────────
@@ -567,13 +431,16 @@ public class JavaDateTime {
         "conf-class:date-and-time",
     };
 
+    static final String[] DECLARED_PROFILES = {
+        "profile:iso-8601-1-core",
+    };
+
     // ── Main dispatch ───────────────────────────────────────────────────────────
 
     public static void main(String[] args) throws IOException {
         String javaVersion = System.getProperty("java.version");
-        // Simplify version (e.g., "21.0.2" → "21")
         String major = javaVersion.split("\\.")[0];
-        if (major.startsWith("1.")) major = javaVersion.split("\\.")[1]; // Java 8 style
+        if (major.startsWith("1.")) major = javaVersion.split("\\.")[1];
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
@@ -583,104 +450,341 @@ public class JavaDateTime {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            String response;
+            Map<String, Object> response;
             try {
-                String method = parseString(line, "method");
-                if (method == null) {
-                    response = "{\"error\":\"no method\"}";
-                } else switch (method) {
-                    case "info":
-                        response = "{\"result\":{\"name\":\"Java " + major + " java.time\","
-                                 + "\"language\":\"java\","
-                                 + "\"version\":" + jsonString(javaVersion) + "}}";
-                        break;
-                    case "declared_conformance_classes":
-                        StringBuilder ccs = new StringBuilder("[");
-                        for (int i = 0; i < DECLARED_CLASSES.length; i++) {
-                            if (i > 0) ccs.append(",");
-                            ccs.append("\"").append(DECLARED_CLASSES[i]).append("\"");
-                        }
-                        ccs.append("]");
-                        response = "{\"result\":" + ccs + "}";
-                        break;
-                    case "declared_profiles":
-                        response = "{\"result\":[\"profile:iso-8601-1-core\"]}";
-                        break;
-                    case "try_parse": {
-                        String expr = parseString(line, "expression");
-                        if (expr == null) {
-                            response = "{\"error\":\"no expression\"}";
-                        } else {
-                            ParseResult pr = tryParse(expr);
-                            if (pr.valid) {
-                                response = "{\"result\":{\"valid\":true,\"parsed\":\"" + pr.handle
-                                         + "\",\"api\":\"" + pr.api + "\"}}";
-                            } else {
-                                response = "{\"result\":{\"valid\":false,\"error\":\"" + pr.error
-                                         + "\",\"api\":\"" + pr.api + "\"}}";
-                            }
-                        }
-                        break;
-                    }
-                    case "extract_components": {
-                        String handle = parseString(line, "parsed");
-                        if (handle == null) {
-                            response = "{\"result\":{}}";
-                        } else {
-                            response = "{\"result\":" + extractComponents(handle) + "}";
-                        }
-                        break;
-                    }
-                    case "generate": {
-                        int compIdx = line.indexOf("\"components\"");
-                        if (compIdx < 0) {
-                            response = "{\"result\":null}";
-                        } else {
-                            compIdx = line.indexOf('{', compIdx);
-                            String components = compIdx >= 0 ? extractJsonObject(line, compIdx) : "{}";
-                            String expr = generate(components);
-                            if (expr != null) {
-                                response = "{\"result\":{\"expression\":" + jsonString(expr) + "}}";
-                            } else {
-                                response = "{\"result\":null}";
-                            }
-                        }
-                        break;
-                    }
-                    case "equivalent": {
-                        String ha = parseString(line, "parsed_a");
-                        String hb = parseString(line, "parsed_b");
-                        response = "{\"result\":" + equivalent(ha, hb) + "}";
-                        break;
-                    }
-                    case "run_arithmetic":
-                        response = "{\"result\":{\"result\":\"not-supported\","
-                                 + "\"notes\":\"java.time does not support ISO 8601 arithmetic\"}}";
-                        break;
-                    default:
-                        response = "{\"error\":\"Unknown method: " + method + "\"}";
+                Object parsed = JsonReader.parse(line);
+                if (!(parsed instanceof Map)) {
+                    response = errorResponse("request must be a JSON object");
+                } else {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> request = (Map<String, Object>) parsed;
+                    String method = (String) request.get("method");
+                    Object paramsObj = request.get("params");
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> params = paramsObj instanceof Map
+                        ? (Map<String, Object>) paramsObj
+                        : Collections.emptyMap();
+                    response = dispatch(method, params, major, javaVersion);
                 }
             } catch (Exception e) {
-                response = "{\"error\":\"" + jsonString(e.getMessage()) + "\"}";
+                response = errorResponse(e.getMessage() != null ? e.getMessage() : e.toString());
             }
 
-            writer.println(response);
+            writer.println(Json.write(response));
             writer.flush();
         }
     }
 
-    static String extractJsonObject(String json, int start) {
-        int depth = 0;
-        int i = start;
-        while (i < json.length()) {
-            char c = json.charAt(i);
-            if (c == '{') depth++;
-            else if (c == '}') {
-                depth--;
-                if (depth == 0) return json.substring(start, i + 1);
+    static Map<String, Object> dispatch(String method, Map<String, Object> params,
+                                        String major, String javaVersion) {
+        if (method == null) return errorResponse("no method");
+        switch (method) {
+            case "info": {
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("name", "Java " + major + " java.time");
+                result.put("language", "java");
+                result.put("version", javaVersion);
+                return resultResponse(result);
             }
-            i++;
+            case "declared_conformance_classes":
+                return resultResponse(Arrays.asList(DECLARED_CLASSES));
+            case "declared_profiles":
+                return resultResponse(Arrays.asList(DECLARED_PROFILES));
+            case "try_parse": {
+                String expr = (String) params.get("expression");
+                if (expr == null) return errorResponse("no expression");
+                ParseResult pr = tryParse(expr);
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("valid", pr.valid);
+                if (pr.valid) {
+                    result.put("parsed", pr.handle);
+                } else {
+                    result.put("error", pr.error != null ? pr.error : "parse error");
+                }
+                result.put("api", pr.api);
+                return resultResponse(result);
+            }
+            case "extract_components": {
+                String handle = (String) params.get("parsed");
+                Object result = handle == null
+                    ? new LinkedHashMap<String, Object>()
+                    : extractComponents(handle);
+                return resultResponse(result);
+            }
+            case "generate":
+                return resultResponse(generate(params.get("components")));
+            case "equivalent":
+                return resultResponse(equivalent(
+                    (String) params.get("parsed_a"),
+                    (String) params.get("parsed_b")));
+            case "run_arithmetic": {
+                Map<String, Object> r = new LinkedHashMap<>();
+                r.put("result", "not-supported");
+                r.put("notes", "java.time does not support ISO 8601 arithmetic");
+                return resultResponse(r);
+            }
+            default:
+                return errorResponse("Unknown method: " + method);
         }
-        return json.substring(start);
+    }
+
+    static Map<String, Object> resultResponse(Object result) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("result", result);
+        return m;
+    }
+
+    static Map<String, Object> errorResponse(String error) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("error", error);
+        return m;
+    }
+
+    // ── JSON writer ─────────────────────────────────────────────────────────────
+
+    static class Json {
+        static String write(Object v) {
+            StringBuilder sb = new StringBuilder();
+            writeValue(sb, v);
+            return sb.toString();
+        }
+
+        static void writeValue(StringBuilder sb, Object v) {
+            if (v == null) { sb.append("null"); return; }
+            if (v instanceof String) { writeString(sb, (String) v); return; }
+            if (v instanceof Boolean) { sb.append((Boolean) v ? "true" : "false"); return; }
+            if (v instanceof Number) {
+                Number n = (Number) v;
+                if (n instanceof Double || n instanceof Float) {
+                    double d = n.doubleValue();
+                    if (Double.isNaN(d) || Double.isInfinite(d)) {
+                        sb.append("null");
+                    } else if (d == Math.floor(d) && Math.abs(d) < 1e15) {
+                        sb.append(Long.toString((long) d));
+                    } else {
+                        sb.append(n.toString());
+                    }
+                } else {
+                    sb.append(n.toString());
+                }
+                return;
+            }
+            if (v instanceof Map) { writeObject(sb, (Map<?, ?>) v); return; }
+            if (v instanceof Object[]) { writeArray(sb, (Object[]) v); return; }
+            if (v instanceof Iterable) { writeIterable(sb, (Iterable<?>) v); return; }
+            writeString(sb, String.valueOf(v));
+        }
+
+        static void writeString(StringBuilder sb, String s) {
+            sb.append('"');
+            for (int i = 0; i < s.length(); i++) {
+                char c = s.charAt(i);
+                switch (c) {
+                    case '"':  sb.append("\\\""); break;
+                    case '\\': sb.append("\\\\"); break;
+                    case '\b': sb.append("\\b"); break;
+                    case '\f': sb.append("\\f"); break;
+                    case '\n': sb.append("\\n"); break;
+                    case '\r': sb.append("\\r"); break;
+                    case '\t': sb.append("\\t"); break;
+                    default:
+                        if (c < 0x20) {
+                            sb.append(String.format("\\u%04x", (int) c));
+                        } else {
+                            sb.append(c);
+                        }
+                }
+            }
+            sb.append('"');
+        }
+
+        static void writeObject(StringBuilder sb, Map<?, ?> m) {
+            sb.append('{');
+            boolean first = true;
+            for (Map.Entry<?, ?> e : m.entrySet()) {
+                if (!first) sb.append(',');
+                first = false;
+                writeString(sb, String.valueOf(e.getKey()));
+                sb.append(':');
+                writeValue(sb, e.getValue());
+            }
+            sb.append('}');
+        }
+
+        static void writeArray(StringBuilder sb, Object[] arr) {
+            sb.append('[');
+            for (int i = 0; i < arr.length; i++) {
+                if (i > 0) sb.append(',');
+                writeValue(sb, arr[i]);
+            }
+            sb.append(']');
+        }
+
+        static void writeIterable(StringBuilder sb, Iterable<?> it) {
+            sb.append('[');
+            boolean first = true;
+            for (Object o : it) {
+                if (!first) sb.append(',');
+                first = false;
+                writeValue(sb, o);
+            }
+            sb.append(']');
+        }
+    }
+
+    // ── JSON reader ─────────────────────────────────────────────────────────────
+
+    static class JsonReader {
+        final String s;
+        int pos;
+
+        JsonReader(String s) { this.s = s; }
+
+        static Object parse(String s) {
+            JsonReader r = new JsonReader(s);
+            r.skipWs();
+            Object v = r.readValue();
+            r.skipWs();
+            return v;
+        }
+
+        void skipWs() {
+            while (pos < s.length()) {
+                char c = s.charAt(pos);
+                if (c == ' ' || c == '\t' || c == '\n' || c == '\r') pos++;
+                else break;
+            }
+        }
+
+        Object readValue() {
+            skipWs();
+            if (pos >= s.length()) throw new RuntimeException("Unexpected EOF");
+            char c = s.charAt(pos);
+            switch (c) {
+                case '{': return readObject();
+                case '[': return readArray();
+                case '"': return readString();
+                case 't': case 'f': return readBool();
+                case 'n': return readNull();
+                default: return readNumber();
+            }
+        }
+
+        Map<String, Object> readObject() {
+            Map<String, Object> m = new LinkedHashMap<>();
+            expect('{');
+            skipWs();
+            if (peek() == '}') { pos++; return m; }
+            while (true) {
+                skipWs();
+                String key = readString();
+                skipWs();
+                expect(':');
+                Object v = readValue();
+                m.put(key, v);
+                skipWs();
+                char c = next();
+                if (c == ',') continue;
+                if (c == '}') break;
+                throw new RuntimeException("Expected , or } at " + (pos - 1));
+            }
+            return m;
+        }
+
+        List<Object> readArray() {
+            List<Object> a = new ArrayList<>();
+            expect('[');
+            skipWs();
+            if (peek() == ']') { pos++; return a; }
+            while (true) {
+                a.add(readValue());
+                skipWs();
+                char c = next();
+                if (c == ',') continue;
+                if (c == ']') break;
+                throw new RuntimeException("Expected , or ] at " + (pos - 1));
+            }
+            return a;
+        }
+
+        String readString() {
+            expect('"');
+            StringBuilder sb = new StringBuilder();
+            while (pos < s.length()) {
+                char c = s.charAt(pos++);
+                if (c == '"') return sb.toString();
+                if (c == '\\') {
+                    if (pos >= s.length()) throw new RuntimeException("Unterminated escape");
+                    char e = s.charAt(pos++);
+                    switch (e) {
+                        case '"':  sb.append('"');  break;
+                        case '\\': sb.append('\\'); break;
+                        case '/':  sb.append('/');  break;
+                        case 'b':  sb.append('\b'); break;
+                        case 'f':  sb.append('\f'); break;
+                        case 'n':  sb.append('\n'); break;
+                        case 'r':  sb.append('\r'); break;
+                        case 't':  sb.append('\t'); break;
+                        case 'u':
+                            if (pos + 4 > s.length()) throw new RuntimeException("Bad \\u");
+                            int code = Integer.parseInt(s.substring(pos, pos + 4), 16);
+                            sb.append((char) code);
+                            pos += 4;
+                            break;
+                        default: throw new RuntimeException("Unknown escape \\" + e);
+                    }
+                } else {
+                    sb.append(c);
+                }
+            }
+            throw new RuntimeException("Unterminated string");
+        }
+
+        Object readNumber() {
+            int start = pos;
+            while (pos < s.length()) {
+                char c = s.charAt(pos);
+                if (Character.isDigit(c) || c == '-' || c == '+'
+                        || c == '.' || c == 'e' || c == 'E') {
+                    pos++;
+                } else {
+                    break;
+                }
+            }
+            if (start == pos) throw new RuntimeException("Expected number at " + pos);
+            String num = s.substring(start, pos);
+            if (num.contains(".") || num.contains("e") || num.contains("E")) {
+                return Double.parseDouble(num);
+            }
+            return Long.parseLong(num);
+        }
+
+        Boolean readBool() {
+            if (s.startsWith("true", pos))  { pos += 4; return Boolean.TRUE; }
+            if (s.startsWith("false", pos)) { pos += 5; return Boolean.FALSE; }
+            throw new RuntimeException("Invalid literal at " + pos);
+        }
+
+        Object readNull() {
+            if (s.startsWith("null", pos)) { pos += 4; return null; }
+            throw new RuntimeException("Invalid literal at " + pos);
+        }
+
+        void expect(char c) {
+            if (pos >= s.length() || s.charAt(pos) != c) {
+                throw new RuntimeException("Expected '" + c + "' at " + pos);
+            }
+            pos++;
+        }
+
+        char peek() {
+            if (pos >= s.length()) throw new RuntimeException("Unexpected EOF");
+            return s.charAt(pos);
+        }
+
+        char next() {
+            if (pos >= s.length()) throw new RuntimeException("Unexpected EOF");
+            return s.charAt(pos++);
+        }
     }
 }

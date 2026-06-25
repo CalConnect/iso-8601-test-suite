@@ -12,7 +12,7 @@
 # =============================================================================
 
 require "json"
-require_relative "ruby-date"
+require_relative "date"
 
 adapter = RubyDateAdapter.new
 
