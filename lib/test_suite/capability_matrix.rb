@@ -483,7 +483,7 @@ class CapabilityMatrix
       declared = declared_classes[a[:id]] || []
       profiles = declared_profiles[a[:id]] || []
       targeted = compute_target_profiles(declared, profile_results, profiles)
-      notes = (a[:adapter].respond_to?(:qualification_notes) ? a[:adapter].qualification_notes : nil) || []
+      notes = a[:adapter].qualification_notes || []
       { id: a[:id], name: a[:name], family: a[:family], logo: a[:logo], language: a[:language], version: a[:version],
         declared_conformance_classes: declared, target_profiles: targeted, qualification_notes: notes }
     end

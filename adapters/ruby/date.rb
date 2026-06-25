@@ -40,6 +40,10 @@ class RubyDateAdapter
     %w[profile:iso-8601-1-core]
   end
 
+  def qualification_notes
+    nil
+  end
+
   # ── Parse an expression ────────────────────────────────────────────────
 
   def try_parse(expression, options = {})
