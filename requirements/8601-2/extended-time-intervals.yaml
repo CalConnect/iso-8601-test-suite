@@ -12,34 +12,72 @@ dependencies:
 source:
   - urn:iso:std:iso:8601:-2:ed-1:en:clause:10
 requirements:
-  - id: req:extended-interval-open-end
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.1"
+  - id: req:extended-interval-open-end-implicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.1:tech:open-end-implicit"
     statement: >
-      A time interval with an open (continuing) end encodes the start followed
-      by a solidus and double-dot: [intexpr]["/"][".."].
+      A time interval with an open (continuing) end may use an implicit-form
+      start expression: a basic or extended date/time followed by a solidus
+      and double-dot, e.g. [intexpr-implicit]["/"][".."].
     format: any
-    pattern: '[intexpr]["/"][".."]'
-  - id: req:extended-interval-open-start
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.2"
+    pattern: '[intexpr-implicit]["/"][".."]'
+  - id: req:extended-interval-open-end-explicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.1:tech:open-end-explicit"
     statement: >
-      A time interval with an open (unbounded earlier) start encodes a double-dot
-      followed by a solidus and the end: [".."]["/"][intexpr].
+      A time interval with an open (continuing) end may use an explicit-form
+      start expression: a Part 2 explicit date/time (with Y/M/D designators)
+      followed by a solidus and double-dot, e.g.
+      [intexpr-explicit]["/"][".."].
     format: any
-    pattern: '[".."]["/"][intexpr]'
-  - id: req:extended-interval-unknown-end
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.3"
+    pattern: '[intexpr-explicit]["/"][".."]'
+  - id: req:extended-interval-open-start-implicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.2:tech:open-start-implicit"
     statement: >
-      A time interval with an unknown end encodes the start followed by a
-      trailing solidus: [intexpr]["/"].
+      A time interval with an open (unbounded earlier) start may use an
+      implicit-form end expression: a double-dot, solidus, and basic or
+      extended date/time, e.g. [".."]["/"][intexpr-implicit].
     format: any
-    pattern: '[intexpr]["/"]'
-  - id: req:extended-interval-unknown-start
-    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.4"
+    pattern: '[".."]["/"][intexpr-implicit]'
+  - id: req:extended-interval-open-start-explicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.2:tech:open-start-explicit"
     statement: >
-      A time interval with an unknown start encodes a leading solidus followed
-      by the end: ["/"][intexpr].
+      A time interval with an open (unbounded earlier) start may use an
+      explicit-form end expression: a double-dot, solidus, and a Part 2
+      explicit date/time (with Y/M/D designators), e.g.
+      [".."]["/"][intexpr-explicit].
     format: any
-    pattern: '["/"][intexpr]'
+    pattern: '[".."]["/"][intexpr-explicit]'
+  - id: req:extended-interval-unknown-end-implicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.3:tech:unknown-end-implicit"
+    statement: >
+      A time interval with an unknown end may use an implicit-form start
+      expression followed by a trailing solidus, e.g.
+      [intexpr-implicit]["/"].
+    format: any
+    pattern: '[intexpr-implicit]["/"]'
+  - id: req:extended-interval-unknown-end-explicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.3:tech:unknown-end-explicit"
+    statement: >
+      A time interval with an unknown end may use an explicit-form start
+      expression followed by a trailing solidus, e.g.
+      [intexpr-explicit]["/"].
+    format: any
+    pattern: '[intexpr-explicit]["/"]'
+  - id: req:extended-interval-unknown-start-implicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.4:tech:unknown-start-implicit"
+    statement: >
+      A time interval with an unknown start may use an implicit-form end
+      expression preceded by a leading solidus, e.g.
+      ["/"][intexpr-implicit].
+    format: any
+    pattern: '["/"][intexpr-implicit]'
+  - id: req:extended-interval-unknown-start-explicit
+    clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.2.4:tech:unknown-start-explicit"
+    statement: >
+      A time interval with an unknown start may use an explicit-form end
+      expression preceded by a leading solidus, e.g.
+      ["/"][intexpr-explicit].
+    format: any
+    pattern: '["/"][intexpr-explicit]'
   - id: req:extended-interval-qualification-complete
     clause: "urn:iso:std:iso:8601:-2:ed-1:en:clause:10.3.2"
     statement: >
