@@ -53,7 +53,7 @@ class Runner
 
     results = []
     counts = { pass: 0, fail: 0, error: 0, not_supported: 0 }
-    declared = adapter.respond_to?(:declared_conformance_classes) ? adapter.declared_conformance_classes : nil
+    declared = adapter.declared_conformance_classes
 
     tests.each do |test|
       tid = test["id"]
@@ -181,8 +181,8 @@ class Runner
       "date" => Date.today.to_s,
       "tester" => "run-tests script",
       "verification" => "automated",
-      "declared_conformance_classes" => adapter.respond_to?(:declared_conformance_classes) ? adapter.declared_conformance_classes : nil,
-      "profiles_tested" => adapter.respond_to?(:declared_profiles) ? adapter.declared_profiles : nil,
+      "declared_conformance_classes" => adapter.declared_conformance_classes,
+      "profiles_tested" => adapter.declared_profiles,
       "conformance_class_results" => cc_results,
       "profile_results" => profile_results.empty? ? nil : profile_results
     }.compact
