@@ -5,7 +5,7 @@ implementation:
   name: C++ std::chrono (LLVM)
   language: cpp
   version: C++20
-date: '2026-06-22'
+date: '2026-06-25'
 tester: run-tests script
 verification: automated
 declared_conformance_classes:
@@ -28,13 +28,15 @@ conformance_class_results:
   - test: conf-test:cal-date-parse-004
     result: pass
   - test: conf-test:cal-date-parse-005
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:cal-date-parse-006
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:cal-date-parse-007
-    result: pass
+    result: fail
   - test: conf-test:cal-date-parse-008
-    result: pass
+    result: fail
   - test: conf-test:cal-date-parse-009
     result: fail
   - test: conf-test:cal-date-parse-010
@@ -74,21 +76,27 @@ conformance_class_results:
   - test: conf-test:cal-date-valid-004
     result: pass
   - test: conf-test:cal-date-valid-005
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-valid-006
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-valid-007
     result: pass
   - test: conf-test:cal-date-valid-008
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-valid-009
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-valid-010
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:cal-date-equiv-001
     result: pass
   - test: conf-test:cal-date-equiv-002
-    result: pass
+    result: not-supported
+    notes: Cannot parse one or both expressions
 - conformance_class: conf-class:date-and-time
   status: failed
   test_results:
@@ -109,21 +117,25 @@ conformance_class_results:
   - test: conf-test:date-time-parse-008
     result: pass
   - test: conf-test:date-time-parse-009
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:date-time-parse-010
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:date-time-parse-011
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:date-time-parse-012
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:date-time-parse-013
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-014
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-015
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-016
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-017
     result: fail
   - test: conf-test:date-time-parse-018
@@ -140,15 +152,28 @@ conformance_class_results:
     result: fail
   - test: conf-test:date-time-parse-024
     result: fail
-  - test: conf-test:date-time-parse-025
+  - test: conf-test:date-time-parse-031
+    result: pass
+  - test: conf-test:date-time-parse-032
+    result: pass
+  - test: conf-test:date-time-parse-033
     result: fail
+    notes: Component mismatch
+  - test: conf-test:date-time-parse-034
+    result: pass
+  - test: conf-test:date-time-parse-035
+    result: fail
+  - test: conf-test:date-time-parse-036
+    result: fail
+  - test: conf-test:date-time-parse-025
+    result: pass
   - test: conf-test:date-time-parse-026
     result: pass
   - test: conf-test:date-time-parse-027
     result: fail
     notes: Component mismatch
   - test: conf-test:date-time-parse-028
-    result: fail
+    result: pass
   - test: conf-test:date-time-parse-029
     result: fail
   - test: conf-test:date-time-parse-030
@@ -249,49 +274,41 @@ conformance_class_results:
   - test: conf-test:dur-parse-015
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:dur-parse-016
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:dur-parse-017
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:fundamentals
   status: failed
   test_results:
-  - test: conf-test:fundamentals-valid-001
-    result: pass
-  - test: conf-test:fundamentals-valid-002
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-003
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-004
-    result: pass
-  - test: conf-test:fundamentals-valid-005
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-006
-    result: pass
-  - test: conf-test:fundamentals-valid-007
-    result: pass
   - test: conf-test:fundamentals-valid-008
     result: pass
   - test: conf-test:fundamentals-valid-009
     result: pass
   - test: conf-test:fundamentals-valid-010
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-011
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-012
     result: pass
   - test: conf-test:fundamentals-valid-013
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:fundamentals-valid-014
     result: pass
   - test: conf-test:fundamentals-valid-015
     result: pass
   - test: conf-test:fundamentals-valid-016
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-017
     result: pass
   - test: conf-test:fundamentals-valid-018
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-019
     result: pass
   - test: conf-test:fundamentals-valid-020
@@ -304,12 +321,20 @@ conformance_class_results:
     result: pass
   - test: conf-test:fundamentals-parse-003
     result: pass
+  - test: conf-test:fundamentals-parse-003b
+    result: fail
+  - test: conf-test:fundamentals-parse-003c
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-parse-004
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:fundamentals-parse-005
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:fundamentals-parse-006
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:fundamentals-gen-001
     result: not-supported
     notes: Adapter cannot generate from given components
@@ -331,14 +356,29 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-025
     result: fail
     notes: Expected true, got false
+  - test: conf-test:fundamentals-valid-025b
+    result: fail
+    notes: Expected true, got false
+  - test: conf-test:fundamentals-valid-025c
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-026
     result: pass
   - test: conf-test:fundamentals-valid-027
     result: pass
   - test: conf-test:fundamentals-valid-028
     result: pass
-  - test: conf-test:fundamentals-valid-029
+  - test: conf-test:fundamentals-valid-028a
     result: pass
+  - test: conf-test:fundamentals-valid-028b
+    result: pass
+  - test: conf-test:fundamentals-valid-028c
+    result: pass
+  - test: conf-test:fundamentals-valid-028d
+    result: pass
+  - test: conf-test:fundamentals-valid-029
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-030
     result: pass
   - test: conf-test:fundamentals-valid-031
@@ -356,7 +396,7 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-036
     result: pass
   - test: conf-test:fundamentals-parse-007
-    result: fail
+    result: pass
   - test: conf-test:fundamentals-parse-008
     result: pass
   - test: conf-test:fundamentals-valid-037
@@ -557,6 +597,12 @@ conformance_class_results:
   - test: conf-test:interval-equiv-002
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:interval-parse-014
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:interval-parse-015
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:time-of-day
   status: failed
   test_results:
@@ -579,6 +625,10 @@ conformance_class_results:
   - test: conf-test:time-parse-009
     result: fail
   - test: conf-test:time-parse-010
+    result: fail
+  - test: conf-test:time-parse-035
+    result: fail
+  - test: conf-test:time-parse-036
     result: fail
   - test: conf-test:time-parse-011
     result: pass
@@ -673,6 +723,17 @@ conformance_class_results:
   - test: conf-test:time-equiv-001
     result: pass
   - test: conf-test:time-equiv-002
+    result: pass
+  - test: conf-test:time-parse-037
+    result: pass
+  - test: conf-test:time-parse-038
+    result: pass
+  - test: conf-test:time-parse-039
+    result: fail
+  - test: conf-test:time-parse-040
+    result: fail
+    notes: Component mismatch
+  - test: conf-test:time-valid-007
     result: pass
 - conformance_class: conf-class:week-date
   status: not-supported
@@ -917,6 +978,54 @@ conformance_class_results:
   - test: conf-test:selection-second-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:selection-position-out-of-range-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-valid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+- conformance_class: conf-class:explicit-duration-and-extensions
+  status: not-supported
+  test_results:
+  - test: conf-test:explicit-duration-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-valid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-parse-003
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-gen-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-week-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-fraction-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-zero-omission-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-date-component-absence-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-time-without-t-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:explicit-representation
   status: not-supported
   test_results:
@@ -1008,30 +1117,6 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-century-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-day-of-week-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-day-of-year-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-decade-additional-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-decade-additional-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-century-additional-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-century-additional-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-value-prefixing-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-value-prefixing-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-omission-zero-parse-001
@@ -1128,6 +1213,33 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:exponential-time-scale-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+- conformance_class: conf-class:extended-date-forms
+  status: not-supported
+  test_results:
+  - test: conf-test:explicit-day-of-week-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-day-of-year-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-decade-additional-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-decade-additional-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-century-additional-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-century-additional-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-value-prefixing-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-value-prefixing-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
 - conformance_class: conf-class:extended-time-intervals
@@ -1344,6 +1456,15 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:negative-duration-arith-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-expanded-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-sign-mandatory-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-precision-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
 - conformance_class: conf-class:qualification
@@ -1847,6 +1968,12 @@ conformance_class_results:
   - test: conf-test:unspecified-anywhere-parse-010
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:unspecified-day-omitted-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:unspecified-time-omitted-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:unspecified-datetime-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
@@ -1861,26 +1988,25 @@ profile_results:
   status: failed
   test_results:
   - test: conf-test:edtf-level-0-valid-001
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-0-valid-002
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-0-valid-003
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-0-valid-004
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-0-invalid-001
     result: pass
+  - test: conf-test:edtf-level-0-valid-002
+    result: pass
+  - test: conf-test:edtf-level-0-valid-003
+    result: pass
+  - test: conf-test:edtf-level-0-valid-004
+    result: pass
+  - test: conf-test:edtf-level-0-invalid-001
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-0-invalid-002
     result: fail
     notes: Expected false, got true
   - test: conf-test:edtf-level-0-invalid-003
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-0-invalid-004
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-0-invalid-005
     result: pass
   - test: conf-test:edtf-level-0-invalid-006
@@ -1904,40 +2030,36 @@ profile_results:
     result: fail
     notes: Expected true, got false
   - test: conf-test:edtf-level-1-valid-006
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-1-invalid-001
     result: pass
   - test: conf-test:edtf-level-1-invalid-002
     result: pass
   - test: conf-test:edtf-level-1-valid-007
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-1-invalid-003
     result: pass
+  - test: conf-test:edtf-level-1-invalid-003
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-1-valid-008
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-1-valid-009
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-1-invalid-004
     result: pass
   - test: conf-test:edtf-level-1-valid-010
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-1-invalid-005
     result: pass
-  - test: conf-test:edtf-level-1-valid-011
+  - test: conf-test:edtf-level-1-invalid-005
     result: fail
-    notes: Expected true, got false
+    notes: Expected false, got true
+  - test: conf-test:edtf-level-1-valid-011
+    result: pass
   - test: conf-test:edtf-level-1-invalid-006
     result: pass
   - test: conf-test:edtf-level-1-valid-012
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-1-invalid-007
     result: pass
+  - test: conf-test:edtf-level-1-invalid-007
+    result: fail
+    notes: Expected false, got true
 - profile: profile:edtf-level-2
   status: failed
   test_results:
@@ -1966,33 +2088,30 @@ profile_results:
     result: fail
     notes: Expected true, got false
   - test: conf-test:edtf-level-2-valid-009
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-2-invalid-001
     result: pass
+  - test: conf-test:edtf-level-2-invalid-001
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-2-valid-010
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-2-valid-011
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-2-invalid-002
     result: pass
   - test: conf-test:edtf-level-2-valid-012
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-2-invalid-003
     result: pass
-  - test: conf-test:edtf-level-2-valid-013
+  - test: conf-test:edtf-level-2-invalid-003
     result: fail
-    notes: Expected true, got false
+    notes: Expected false, got true
+  - test: conf-test:edtf-level-2-valid-013
+    result: pass
   - test: conf-test:edtf-level-2-invalid-004
     result: pass
   - test: conf-test:edtf-level-2-valid-014
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:edtf-level-2-invalid-005
     result: pass
+  - test: conf-test:edtf-level-2-invalid-005
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:edtf-level-2-valid-015
     result: fail
     notes: Expected true, got false
@@ -2003,8 +2122,7 @@ profile_results:
     result: fail
     notes: Expected true, got false
   - test: conf-test:edtf-level-2-valid-018
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:edtf-level-2-valid-019
     result: fail
     notes: Expected true, got false
@@ -2050,8 +2168,7 @@ profile_results:
     result: fail
     notes: Expected false, got true
   - test: conf-test:rfc-3339-valid-004
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:rfc-3339-valid-005
     result: pass
   - test: conf-test:rfc-3339-invalid-002
@@ -2095,7 +2212,8 @@ profile_results:
   - test: conf-test:w3c-datetime-valid-007
     result: pass
   - test: conf-test:w3c-datetime-invalid-001
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:w3c-datetime-invalid-002
     result: fail
     notes: Expected false, got true
@@ -2108,14 +2226,15 @@ profile_results:
   - test: conf-test:w3c-datetime-valid-008
     result: pass
   - test: conf-test:w3c-datetime-valid-009
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:w3c-datetime-invalid-005
     result: fail
     notes: Expected false, got true
   - test: conf-test:w3c-datetime-invalid-006
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:w3c-datetime-invalid-007
-    result: pass
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:w3c-datetime-invalid-008
     result: pass

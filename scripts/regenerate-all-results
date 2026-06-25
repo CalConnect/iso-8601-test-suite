@@ -45,18 +45,32 @@ to_run.each_with_index do |d, i|
   $stdout.flush
 
   start = Time.now
+  prior_mtime = File.exist?(output) ? File.mtime(output) : nil
   cmd = ["ruby", "scripts/run-tests", "--adapter", adapter_spec, "-o", output]
   cmd << "--quiet" if options[:quiet]
-  system(*cmd, out: "/dev/null", err: "/dev/null")
+  stderr_file = File.join(results_dir, ".#{id}.regenerate.log")
+  system(*cmd, out: "/dev/null", err: stderr_file)
   elapsed = Time.now - start
 
-  if File.exist?(output) && File.size(output) > 100
+  # run-tests exits 1 whenever any test fails — that's expected for most
+  # adapters and does NOT indicate the adapter is broken. The real signals
+  # are: (1) the output file was rewritten this run (mtime advanced), and
+  # (2) the file is non-trivially sized. A broken adapter (LoadError,
+  # crash, can't start) leaves the stale file untouched.
+  fresh = File.exist?(output) && (prior_mtime.nil? || File.mtime(output) > prior_mtime)
+  nontrivial = File.exist?(output) && File.size(output) > 100
+
+  if fresh && nontrivial
     puts sprintf("done (%.1fs)", elapsed)
     success << id
   else
-    puts sprintf("FAILED (%.1fs)", elapsed)
+    reason = !fresh ? "no output written (adapter likely broken)" : "output too small"
+    tail = File.exist?(stderr_file) ? File.read(stderr_file) : ""
+    tail_lines = tail.lines.last(5).map { |l| "    | #{l.chomp}" }.join("\n")
+    puts sprintf("FAILED (%.1fs) — %s\n%s", elapsed, reason, tail_lines)
     failed << id
   end
+  File.delete(stderr_file) if File.exist?(stderr_file)
 end
 
 puts ""
