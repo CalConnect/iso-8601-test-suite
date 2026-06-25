@@ -5,9 +5,6 @@
 # Used by both scripts/validate and scripts/run-tests.
 
 module Term
-  COLORS_ENABLED = $stdout.tty? && ENV["NO_COLOR"].nil?
-  EMOJI_ENABLED  = COLORS_ENABLED && $stdout.tty?
-
   RESET   = "\e[0m"
   BOLD    = "\e[1m"
   DIM     = "\e[2m"
@@ -49,8 +46,16 @@ module Term
 
   module_function
 
+  def colors_enabled?
+    $stdout.tty? && ENV["NO_COLOR"].nil?
+  end
+
+  def emoji_enabled?
+    colors_enabled? && $stdout.tty?
+  end
+
   def color?(code, text)
-    COLORS_ENABLED ? "#{code}#{text}#{RESET}" : text.to_s
+    colors_enabled? ? "#{code}#{text}#{RESET}" : text.to_s
   end
 
   def bold(text)    = color?(BOLD, text)
@@ -70,27 +75,27 @@ module Term
   def bmag(text)    = color?(BMAGENTA, text)
 
   def badge(text, color = BG_GREEN)
-    COLORS_ENABLED ? " #{color}#{WHITE} #{text} #{RESET} " : " [#{text}] "
+    colors_enabled? ? " #{color}#{WHITE} #{text} #{RESET} " : " [#{text}] "
   end
 
   def ok_icon
-    EMOJI_ENABLED ? green("  ✓") : green("PASS")
+    emoji_enabled? ? green("  ✓") : green("PASS")
   end
 
   def fail_icon
-    EMOJI_ENABLED ? bred("  ✗") : bred("FAIL")
+    emoji_enabled? ? bred("  ✗") : bred("FAIL")
   end
 
   def warn_icon
-    EMOJI_ENABLED ? byellow("  ⚠") : byellow("WARN")
+    emoji_enabled? ? byellow("  ⚠") : byellow("WARN")
   end
 
   def info_icon
-    EMOJI_ENABLED ? bblue("  ℹ") : bblue("INFO")
+    emoji_enabled? ? bblue("  ℹ") : bblue("INFO")
   end
 
   def section_icon(type)
-    return "" unless EMOJI_ENABLED
+    return "" unless emoji_enabled?
     ICONS.fetch(type, "  ")
   end
 
