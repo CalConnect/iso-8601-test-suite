@@ -5,7 +5,7 @@ implementation:
   name: Java 21 java.time
   language: java
   version: 21.0.2
-date: '2026-06-22'
+date: '2026-06-25'
 tester: run-tests script
 verification: automated
 declared_conformance_classes:
@@ -28,9 +28,10 @@ conformance_class_results:
   - test: conf-test:cal-date-parse-004
     result: pass
   - test: conf-test:cal-date-parse-005
-    result: pass
+    result: fail
   - test: conf-test:cal-date-parse-006
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:cal-date-parse-007
     result: fail
   - test: conf-test:cal-date-parse-008
@@ -142,6 +143,18 @@ conformance_class_results:
     result: fail
   - test: conf-test:date-time-parse-024
     result: fail
+  - test: conf-test:date-time-parse-031
+    result: pass
+  - test: conf-test:date-time-parse-032
+    result: pass
+  - test: conf-test:date-time-parse-033
+    result: pass
+  - test: conf-test:date-time-parse-034
+    result: pass
+  - test: conf-test:date-time-parse-035
+    result: fail
+  - test: conf-test:date-time-parse-036
+    result: fail
   - test: conf-test:date-time-parse-025
     result: pass
   - test: conf-test:date-time-parse-026
@@ -246,25 +259,15 @@ conformance_class_results:
   - test: conf-test:dur-parse-015
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:dur-parse-016
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:dur-parse-017
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:fundamentals
   status: failed
   test_results:
-  - test: conf-test:fundamentals-valid-001
-    result: pass
-  - test: conf-test:fundamentals-valid-002
-    result: pass
-  - test: conf-test:fundamentals-valid-003
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-004
-    result: pass
-  - test: conf-test:fundamentals-valid-005
-    result: fail
-    notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-006
-    result: pass
-  - test: conf-test:fundamentals-valid-007
-    result: pass
   - test: conf-test:fundamentals-valid-008
     result: pass
   - test: conf-test:fundamentals-valid-009
@@ -299,12 +302,18 @@ conformance_class_results:
     result: pass
   - test: conf-test:fundamentals-parse-003
     result: pass
+  - test: conf-test:fundamentals-parse-003b
+    result: fail
+  - test: conf-test:fundamentals-parse-003c
+    result: pass
   - test: conf-test:fundamentals-parse-004
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:fundamentals-parse-005
-    result: pass
+    result: fail
+    notes: Component mismatch
   - test: conf-test:fundamentals-parse-006
-    result: pass
+    result: fail
   - test: conf-test:fundamentals-gen-001
     result: not-supported
     notes: Adapter cannot generate from given components
@@ -326,13 +335,26 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-025
     result: fail
     notes: Expected true, got false
+  - test: conf-test:fundamentals-valid-025b
+    result: fail
+    notes: Expected true, got false
+  - test: conf-test:fundamentals-valid-025c
+    result: fail
+    notes: Expected false, got true
   - test: conf-test:fundamentals-valid-026
-    result: fail
-    notes: Expected true, got false
+    result: pass
   - test: conf-test:fundamentals-valid-027
+    result: pass
+  - test: conf-test:fundamentals-valid-028
+    result: pass
+  - test: conf-test:fundamentals-valid-028a
     result: fail
     notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-028
+  - test: conf-test:fundamentals-valid-028b
+    result: pass
+  - test: conf-test:fundamentals-valid-028c
+    result: pass
+  - test: conf-test:fundamentals-valid-028d
     result: pass
   - test: conf-test:fundamentals-valid-029
     result: pass
@@ -549,6 +571,12 @@ conformance_class_results:
   - test: conf-test:interval-equiv-002
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:interval-parse-014
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:interval-parse-015
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:time-of-day
   status: failed
   test_results:
@@ -561,7 +589,7 @@ conformance_class_results:
   - test: conf-test:time-parse-004
     result: pass
   - test: conf-test:time-parse-005
-    result: fail
+    result: pass
   - test: conf-test:time-parse-006
     result: fail
   - test: conf-test:time-parse-007
@@ -572,6 +600,10 @@ conformance_class_results:
   - test: conf-test:time-parse-009
     result: fail
   - test: conf-test:time-parse-010
+    result: fail
+  - test: conf-test:time-parse-035
+    result: fail
+  - test: conf-test:time-parse-036
     result: fail
   - test: conf-test:time-parse-011
     result: pass
@@ -592,6 +624,7 @@ conformance_class_results:
     notes: Component mismatch
   - test: conf-test:time-parse-018
     result: fail
+    notes: Component mismatch
   - test: conf-test:time-parse-019
     result: fail
     notes: Component mismatch
@@ -616,7 +649,7 @@ conformance_class_results:
   - test: conf-test:time-parse-027
     result: fail
   - test: conf-test:time-parse-028
-    result: fail
+    result: pass
   - test: conf-test:time-parse-029
     result: pass
   - test: conf-test:time-parse-030
@@ -671,6 +704,16 @@ conformance_class_results:
   - test: conf-test:time-equiv-001
     result: pass
   - test: conf-test:time-equiv-002
+    result: pass
+  - test: conf-test:time-parse-037
+    result: pass
+  - test: conf-test:time-parse-038
+    result: pass
+  - test: conf-test:time-parse-039
+    result: fail
+  - test: conf-test:time-parse-040
+    result: fail
+  - test: conf-test:time-valid-007
     result: pass
 - conformance_class: conf-class:week-date
   status: not-supported
@@ -915,6 +958,54 @@ conformance_class_results:
   - test: conf-test:selection-second-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:selection-position-out-of-range-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:selection-nested-valid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+- conformance_class: conf-class:explicit-duration-and-extensions
+  status: not-supported
+  test_results:
+  - test: conf-test:explicit-duration-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-valid-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-parse-003
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-gen-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-week-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-fraction-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-zero-omission-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-date-component-absence-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-duration-time-without-t-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
 - conformance_class: conf-class:explicit-representation
   status: not-supported
   test_results:
@@ -1006,30 +1097,6 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-century-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-day-of-week-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-day-of-year-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-decade-additional-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-decade-additional-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-century-additional-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-century-additional-parse-002
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-value-prefixing-parse-001
-    result: not-supported
-    notes: Conformance class not declared by implementation
-  - test: conf-test:explicit-value-prefixing-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-omission-zero-parse-001
@@ -1126,6 +1193,33 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:exponential-time-scale-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+- conformance_class: conf-class:extended-date-forms
+  status: not-supported
+  test_results:
+  - test: conf-test:explicit-day-of-week-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-day-of-year-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-decade-additional-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-decade-additional-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-century-additional-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-century-additional-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-value-prefixing-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-value-prefixing-parse-002
     result: not-supported
     notes: Conformance class not declared by implementation
 - conformance_class: conf-class:extended-time-intervals
@@ -1342,6 +1436,15 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:negative-duration-arith-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-expanded-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-sign-mandatory-valid-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:negative-year-precision-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
 - conformance_class: conf-class:qualification
@@ -1845,6 +1948,12 @@ conformance_class_results:
   - test: conf-test:unspecified-anywhere-parse-010
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:unspecified-day-omitted-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:unspecified-time-omitted-parse-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:unspecified-datetime-parse-001
     result: not-supported
     notes: Conformance class not declared by implementation
@@ -2095,8 +2204,7 @@ profile_results:
   - test: conf-test:w3c-datetime-valid-009
     result: pass
   - test: conf-test:w3c-datetime-invalid-005
-    result: fail
-    notes: Expected false, got true
+    result: pass
   - test: conf-test:w3c-datetime-invalid-006
     result: pass
   - test: conf-test:w3c-datetime-invalid-007
