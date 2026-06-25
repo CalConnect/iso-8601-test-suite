@@ -36,8 +36,8 @@ class CapabilityMatrix
     { id: "node-20",         name: "Node.js 20 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE20} adapters/node/datetime.js" },
     { id: "node-22",         name: "Node.js 22 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE22} adapters/node/datetime.js" },
     { id: "node-datetime",   name: "Node.js 24 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:node adapters/node/datetime.js" },
-    { id: "c-stdio",         name: "C strftime/strptime (BSD)", family: "C stdio",          logo: "/logos/c.svg",          adapter: "exec:env ADAPTER_LABEL='C strftime/strptime (BSD)' ADAPTER_VERSION='BSD libc' gcc -o /tmp/c-stdio-adapter adapters/c/stdio.c && /tmp/c-stdio-adapter" },
-    { id: "c-stdio-glibc",   name: "C strftime/strptime (glibc)", family: "C stdio",        logo: "/logos/c.svg",          adapter: "exec:docker run --rm -i -v #{REPO_ROOT}/adapters:/adapters:ro gcc:15 sh -c 'gcc -O2 -D_GNU_SOURCE -o /tmp/c-adapter /adapters/c/stdio.c && ADAPTER_LABEL=\"C strftime/strptime (glibc)\" ADAPTER_VERSION=\"glibc (gcc 15)\" /tmp/c-adapter'" },
+    { id: "c-stdio",         name: "C strftime/strptime (BSD)", family: "C stdio",          logo: "/logos/c.svg",          adapter: "exec:env ADAPTER_LABEL='C strftime/strptime (BSD)' ADAPTER_VERSION='BSD libc' gcc -O2 -Iadapters/c -o /tmp/c-stdio-adapter adapters/c/stdio.c adapters/c/vendor/cjson/cJSON.c && /tmp/c-stdio-adapter" },
+    { id: "c-stdio-glibc",   name: "C strftime/strptime (glibc)", family: "C stdio",        logo: "/logos/c.svg",          adapter: "exec:docker run --rm -i -v #{REPO_ROOT}/adapters:/adapters:ro gcc:15 sh -c 'gcc -O2 -D_GNU_SOURCE -I/adapters/c -o /tmp/c-adapter /adapters/c/stdio.c /adapters/c/vendor/cjson/cJSON.c && ADAPTER_LABEL=\"C strftime/strptime (glibc)\" ADAPTER_VERSION=\"glibc (gcc 15)\" /tmp/c-adapter'" },
     { id: "cpp-chrono",      name: "C++ std::chrono (LLVM)", family: "C++ chrono",     logo: "/logos/cpp.svg",        adapter: "exec:#{HOMEBREW_LLVM_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (LLVM)\"' -o /tmp/cpp-chrono adapters/cpp/chrono.cpp && /tmp/cpp-chrono" },
     { id: "cpp-chrono-apple", name: "C++ std::chrono (Apple)", family: "C++ chrono",   logo: "/logos/cpp.svg",        adapter: "exec:#{APPLE_CLANG_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (Apple)\"' -o /tmp/cpp-chrono-apple adapters/cpp/chrono.cpp && /tmp/cpp-chrono-apple" },
     { id: "rust-chrono",     name: "Rust chrono (latest)", family: "Rust chrono",      logo: "/logos/rust.svg",       adapter: "exec:env ADAPTER_LABEL='Rust chrono (latest)' ADAPTER_VERSION='chrono 0.4 (latest)' adapters/rust/chrono-latest/target/release/rust-chrono" },
@@ -483,8 +483,9 @@ class CapabilityMatrix
       declared = declared_classes[a[:id]] || []
       profiles = declared_profiles[a[:id]] || []
       targeted = compute_target_profiles(declared, profile_results, profiles)
+      notes = (a[:adapter].respond_to?(:qualification_notes) ? a[:adapter].qualification_notes : nil) || []
       { id: a[:id], name: a[:name], family: a[:family], logo: a[:logo], language: a[:language], version: a[:version],
-        declared_conformance_classes: declared, target_profiles: targeted }
+        declared_conformance_classes: declared, target_profiles: targeted, qualification_notes: notes }
     end
   end
 

@@ -1,0 +1,374 @@
+= Adapter rules — preventing test gaming
+
+This document defines what an ISO 8601 test-suite adapter is *allowed* to do
+and what counts as *test gaming*. It exists because every adapter in this repo
+has at some point cheated — quietly re-implementing pieces of ISO 8601 inside
+the adapter so that tests pass for features the underlying library does not
+actually support.
+
+The point of the test suite is to **measure where real libraries fall short of
+ISO 8601**. An adapter that fills those gaps itself destroys the signal and
+makes the dashboard lie.
+
+== The Golden Rule: is the library doing the work, or am I?
+
+The single test for whether adapter behavior is gaming:
+
+> For this line of code — is the LIBRARY doing the work, or am I doing the
+> work instead of the library?
+
+Everything else in this document follows from that one question. Three tiers
+fall out naturally:
+
+[cols="1,4,2",options="header"]
+|===
+| Tier | What it covers | Treatment
+
+| **1 — Native**
+| The library is doing the work via its documented public API. The adapter
+  configures it (format patterns, methods, arguments) and reports the result.
+| Acceptable. No declaration needed.
+
+| **2 — Qualification note**
+| The library is doing the work, but the adapter performs minor edits to the
+  input before the call or to the output after. These edits work around known
+  library quirks; the library is still the parser/formatter.
+| Acceptable, **but MUST be declared** as a qualification note so the dashboard
+  can surface it.
+
+| **3 — Prohibited (test gaming)**
+| The adapter is doing the work instead of the library — manually parsing
+  components, inventing model classes, re-validating what the library already
+  accepted, or otherwise overriding library behavior.
+| Not allowed. Return `not-supported`.
+
+|===
+
+== The Adapter Purity Rule
+
+An adapter's only job is to translate between the JSON protocol (see
+`TEMPLATE.rb` in the parent directory) and the **library's native public API**.
+
+If the library cannot do the thing the test asks for, the correct adapter
+response is `not-supported` — not `pass`, and not `fail`-with-massaged-output.
+
+== Tier 1 — Native (no declaration needed)
+
+These behaviors use the library's documented API. The library is doing the
+parsing, formatting, and component extraction. The adapter is configuring it.
+
+=== 1.1 — Documented format patterns
+
+Any format string the library documents as supported is fair game, in any
+quantity. `strptime` with `%Y%m%dT%H%M%S%z` is just as native as `strptime`
+with `%Y-%m-%d`. Real-world code uses many format strings to handle the
+varied shapes ISO 8601 allows; the adapter may do the same.
+
+[source,ruby]
+----
+# ACCEPTABLE — Ruby Date/Time/DateTime strptime is a documented library API.
+# Each format string is a documented pattern. Trying them in order mirrors
+# how real code would dispatch on input shape.
+STRPTIME_FORMATS = [
+  [/\A\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[.,]\d+Z\z/,   "%Y%m%dT%H%M%S.%L%z", Time],
+  [/\A\d{4}\d{2}\d{2}T\d{2}\d{2}\d{2}[+-]\d{2}:?\d{2}\z/, "%Y%m%dT%H%M%S%z", Time],
+  # ...as many entries as needed; each one a real library pattern...
+]
+----
+
+=== 1.2 — Distinct library API entry points
+
+Calling multiple library parsers, each with that parser's default ISO 8601
+format. For example, `LocalDate.parse` + `LocalDateTime.parse` +
+`OffsetDateTime.parse` are three distinct entry points in `java.time`; the
+adapter may try each.
+
+[source,java]
+----
+// ACCEPTABLE — three distinct library entry points, each called once
+// with that parser's default ISO format.
+try { return ParseResult.ok(store(OffsetDateTime.parse(expr)), ...); }
+catch (DateTimeParseException ignored) {}
+try { return ParseResult.ok(store(LocalDateTime.parse(expr)), ...); }
+catch (DateTimeParseException ignored) {}
+try { return ParseResult.ok(store(LocalDate.parse(expr)), ...); }
+catch (DateTimeParseException ignored) {}
+----
+
+=== 1.3 — Hand-rolled generation using library-provided components
+
+Building output strings via `snprintf`, `sprintf`, f-strings, template
+literals, `String.format`, etc. — *when the data comes from the library's
+parsed object or from the test's given components*. The library may simply
+lack a format string for the target output; the adapter is serializing data
+the library already produced.
+
+[source,python]
+----
+# ACCEPTABLE — datetime.isoformat() can't produce basic format, but the
+# library has all the data; the adapter just composes the string.
+def _generate_datetime(year, month, day, time_comp, fmt):
+    if fmt == "basic":
+        return f"{year:04d}{month:02d}{day:02d}T{hour:02d}:{minute:02d}:{second:02d}"
+----
+
+=== 1.4 — Plumbing
+
+JSON I/O, handle caches, metadata, dispatch loops, protocol framing, error
+wrapping. These don't touch ISO 8601 semantics at all.
+
+== Tier 2 — Qualification notes (acceptable, MUST be declared)
+
+These behaviors edit the input or output around a real library call. The
+library is still the parser/formatter; the adapter is patching a known quirk.
+The behavior is acceptable, **but the adapter MUST declare a qualification
+note** so the dashboard can show "this result required workarounds X, Y, Z".
+
+Qualification notes are surfaced via the adapter's metadata — see the
+adapter protocol in `TEMPLATE.rb`. Examples of note text:
+
+* "Python `strptime` `%z` does not accept `Z` on this runtime; adapter
+  substitutes `Z → +00:00` before parsing."
+* "`Date.parse` converts to UTC and discards the original wall-clock;
+  adapter re-applies the parsed offset to recover hour/minute/second."
+* "macOS `strptime` lacks `%z`; adapter strips the offset before parsing and
+  re-applies it manually to the result."
+
+=== 2.1 — Input pre-processing
+
+Editing the expression string before handing it to the library, to work
+around a documented library limitation. Examples: `Z → +00:00`, `, → .` in
+fractional seconds, stripping a signed-year prefix the library rejects,
+stripping a trailing offset the library's `%z` can't handle.
+
+[source,python]
+----
+# QUALIFICATION NOTE REQUIRED — strptime %z doesn't accept Z on older
+# Pythons. The library IS still parsing the offset; we're just spelling
+# it the way %z expects.
+normalized = expr[:-1] + "+0000" if expr.endswith("Z") else expr
+parsed = datetime.strptime(normalized, fmt)
+----
+
+=== 2.2 — Output post-processing
+
+Editing or reconstructing fields after a successful parse. Examples:
+recovering the original wall-clock after a UTC conversion, reverse-engineering
+an offset the library collapsed into the timestamp, recomposing a calendar
+field from sub-fields the library split apart.
+
+[source,javascript]
+----
+// QUALIFICATION NOTE REQUIRED — Date.parse accepts the input but converts
+// to UTC, losing the original wall-clock. The offset is right there in the
+// string; the adapter restores what Date.parse threw away.
+const offsetMs = (tz.sign === "-" ? -1 : 1) * (tz.hours * 60 + tz.minutes) * 60000;
+const adjusted = new Date(obj.getTime() + offsetMs);
+hour = adjusted.getUTCHours();
+----
+
+== Tier 3 — Prohibited (test gaming — must be removed)
+
+These patterns must be removed when found, and must not be re-introduced.
+Each appears with a concrete NOT-ACCEPTABLE example and its ACCEPTABLE
+replacement.
+
+=== 3.1 — Inventing domain types
+
+If the library has no type for a feature — century, decade, fractional
+minute, expanded year, reduced-precision date — the adapter returns
+`not-supported` for inputs that exercise that feature. The adapter MUST NOT
+declare its own model classes (`ReducedPrecisionDate`, `FractionalTime`,
+`FractionalMeta`, etc.) to fabricate support.
+
+NOT ACCEPTABLE — synthesizing a value object the library has no equivalent of:
+
+[source,java]
+----
+// Library (java.time) has no ReducedPrecisionDate type.
+// Fabricating one makes "century" tests pass for a library that
+// doesn't support centuries.
+if (core.matches("^[0-9]{2}$")) {
+    return ParseResult.ok(
+        store(new ReducedPrecisionDate("century", Integer.parseInt(core))),
+        "reduced-precision");
+}
+----
+
+ACCEPTABLE — report `not-supported` and let the dashboard show the gap:
+
+[source,java]
+----
+// Century / decade inputs: java.time has no native representation.
+return ParseResult.fail("java.time");  // → not-supported from harness
+----
+
+*Historical offenders:* Ruby `ReducedPrecisionDate`; Java
+`ReducedPrecisionDate`, `FractionalTime`, `FractionalMeta`; C++
+`CacheEntry::REDUCED`.
+
+=== 3.2 — Manually parsing components the library didn't produce
+
+`extract_components` returns ONLY the fields the library's parsed object
+actually exposes. The adapter MUST NOT compute derived fields (ISO week,
+ordinal day-of-year, day-of-week) from year/month/day and present them as if
+the library had produced them. This is the canonical case of "the adapter is
+doing the work instead of the library" — the library gave you year/month/day;
+everything else you compute by hand is fabrication.
+
+NOT ACCEPTABLE — JavaScript `Date` has no ISO week or ordinal fields;
+hand-rolling them fabricates support:
+
+[source,javascript]
+----
+// Date has no ISO week API. Computing one from y/m/d makes
+// "Date supports week dates" appear true on the dashboard.
+const wd = new Date(Date.UTC(year, month - 1, day));
+const dayNum = wd.getUTCDay() || 7;
+wd.setUTCDate(wd.getUTCDate() + 4 - dayNum);
+const yearStart = new Date(Date.UTC(wd.getUTCFullYear(), 0, 1));
+const weekNum = Math.ceil(((wd - yearStart) / 86400000 + 1) / 7);
+result.week = { week_year: wd.getUTCFullYear(), week: weekNum, day_of_week: dayNum };
+----
+
+ACCEPTABLE — return only fields `Date` actually exposes; omit `week`:
+
+[source,javascript]
+----
+const result = { calendar: { year, month, day } };
+// No "week" key — Date has no week-date API.
+return result;
+----
+
+Tests for week-date extraction then fail / not-supported — which is
+correct, because `Date` does not support week dates.
+
+Note: Tier 2 post-processing is different — it restores info the library
+*parsed but discarded*, not info the library *cannot compute*. The
+distinction is whether the info was in the input string.
+
+*Historical offenders:* Node.js `extractComponents` (ordinal + week
+computed from scratch); C++ `extract_components` (`iso_week`, `day_of_year`,
+`yday_to_md` all hand-rolled).
+
+=== 3.3 — Re-validation after acceptance
+
+If the library's parser accepted invalid input (Feb 30, hour 25, month 13),
+the adapter reports the parsed result as-is. The adapter MUST NOT re-check
+validity the library skipped. Adding your own days-in-month check makes the
+test pass for the wrong reason — adapter validation, not library validation.
+
+NOT ACCEPTABLE — `get_time` accepts Feb 30 and rolls it over to Mar 2;
+re-validating hides this library behavior:
+
+[source,cpp]
+----
+// get_time silently accepts Feb 30. Adding our own days-in-month check
+// makes the test pass for the wrong reason (adapter validation, not
+// library validation). The library's behavior IS the test signal.
+static bool validate_tm(const std::tm& t, ...) {
+  static const int days_in_month[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+  if (t.tm_mday > days_in_month[t.tm_mon]) return false;
+  ...
+}
+----
+
+ACCEPTABLE — return what `get_time` produced; let the test catch the
+rollover:
+
+[source,cpp]
+----
+// Trust the library's parse. If get_time rolled Feb 30 over to Mar 2,
+// the round-trip / component-match test will catch that downstream.
+return ParseResult{true, store(t, ...), "", "get_time"};
+----
+
+"Does this library reject Feb 30?" is a test question. The adapter must not
+answer it on the library's behalf.
+
+*Historical offenders:* C++ `validate_tm` (days-in-month + leap-year
+checks); C++ `validate_input_for_pattern` (literal-character checks).
+
+== Summary
+
+[cols="1,4",options="header"]
+|===
+| Tier | One-line test
+
+| 1 — Native
+| The library is doing the work; the adapter configures it.
+
+| 2 — Qualification note
+| The library is doing the work; the adapter edits input or output around it.
+  **Declare the workaround.**
+
+| 3 — Prohibited
+| The adapter is doing the work instead of the library. Stop. Return
+  `not-supported`.
+|===
+
+For each line of adapter code, ask:
+
+> Is the library doing the work here? If yes — native, or qualification note
+> if I edited the I/O. If no — delete the line and return `not-supported`.
+
+== Audit history
+
+* 2026-06-24: Initial audit. All seven adapter families (Ruby, Python, Node,
+  C, C++, Rust, Java) were found to violate at least one Tier 3 pattern.
+  Cleanup tracked separately per adapter.
+* 2026-06-24: Three-tier framework adopted. Many patterns previously
+  classified as prohibited (format cascades, hand-rolled generation, wall-clock
+  reconstruction, input rewriting) are reclassified: format cascades and
+  hand-rolled generation are Tier 1; input rewriting and wall-clock
+  reconstruction are Tier 2 with required qualification notes. Only invented
+  domain types, fabricated components, and re-validation remain prohibited.
+
+== A note to library authors: port your wrappers upstream
+
+If you find yourself writing a wrapper, a workaround, or a qualification note
+in an adapter — **the more effective and easier long-term fix is to fix the
+underlying library**, not the adapter.
+
+The wrapper code you're tempted to write inside an adapter is almost always
+exactly the code that belongs inside the library itself. The library is what
+real users call; the library is what real applications depend on. A wrapper
+that lives only inside this test-suite adapter helps nobody but the dashboard
+number. A wrapper ported into the library helps every user of that library,
+on every project, forever.
+
+Concretely:
+
+* **Tier 2 workarounds are library bug reports waiting to be filed.** If
+  Python `strptime %z` rejects `Z`, that's a CPython bug — file it, fix it,
+  submit a PR. If `Date.parse` discards the original wall-clock, that's a
+  V8/JavaScriptCore bug — same.
+* **Tier 3 fabrication is usually a library missing a feature.** If
+  `java.time` has no century or decade type, the right fix is to add one
+  upstream (or argue for one on the JSR), not to invent `ReducedPrecisionDate`
+  inside a test adapter.
+* **The dashboard exists to surface these gaps.** Every `not-supported` and
+  every qualification note is a candidate upstream PR. The dashboard is the
+  backlog; the libraries are the work.
+
+Why this matters:
+
+1. **Adapter fixes are temporary; library fixes are permanent.** A wrapper in
+   an adapter rots the moment the adapter is no longer maintained. A fix in
+   the library ships with every release of the library.
+2. **Adapter fixes help one test suite; library fixes help every user.** Real
+   applications do not import your adapter — they call the library directly.
+   A library fix benefits everyone; an adapter fix benefits only the
+   conformance report.
+3. **Library fixes are usually not harder.** Most Tier 2 workarounds are
+   10-line patches. Most Tier 3 fabrications are 50-line model classes.
+   Porting either to the library is comparable work — and once ported, the
+   adapter code is gone forever.
+4. **The conformance suite is the agenda.** When you find yourself reaching
+   for an adapter-side workaround, treat it as a signal that the library has
+   a real gap, and direct your energy there.
+
+The end goal of this test suite is not "every adapter reports 100% pass" —
+that goal would be meaningless, because the adapters could always lie. The
+end goal is "every library implements ISO 8601 correctly, and the dashboard
+reflects that without any adapter-side workarounds at all."

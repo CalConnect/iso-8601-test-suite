@@ -5,6 +5,16 @@
 //
 // Uses the chrono crate for date/time operations. chrono is the de facto
 // standard datetime library in the Rust ecosystem (not stdlib, but universal).
+//
+// Tier 2 qualification notes (declared via qualification_notes()):
+//   - input-preprocessing: trailing timezone suffix stripped before parse.
+//     chrono's DateTime::parse_from_str accepts numeric offsets in a
+//     fixed format only; the adapter splits the expression into a core
+//     date/time and a trailing offset suffix, then re-attaches the offset
+//     to the parsed NaiveDateTime by constructing a FixedOffset.
+//
+// This is a workaround for a chrono ergonomics gap. An upstream feature
+// request should be filed so the workaround can eventually be removed.
 
 use std::io::{self, BufRead, Write};
 use std::collections::HashMap;
@@ -408,6 +418,13 @@ fn handle_request(request: &Value) -> Value {
             "conf-class:date-and-time"
         ]),
         "declared_profiles" => json!(["profile:iso-8601-1-core"]),
+        "qualification_notes" => json!([
+            {
+                "category": "input-preprocessing",
+                "summary": "trailing timezone suffix stripped before parse",
+                "detail": "chrono's DateTime::parse_from_str accepts numeric offsets in a fixed format only; the adapter splits the expression into a core date/time and a trailing offset suffix, then re-attaches the offset to the parsed NaiveDateTime by constructing a FixedOffset."
+            }
+        ]),
         _ => json!({ "error": format!("Unknown method: {}", method) }),
     }
 }

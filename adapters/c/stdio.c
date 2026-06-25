@@ -2,13 +2,26 @@
  * ISO 8601 Test Suite — C stdlib strftime/strptime adapter (JSON protocol)
  *
  * Implements the newline-delimited JSON protocol for use with:
- *   ruby run-tests --adapter "exec:gcc -o /tmp/c-stdio adapters/c/stdio.c && /tmp/c-stdio"
+ *   ruby run-tests --adapter "exec:gcc -o /tmp/c-stdio adapters/c/stdio.c adapters/c/vendor/cjson/cJSON.c && /tmp/c-stdio"
  *
  * Uses C standard library strftime/strptime for date/time operations.
  * Limited to what POSIX/C99 provides:
  *   - strptime for parsing (basic + extended formats)
  *   - strftime for generation
  *   - No duration, interval, or recurring interval support
+ *
+ * JSON I/O is handled by cJSON (vendored at adapters/c/vendor/cjson/,
+ * MIT licensed — see LICENSE in that directory).
+ *
+ * Tier 2 qualification notes (declared via qualification_notes()):
+ *   - input-preprocessing: trailing timezone suffix stripped before parse.
+ *     macOS BSD libc strptime does not support %z, so the adapter
+ *     recognizes 'Z' and numeric UTC offsets at the end of the expression,
+ *     strips them, parses the core date/time with a format that has no
+ *     timezone directive, then re-attaches the offset to the result.
+ *
+ * This is a workaround for a BSD libc gap. An upstream bug report should
+ * be filed so the workaround can eventually be removed.
  */
 
 #include <stdio.h>
@@ -17,7 +30,9 @@
 #include <time.h>
 #include <ctype.h>
 
-#define MAX_LINE 4096
+#include "vendor/cjson/cJSON.h"
+
+#define MAX_LINE 65536
 #define INITIAL_CACHE_CAPACITY 1024
 
 /* ── Handle cache (dynamically grown — no silent wraparound) ──────────────── */
@@ -61,87 +76,6 @@ static CacheEntry *lookup(int h) {
     return &cache[h];
 }
 
-/* ── JSON helpers ─────────────────────────────────────────────────────────── */
-
-static void json_str(FILE *f, const char *s) {
-    fputc('"', f);
-    for (; *s; s++) {
-        if (*s == '"') fputs("\\\"", f);
-        else if (*s == '\\') fputs("\\\\", f);
-        else if (*s == '\n') fputs("\\n", f);
-        else fputc(*s, f);
-    }
-    fputc('"', f);
-}
-
-/* Extract a string value for a given key from a JSON line.
- * Finds "key" then reads the following string value. */
-static int json_get_string(const char *line, const char *key, char *out, size_t outsz) {
-    char pattern[64];
-    snprintf(pattern, sizeof(pattern), "\"%s\"", key);
-    const char *p = strstr(line, pattern);
-    if (!p) return 0;
-    p += strlen(pattern);
-    p = strchr(p, ':');
-    if (!p) return 0;
-    p++;
-    while (*p == ' ' || *p == '\t') p++;
-    if (*p != '"') return 0;
-    p++;
-    const char *end = p;
-    while (*end && *end != '"') {
-        if (*end == '\\' && end[1]) end++;
-        end++;
-    }
-    size_t len = end - p;
-    if (len >= outsz) len = outsz - 1;
-    /* Unescape minimal */
-    size_t oi = 0;
-    for (size_t i = 0; i < len && oi < outsz - 1; i++) {
-        if (p[i] == '\\' && i + 1 < len) {
-            i++;
-            switch (p[i]) {
-                case 'n': out[oi++] = '\n'; break;
-                case 't': out[oi++] = '\t'; break;
-                case '"': out[oi++] = '"'; break;
-                case '\\': out[oi++] = '\\'; break;
-                default: out[oi++] = p[i]; break;
-            }
-        } else {
-            out[oi++] = p[i];
-        }
-    }
-    out[oi] = '\0';
-    return 1;
-}
-
-/* Extract an integer value for a given key. Optionally scope the search
- * to start after a containing key (for nested objects). */
-static int json_get_int_after(const char *start, const char *key, int *out) {
-    char pattern[64];
-    snprintf(pattern, sizeof(pattern), "\"%s\"", key);
-    const char *p = strstr(start, pattern);
-    if (!p) return 0;
-    p += strlen(pattern);
-    p = strchr(p, ':');
-    if (!p) return 0;
-    p++;
-    while (*p == ' ' || *p == '\t') p++;
-    *out = atoi(p);
-    return 1;
-}
-
-/* Extract a handle (string like "h42" or number) → integer ID */
-static int json_get_handle(const char *line, const char *key, int *out) {
-    char raw[32];
-    if (!json_get_string(line, key, raw, sizeof(raw))) return 0;
-    /* Skip optional 'h' prefix */
-    const char *p = raw;
-    if (*p == 'h') p++;
-    *out = atoi(p);
-    return 1;
-}
-
 /* ── Regex matching (minimal: ^...\d{n}...$ ) ────────────────────────────── */
 
 static int match_pattern(const char *pattern, const char *str) {
@@ -162,7 +96,6 @@ static int match_pattern(const char *pattern, const char *str) {
                 s++;
             }
         } else if (p[0] == '\\' && p[1]) {
-            /* Escaped literal like \., \+, \- */
             if (*s != p[1]) return 0;
             p += 2;
             s++;
@@ -190,7 +123,6 @@ static int parse_and_strip_tz(char *expr, int *gmtoff, int *has_offset) {
 
     if (len == 0) return 1;
 
-    /* Z suffix */
     if (expr[len - 1] == 'Z') {
         expr[len - 1] = '\0';
         *has_offset = 1;
@@ -198,12 +130,10 @@ static int parse_and_strip_tz(char *expr, int *gmtoff, int *has_offset) {
         return 1;
     }
 
-    /* ±HH:MM or ±HHMM suffix */
     if (len >= 6 && (expr[len - 6] == '+' || expr[len - 6] == '-') &&
         isdigit((unsigned char)expr[len - 5]) && isdigit((unsigned char)expr[len - 4]) &&
         isdigit((unsigned char)expr[len - 2]) && isdigit((unsigned char)expr[len - 1]) &&
         expr[len - 3] == ':') {
-        /* ±HH:MM */
         int sign = (expr[len - 6] == '-') ? -1 : 1;
         int h = (expr[len - 5] - '0') * 10 + (expr[len - 4] - '0');
         int m = (expr[len - 2] - '0') * 10 + (expr[len - 1] - '0');
@@ -216,7 +146,6 @@ static int parse_and_strip_tz(char *expr, int *gmtoff, int *has_offset) {
     if (len >= 5 && (expr[len - 5] == '+' || expr[len - 5] == '-') &&
         isdigit((unsigned char)expr[len - 4]) && isdigit((unsigned char)expr[len - 3]) &&
         isdigit((unsigned char)expr[len - 2]) && isdigit((unsigned char)expr[len - 1])) {
-        /* ±HHMM */
         int sign = (expr[len - 5] == '-') ? -1 : 1;
         int h = (expr[len - 4] - '0') * 10 + (expr[len - 3] - '0');
         int m = (expr[len - 2] - '0') * 10 + (expr[len - 1] - '0');
@@ -278,18 +207,44 @@ static const FormatEntry FORMATS[] = {
     {NULL, NULL, 0}
 };
 
-/* ── Protocol methods ─────────────────────────────────────────────────────── */
+/* ── Output helpers ───────────────────────────────────────────────────────────
+ * Each command returns a cJSON object representing the `result` payload.
+ * The main loop wraps it as `{"result": <payload>}` and prints one line.
+ */
 
-static void cmd_info(void) {
-    const char *label = getenv("ADAPTER_LABEL");
-    const char *version = getenv("ADAPTER_VERSION");
-    printf("{\"result\":{\"name\":\"%s\",\"language\":\"c\",\"version\":\"%s\"}}\n",
-           label ? label : "C strftime/strptime",
-           version ? version : "c99");
+static void reply(cJSON *result) {
+    cJSON *wrapper = cJSON_CreateObject();
+    cJSON_AddItemToObject(wrapper, "result", result ? result : cJSON_CreateNull());
+    char *s = cJSON_PrintUnformatted(wrapper);
+    fputs(s, stdout);
+    fputc('\n', stdout);
+    free(s);
+    cJSON_Delete(wrapper);
 }
 
-static void cmd_try_parse(const char *orig_expr) {
-    /* Strip trailing timezone suffix, parse offset manually */
+static void reply_error(const char *msg) {
+    cJSON *wrapper = cJSON_CreateObject();
+    cJSON_AddStringToObject(wrapper, "error", msg);
+    char *s = cJSON_PrintUnformatted(wrapper);
+    fputs(s, stdout);
+    fputc('\n', stdout);
+    free(s);
+    cJSON_Delete(wrapper);
+}
+
+/* ── Protocol methods ─────────────────────────────────────────────────────── */
+
+static cJSON *cmd_info(void) {
+    const char *label = getenv("ADAPTER_LABEL");
+    const char *version = getenv("ADAPTER_VERSION");
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddStringToObject(o, "name", label ? label : "C strftime/strptime");
+    cJSON_AddStringToObject(o, "language", "c");
+    cJSON_AddStringToObject(o, "version", version ? version : "c99");
+    return o;
+}
+
+static cJSON *cmd_try_parse(const char *orig_expr) {
     char expr[512];
     strncpy(expr, orig_expr, sizeof(expr) - 1);
     expr[sizeof(expr) - 1] = '\0';
@@ -304,152 +259,205 @@ static void cmd_try_parse(const char *orig_expr) {
         char *ret = strptime(expr, e->format, &tm);
         if (ret && *ret == '\0') {
             int h = store(&tm, e->has_time, gmtoff, has_offset && e->has_time);
-            printf("{\"result\":{\"valid\":true,\"parsed\":\"h%d\",\"api\":\"strptime\"}}\n", h);
-            return;
+            char handle_str[16];
+            snprintf(handle_str, sizeof(handle_str), "h%d", h);
+            cJSON *o = cJSON_CreateObject();
+            cJSON_AddTrueToObject(o, "valid");
+            cJSON_AddStringToObject(o, "parsed", handle_str);
+            cJSON_AddStringToObject(o, "api", "strptime");
+            return o;
         }
     }
-    printf("{\"result\":{\"valid\":false,\"error\":\"parse error\",\"api\":\"strptime\"}}\n");
+
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddFalseToObject(o, "valid");
+    cJSON_AddStringToObject(o, "error", "parse error");
+    cJSON_AddStringToObject(o, "api", "strptime");
+    return o;
 }
 
-static void cmd_extract_components(int handle) {
-    CacheEntry *e = lookup(handle);
-    if (!e) { printf("{\"result\":{}}\n"); return; }
-    struct tm *tm = &e->tm;
+static cJSON *offset_to_json(int off) {
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddStringToObject(o, "sign", off >= 0 ? "+" : "-");
+    int abs_off = abs(off);
+    cJSON_AddNumberToObject(o, "hours", abs_off / 3600);
+    cJSON_AddNumberToObject(o, "minutes", (abs_off % 3600) / 60);
+    return o;
+}
 
-    /* Normalize tm for strftime ( mktime fills wday/yday ) */
+static cJSON *cmd_extract_components(int handle) {
+    CacheEntry *e = lookup(handle);
+    if (!e) return cJSON_CreateObject();
+
+    struct tm *tm = &e->tm;
     struct tm normalized = *tm;
     normalized.tm_isdst = -1;
     mktime(&normalized);
 
-    printf("{\"result\":{");
-    printf("\"calendar\":{\"year\":%d,\"month\":%d,\"day\":%d}",
-           tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+    cJSON *result = cJSON_CreateObject();
+
+    cJSON *cal = cJSON_CreateObject();
+    cJSON_AddNumberToObject(cal, "year", tm->tm_year + 1900);
+    cJSON_AddNumberToObject(cal, "month", tm->tm_mon + 1);
+    cJSON_AddNumberToObject(cal, "day", tm->tm_mday);
+    cJSON_AddItemToObject(result, "calendar", cal);
 
     /* Week date components via strftime (works even though strptime can't parse %G/%V/%u) */
     char weekbuf[32];
     strftime(weekbuf, sizeof(weekbuf), "%G\t%V\t%u", &normalized);
     int wy, wn, wd;
     if (sscanf(weekbuf, "%d\t%d\t%d", &wy, &wn, &wd) == 3) {
-        printf(",\"week\":{\"week_year\":%d,\"week\":%d,\"day_of_week\":%d}", wy, wn, wd);
+        cJSON *week = cJSON_CreateObject();
+        cJSON_AddNumberToObject(week, "week_year", wy);
+        cJSON_AddNumberToObject(week, "week", wn);
+        cJSON_AddNumberToObject(week, "day_of_week", wd);
+        cJSON_AddItemToObject(result, "week", week);
     }
 
-    /* Ordinal date */
-    printf(",\"ordinal\":{\"year\":%d,\"day_of_year\":%d}",
-           tm->tm_year + 1900, tm->tm_yday + 1);
+    cJSON *ord = cJSON_CreateObject();
+    cJSON_AddNumberToObject(ord, "year", tm->tm_year + 1900);
+    cJSON_AddNumberToObject(ord, "day_of_year", tm->tm_yday + 1);
+    cJSON_AddItemToObject(result, "ordinal", ord);
 
     if (e->has_time) {
-        printf(",\"time\":{\"hour\":%d,\"minute\":%d,\"second\":%d",
-               tm->tm_hour, tm->tm_min, tm->tm_sec);
+        cJSON *t = cJSON_CreateObject();
+        cJSON_AddNumberToObject(t, "hour", tm->tm_hour);
+        cJSON_AddNumberToObject(t, "minute", tm->tm_min);
+        cJSON_AddNumberToObject(t, "second", tm->tm_sec);
         if (e->has_offset) {
-            int off = e->gmtoff;
-            printf(",\"utc_offset\":{\"sign\":\"%s\",\"hours\":%d,\"minutes\":%d}",
-                   off >= 0 ? "+" : "-", abs(off) / 3600, (abs(off) % 3600) / 60);
+            cJSON_AddItemToObject(t, "utc_offset", offset_to_json(e->gmtoff));
         }
-        printf("}");
+        cJSON_AddItemToObject(result, "time", t);
     }
-    printf("}}\n");
+
+    return result;
 }
 
-static void cmd_generate(const char *components) {
-    int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;
-    int has_cal = 0, has_time = 0, is_basic = 0;
-    int off_h = 0, off_m = 0;
-    const char *off_sign = "+";
-    int has_offset = 0;
+/* Read a nested integer: parent -> child_key. Returns 0 if absent. */
+static int get_int(const cJSON *parent, const char *key, int *out) {
+    cJSON *v = cJSON_GetObjectItemCaseSensitive(parent, key);
+    if (!cJSON_IsNumber(v)) return 0;
+    *out = v->valueint;
+    return 1;
+}
 
-    if (strstr(components, "\"basic\"")) is_basic = 1;
+static int get_string(const cJSON *parent, const char *key, const char **out) {
+    cJSON *v = cJSON_GetObjectItemCaseSensitive(parent, key);
+    if (!cJSON_IsString(v)) return 0;
+    *out = v->valuestring;
+    return 1;
+}
 
-    const char *cal = strstr(components, "\"calendar\"");
-    if (cal) {
-        has_cal = json_get_int_after(cal, "year", &year)
-               && json_get_int_after(cal, "month", &month)
-               && json_get_int_after(cal, "day", &day);
+static void format_offset_suffix(char *buf, size_t bufsz, const char *sign, int h, int m) {
+    if (h == 0 && m == 0 && sign[0] == '+') {
+        snprintf(buf, bufsz, "Z");
+    } else {
+        snprintf(buf, bufsz, "%s%02d:%02d", sign, h, m);
     }
+}
 
-    const char *tc = strstr(components, "\"time\"");
-    if (tc) {
-        has_time = 1;
-        json_get_int_after(tc, "hour", &hour);
-        json_get_int_after(tc, "minute", &minute);
-        json_get_int_after(tc, "second", &second);
-        const char *off = strstr(tc, "\"utc_offset\"");
-        if (off) {
-            has_offset = 1;
-            json_get_int_after(off, "hours", &off_h);
-            json_get_int_after(off, "minutes", &off_m);
-            char sign[8];
-            if (json_get_string(off, "sign", sign, sizeof(sign))) off_sign = strdup(sign);
+static cJSON *cmd_generate(const cJSON *components) {
+    const char *fmt_str = NULL;
+    int is_basic = (get_string(components, "format", &fmt_str) && strcmp(fmt_str, "basic") == 0);
+
+    cJSON *cal = cJSON_GetObjectItemCaseSensitive(components, "calendar");
+    cJSON *time_comp = cJSON_GetObjectItemCaseSensitive(components, "time");
+
+    int has_cal = cJSON_IsObject(cal);
+    int has_time = cJSON_IsObject(time_comp);
+
+    if (!has_cal && !has_time) return NULL;
+
+    int year = 0, month = 0, day = 0;
+    if (has_cal) {
+        if (!get_int(cal, "year", &year) || !get_int(cal, "month", &month) || !get_int(cal, "day", &day)) {
+            return NULL;
         }
     }
 
-    if (!has_cal && !has_time) { printf("{\"result\":null}\n"); return; }
+    int hour = 0, minute = 0, second = 0;
+    const char *off_sign = "+";
+    int off_h = 0, off_m = 0, has_offset = 0;
+    if (has_time) {
+        get_int(time_comp, "hour", &hour);
+        get_int(time_comp, "minute", &minute);
+        get_int(time_comp, "second", &second);
+        cJSON *off = cJSON_GetObjectItemCaseSensitive(time_comp, "utc_offset");
+        if (cJSON_IsObject(off)) {
+            has_offset = 1;
+            get_int(off, "hours", &off_h);
+            get_int(off, "minutes", &off_m);
+            const char *sign_str = NULL;
+            if (get_string(off, "sign", &sign_str)) off_sign = sign_str;
+        }
+    }
+
+    char offset_suffix[16] = "";
+    if (has_offset) {
+        format_offset_suffix(offset_suffix, sizeof(offset_suffix), off_sign, off_h, off_m);
+    }
 
     char buf[64];
-    if (has_cal) {
-        struct tm tm = {0};
-        tm.tm_year = year - 1900;
-        tm.tm_mon = month - 1;
-        tm.tm_mday = day;
-        tm.tm_hour = hour;
-        tm.tm_min = minute;
-        tm.tm_sec = second;
-        tm.tm_isdst = -1;
-        mktime(&tm);
-
-        const char *offset_suffix = "";
-        char offbuf[16] = "";
-        if (has_offset) {
-            if (off_h == 0 && off_m == 0 && off_sign[0] == '+') {
-                offset_suffix = "Z";
-            } else {
-                snprintf(offbuf, sizeof(offbuf), "%s%02d:%02d", off_sign, off_h, off_m);
-                offset_suffix = offbuf;
-            }
-        }
-
-        if (has_time) {
-            if (is_basic)
-                snprintf(buf, sizeof(buf), "%04d%02d%02dT%02d%02d%02d%s",
-                         year, month, day, hour, minute, second, offset_suffix);
-            else
-                snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02d%s",
-                         year, month, day, hour, minute, second, offset_suffix);
-        } else {
-            if (is_basic)
-                snprintf(buf, sizeof(buf), "%04d%02d%02d", year, month, day);
-            else
-                snprintf(buf, sizeof(buf), "%04d-%02d-%02d", year, month, day);
-        }
+    if (has_cal && has_time) {
+        if (is_basic)
+            snprintf(buf, sizeof(buf), "%04d%02d%02dT%02d%02d%02d%s",
+                     year, month, day, hour, minute, second, offset_suffix);
+        else
+            snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02d%s",
+                     year, month, day, hour, minute, second, offset_suffix);
+    } else if (has_cal) {
+        if (is_basic)
+            snprintf(buf, sizeof(buf), "%04d%02d%02d", year, month, day);
+        else
+            snprintf(buf, sizeof(buf), "%04d-%02d-%02d", year, month, day);
     } else {
-        /* Time only */
-        const char *offset_suffix = "";
-        char offbuf[16] = "";
-        if (has_offset) {
-            if (off_h == 0 && off_m == 0 && off_sign[0] == '+') {
-                offset_suffix = "Z";
-            } else {
-                snprintf(offbuf, sizeof(offbuf), "%s%02d:%02d", off_sign, off_h, off_m);
-                offset_suffix = offbuf;
-            }
-        }
         if (is_basic)
             snprintf(buf, sizeof(buf), "%02d%02d%02d%s", hour, minute, second, offset_suffix);
         else
             snprintf(buf, sizeof(buf), "%02d:%02d:%02d%s", hour, minute, second, offset_suffix);
     }
 
-    printf("{\"result\":{\"expression\":");
-    json_str(stdout, buf);
-    printf("}}\n");
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddStringToObject(o, "expression", buf);
+    return o;
 }
 
-static void cmd_equivalent(int h1, int h2) {
+static cJSON *cmd_equivalent(int h1, int h2) {
     CacheEntry *a = lookup(h1), *b = lookup(h2);
-    if (!a || !b) { printf("{\"result\":null}\n"); return; }
+    if (!a || !b) return cJSON_CreateNull();
     struct tm ta = a->tm, tb = b->tm;
     ta.tm_isdst = -1; tb.tm_isdst = -1;
     time_t t1 = mktime(&ta), t2 = mktime(&tb);
-    printf("{\"result\":%s}\n", t1 == t2 ? "true" : "false");
+    return cJSON_CreateBool(t1 == t2);
+}
+
+static cJSON *qualification_notes(void) {
+    cJSON *arr = cJSON_CreateArray();
+    cJSON *note = cJSON_CreateObject();
+    cJSON_AddStringToObject(note, "category", "input-preprocessing");
+    cJSON_AddStringToObject(note, "summary", "trailing timezone suffix stripped before parse");
+    cJSON_AddStringToObject(note, "detail",
+        "macOS BSD libc strptime does not support %z, so the adapter "
+        "recognizes 'Z' and numeric UTC offsets at the end of the expression, "
+        "strips them, parses the core date/time with a format that has no "
+        "timezone directive, then re-attaches the offset to the result.");
+    cJSON_AddItemToArray(arr, note);
+    return arr;
+}
+
+/* Parse a handle string of the form "h42" (or a bare number). Returns 0 on failure. */
+static int handle_to_int(const cJSON *v, int *out) {
+    if (cJSON_IsString(v)) {
+        const char *s = v->valuestring;
+        if (*s == 'h') s++;
+        *out = atoi(s);
+        return *out > 0;
+    }
+    if (cJSON_IsNumber(v)) {
+        *out = v->valueint;
+        return *out > 0;
+    }
+    return 0;
 }
 
 /* ── Main loop ─────────────────────────────────────────────────────────────── */
@@ -461,52 +469,65 @@ int main(void) {
         while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) line[--len] = '\0';
         if (len == 0) continue;
 
-        /* Extract method */
-        char method[32];
-        if (!json_get_string(line, "method", method, sizeof(method))) {
-            printf("{\"error\":\"no method\"}\n"); fflush(stdout); continue;
+        cJSON *req = cJSON_Parse(line);
+        if (!req) {
+            reply_error("invalid JSON");
+            fflush(stdout);
+            continue;
         }
 
+        cJSON *method_v = cJSON_GetObjectItemCaseSensitive(req, "method");
+        const char *method = cJSON_IsString(method_v) ? method_v->valuestring : "";
+        cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
+
         if (strcmp(method, "info") == 0) {
-            cmd_info();
+            reply(cmd_info());
         } else if (strcmp(method, "try_parse") == 0) {
-            char expr[512];
-            if (!json_get_string(line, "expression", expr, sizeof(expr))) {
-                printf("{\"error\":\"no expression\"}\n");
-            } else {
-                cmd_try_parse(expr);
-            }
+            const char *expr = NULL;
+            if (!get_string(params, "expression", &expr)) expr = "";
+            reply(cmd_try_parse(expr));
         } else if (strcmp(method, "extract_components") == 0) {
+            cJSON *h_v = cJSON_GetObjectItemCaseSensitive(params, "parsed");
             int h;
-            if (!json_get_handle(line, "parsed", &h)) {
-                printf("{\"result\":{}}\n");
-            } else {
-                cmd_extract_components(h);
-            }
+            if (handle_to_int(h_v, &h)) reply(cmd_extract_components(h));
+            else reply(cJSON_CreateObject());
         } else if (strcmp(method, "generate") == 0) {
-            const char *cp = strstr(line, "\"components\"");
-            if (!cp) {
-                printf("{\"result\":null}\n");
-            } else {
-                cp = strchr(cp, ':');
-                cmd_generate(cp ? cp + 1 : "{}");
-            }
+            cJSON *comps = cJSON_GetObjectItemCaseSensitive(params, "components");
+            reply(cmd_generate(comps ? comps : cJSON_CreateObject()));
         } else if (strcmp(method, "equivalent") == 0) {
+            cJSON *ha_v = cJSON_GetObjectItemCaseSensitive(params, "parsed_a");
+            cJSON *hb_v = cJSON_GetObjectItemCaseSensitive(params, "parsed_b");
             int ha, hb;
-            if (!json_get_handle(line, "parsed_a", &ha) || !json_get_handle(line, "parsed_b", &hb)) {
-                printf("{\"result\":null}\n");
+            if (handle_to_int(ha_v, &ha) && handle_to_int(hb_v, &hb)) {
+                reply(cmd_equivalent(ha, hb));
             } else {
-                cmd_equivalent(ha, hb);
+                reply(cJSON_CreateNull());
             }
         } else if (strcmp(method, "run_arithmetic") == 0) {
-            printf("{\"result\":{\"result\":\"not-supported\",\"notes\":\"C has no ISO 8601 arithmetic\"}}\n");
+            cJSON *o = cJSON_CreateObject();
+            cJSON_AddStringToObject(o, "result", "not-supported");
+            cJSON_AddStringToObject(o, "notes", "C has no ISO 8601 arithmetic");
+            reply(o);
         } else if (strcmp(method, "declared_conformance_classes") == 0) {
-            printf("{\"result\":[\"conf-class:fundamentals\",\"conf-class:calendar-date\",\"conf-class:time-of-day\",\"conf-class:date-and-time\"]}\n");
+            cJSON *arr = cJSON_CreateArray();
+            cJSON_AddItemToArray(arr, cJSON_CreateStringReference("conf-class:fundamentals"));
+            cJSON_AddItemToArray(arr, cJSON_CreateStringReference("conf-class:calendar-date"));
+            cJSON_AddItemToArray(arr, cJSON_CreateStringReference("conf-class:time-of-day"));
+            cJSON_AddItemToArray(arr, cJSON_CreateStringReference("conf-class:date-and-time"));
+            reply(arr);
         } else if (strcmp(method, "declared_profiles") == 0) {
-            printf("{\"result\":[\"profile:iso-8601-1-core\"]}\n");
+            cJSON *arr = cJSON_CreateArray();
+            cJSON_AddItemToArray(arr, cJSON_CreateStringReference("profile:iso-8601-1-core"));
+            reply(arr);
+        } else if (strcmp(method, "qualification_notes") == 0) {
+            reply(qualification_notes());
         } else {
-            printf("{\"error\":\"Unknown method: %s\"}\n", method);
+            char err[64];
+            snprintf(err, sizeof(err), "Unknown method: %s", method);
+            reply_error(err);
         }
+
+        cJSON_Delete(req);
         fflush(stdout);
     }
     return 0;

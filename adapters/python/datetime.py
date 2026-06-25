@@ -8,10 +8,28 @@ Uses Python's standard library date/datetime for parsing, with strptime
 for format-specific parsing (basic format, ordinal, week dates) that
 fromisoformat doesn't handle.
 
+Tier 2 qualification notes (declared via qualification_notes()):
+  - input-preprocessing: 'Z' → '+0000' / '+00:00' rewrite before parsing.
+    Python's datetime.strptime %z rejects 'Z', and fromisoformat on
+    Python < 3.11 rejects trailing 'Z'. The adapter rewrites 'Z' to a
+    numeric UTC offset before handing the expression to the library.
+  - input-preprocessing: ',' → '.' for fractional seconds. Python's
+    strptime %f only accepts a dot decimal separator; ISO 8601 allows
+    either comma or dot. The adapter rewrites commas to dots.
+
+These are workarounds for CPython gaps. Upstream bug reports should be
+filed so they can eventually be removed.
+
 See adapters/TEMPLATE.rb for the full adapter interface specification.
 """
 
 import sys
+# The script lives at adapters/python/datetime.py, which Python inserts
+# into sys.path[0] and shadows stdlib datetime. Drop it so the import
+# below resolves to the real stdlib module.
+if sys.path and sys.path[0]:
+    sys.path[0] = ""
+
 import json
 import re
 from datetime import date, datetime, timezone, timedelta
@@ -189,6 +207,30 @@ def declared_conformance_classes(params):
 
 def declared_profiles(params):
     return DECLARED_PROFILES
+
+
+def qualification_notes(params):
+    return [
+        {
+            "category": "input-preprocessing",
+            "summary": "'Z' → '+0000' / '+00:00' rewrite",
+            "detail": (
+                "datetime.strptime %z rejects the designator 'Z' and "
+                "datetime.fromisoformat on Python < 3.11 also rejects a "
+                "trailing 'Z'. The adapter rewrites 'Z' to a numeric UTC "
+                "offset before handing the expression to the library."
+            ),
+        },
+        {
+            "category": "input-preprocessing",
+            "summary": "',' → '.' for fractional seconds",
+            "detail": (
+                "strptime %f only accepts a dot decimal separator, but ISO 8601 "
+                "permits either comma or dot. The adapter rewrites commas to "
+                "dots in the fractional-seconds portion before parsing."
+            ),
+        },
+    ]
 
 
 def try_parse(params):
@@ -424,6 +466,7 @@ METHODS = {
     "info": info,
     "declared_conformance_classes": declared_conformance_classes,
     "declared_profiles": declared_profiles,
+    "qualification_notes": qualification_notes,
     "try_parse": try_parse,
     "extract_components": extract_components,
     "generate": generate,

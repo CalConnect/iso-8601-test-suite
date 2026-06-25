@@ -127,25 +127,6 @@ function extractComponents(params) {
 
   result.calendar = { year, month, day };
 
-  // Day of year (ordinal)
-  const startOfYear = new Date(Date.UTC(year, 0, 0));
-  const diff = new Date(Date.UTC(year, month - 1, day)) - startOfYear;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  result.ordinal = { year, day_of_year: dayOfYear };
-
-  // Week date — compute from the calendar date
-  const wd = new Date(Date.UTC(year, month - 1, day));
-  const dayNum = wd.getUTCDay() || 7;
-  wd.setUTCDate(wd.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(wd.getUTCFullYear(), 0, 1));
-  const weekNum = Math.ceil(((wd - yearStart) / 86400000 + 1) / 7);
-  result.week = {
-    week_year: wd.getUTCFullYear(),
-    week: weekNum,
-    day_of_week: dayNum,
-  };
-
   // Time components
   const timeEntry = { hour, minute, second };
   if (tz) {

@@ -74,6 +74,27 @@ class TemplateAdapter
     nil
   end
 
+  # ── Optional: declare Tier 2 qualification notes ───────────────────────────
+  #
+  # Per the Adapter Purity Rules (see adapters/RULES.adoc), an adapter MUST
+  # declare every Tier 2 workaround it performs. Tier 2 workarounds are
+  # input pre-processing (e.g. rewriting 'Z' to '+00:00' before a library
+  # call) or output post-processing (e.g. reconstructing wall-clock fields
+  # after a library collapsed them to UTC).
+  #
+  # Return an Array of Hashes with these keys:
+  #   category:   "input-preprocessing" | "output-postprocessing"
+  #   summary:    short label (a few words)
+  #   detail:     one-sentence explanation, including WHY the adapter
+  #               performs the workaround (the library bug/gap it covers)
+  #
+  # Return nil or an empty Array if the adapter has no Tier 2 workarounds.
+  # The notes are surfaced on the dashboard implementation detail page.
+  #
+  def qualification_notes
+    nil
+  end
+
   # ── Required: parse an expression ──────────────────────────────────────
   #
   # The harness calls this for validity, parsing, and round_trip tests.

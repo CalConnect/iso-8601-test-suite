@@ -9,6 +9,19 @@ parent. Every adapter — regardless of language — implements the same
 small set of methods (`try_parse`, `extract_components`, `generate`,
 `equivalent`, plus metadata) so the harness can drive it uniformly.
 
+== READ FIRST: Adapter Purity Rule
+
+Before writing or modifying an adapter, read link:RULES.adoc[]. It
+defines what adapters are **prohibited** from doing — re-implementing
+ISO 8601 parsing/formatting/models inside an adapter is *test gaming*:
+it makes the dashboard report that a library supports features it does
+not. The rules document catalogues the eight patterns that have
+historically appeared in this repo and must not be re-introduced.
+
+The short version: an adapter only translates between the JSON protocol
+and the library's native public API. If the library cannot do what a
+test asks for, the adapter returns `not-supported`.
+
 == Layout
 
 Adapters are grouped by language family. Each family folder holds the

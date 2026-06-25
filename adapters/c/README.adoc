@@ -2,10 +2,13 @@
 
 Wraps the C standard library `strftime` and `strptime` functions.
 
-== File
+== Files
 
-`stdio.c` — single source file. Compiled on each invocation by `gcc`
-(or inside Docker for the glibc variant).
+* `stdio.c` — adapter source. Compiled on each invocation by `gcc`
+  (or inside Docker for the glibc variant).
+* `vendor/cjson/cJSON.c` and `vendor/cjson/cJSON.h` — vendored cJSON
+  v1.7.19 (MIT). Provides JSON parsing and serialization so the adapter
+  doesn't hand-roll line protocol. See `vendor/cjson/LICENSE`.
 
 == Running
 
@@ -20,9 +23,9 @@ ruby scripts/run-tests --adapter c-stdio
 ruby scripts/run-tests --adapter c-stdio-glibc
 ----
 
-The macOS variant compiles locally via `gcc`; the glibc variant runs
-`gcc:15` in a Docker container so the test hits real glibc rather than
-Apple's libc.
+Both compile `stdio.c` together with `vendor/cjson/cJSON.c`. The macOS
+variant compiles locally via `gcc`; the glibc variant runs `gcc:15` in a
+Docker container so the test hits real glibc rather than Apple's libc.
 
 == Parser strategy
 

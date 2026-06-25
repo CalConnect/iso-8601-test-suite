@@ -26,6 +26,10 @@ class ExecAdapter
     @declared_profiles ||= safe_call("declared_profiles")
   end
 
+  def qualification_notes
+    @qualification_notes ||= safe_call("qualification_notes") || []
+  end
+
   def try_parse(expression, options = {})
     result = call("try_parse", "expression" => expression, "options" => options)
     unless result
