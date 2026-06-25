@@ -311,4 +311,46 @@ RSpec.describe CapabilityMatrix do
       expect(details[:requirements]).to eq([])
     end
   end
+
+  describe ".classify_status" do
+    it "returns 'not-applicable' when total is zero" do
+      result = described_class.classify_status(pass: 0, fail: 0, not_supported: 0, total: 0)
+      expect(result).to eq("not-applicable")
+    end
+
+    it "returns 'pass' when all tests pass" do
+      result = described_class.classify_status(pass: 5, fail: 0, not_supported: 0, total: 5)
+      expect(result).to eq("pass")
+    end
+
+    it "returns 'fail' when all tests fail" do
+      result = described_class.classify_status(pass: 0, fail: 3, not_supported: 0, total: 3)
+      expect(result).to eq("fail")
+    end
+
+    it "treats error results as failures" do
+      result = described_class.classify_status(pass: 0, fail: 3, not_supported: 0, total: 3)
+      expect(result).to eq("fail")
+    end
+
+    it "returns 'not-supported' when all tests are not-supported" do
+      result = described_class.classify_status(pass: 0, fail: 0, not_supported: 4, total: 4)
+      expect(result).to eq("not-supported")
+    end
+
+    it "returns 'partial' when some pass and some fail" do
+      result = described_class.classify_status(pass: 2, fail: 1, not_supported: 0, total: 3)
+      expect(result).to eq("partial")
+    end
+
+    it "returns 'fail' when no passes but failures exist" do
+      result = described_class.classify_status(pass: 0, fail: 2, not_supported: 1, total: 3)
+      expect(result).to eq("fail")
+    end
+
+    it "returns 'not-supported' when only not-supported and zero passes/failures" do
+      result = described_class.classify_status(pass: 0, fail: 0, not_supported: 2, total: 2)
+      expect(result).to eq("not-supported")
+    end
+  end
 end

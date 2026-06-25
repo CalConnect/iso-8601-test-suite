@@ -285,33 +285,17 @@ class CapabilityMatrix
 
     tests_by_type.each do |test_type, tests|
       cap_key = TEST_TYPE_TO_CAPABILITY[test_type] || test_type
-      results = tests.map { |t|
-        cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
-        if !declared_bare.empty? && !declared_bare.include?(cc_bare)
-          { "result" => "not-supported", "notes" => "Conformance class not declared" }
-        else
-          run_single_test(adapter, t)
-        end
-      }
+      results = run_tests_with_declaration_guard(adapter, tests, declared_bare)
       pass_count = results.count { |r| r["result"] == "pass" }
       not_supported_count = results.count { |r| r["result"] == "not-supported" }
       fail_count = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
       total = results.length
 
       if total > 0
-        status = if pass_count == total
-          "pass"
-        elsif fail_count == total
-          "fail"
-        elsif not_supported_count == total
-          "not-supported"
-        elsif pass_count > 0
-          "partial"
-        elsif fail_count > 0
-          "fail"
-        else
-          "not-supported"
-        end
+        status = self.class.classify_status(
+          pass: pass_count, fail: fail_count,
+          not_supported: not_supported_count, total: total
+        )
         capabilities[cap_key] = {
           status: status,
           pass: pass_count,
@@ -400,33 +384,12 @@ class CapabilityMatrix
 
   def compute_per_library_detail(adefn, tests, declared)
     declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
-    results = tests.map { |t|
-      cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
-      if !declared_bare.empty? && !declared_bare.include?(cc_bare)
-        { "result" => "not-supported", "notes" => "Conformance class not declared" }
-      else
-        run_single_test(adefn[:adapter], t)
-      end
-    }
+    results = run_tests_with_declaration_guard(adefn[:adapter], tests, declared_bare)
     p = results.count { |r| r["result"] == "pass" }
     ns = results.count { |r| r["result"] == "not-supported" }
     f = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
     total = results.length
-    status = if total == 0
-      "not-applicable"
-    elsif p == total
-      "pass"
-    elsif f == total
-      "fail"
-    elsif ns == total
-      "not-supported"
-    elsif p > 0
-      "partial"
-    elsif f > 0
-      "fail"
-    else
-      "not-supported"
-    end
+    status = self.class.classify_status(pass: p, fail: f, not_supported: ns, total: total)
     {
       library_id: adefn[:id], status: status, pass: p, total: total,
       details: tests.zip(results).map { |t, r|
@@ -450,27 +413,18 @@ class CapabilityMatrix
     req_ids_in_profile.each do |rid|
       tests = ptests[rid]
       next unless tests && !tests.empty?
-      results = tests.map { |t|
-        cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
-        if !declared_bare.empty? && !declared_bare.include?(cc_bare)
-          { "result" => "not-supported", "notes" => "Conformance class not declared" }
-        else
-          run_single_test(adefn[:adapter], t)
-        end
-      }
+      results = run_tests_with_declaration_guard(adefn[:adapter], tests, declared_bare)
       p = results.count { |r| r["result"] == "pass" }
       ns = results.count { |r| r["result"] == "not-supported" }
       f = results.count { |r| r["result"] == "fail" || r["result"] == "error" }
       test_pass += p
       test_total += results.length
-      if p == results.length
-        req_pass += 1
-      elsif f == results.length
-        req_fail += 1
-      elsif ns == results.length
-        req_not_supported += 1
-      else
-        req_partial += 1
+      status = self.class.classify_status(pass: p, fail: f, not_supported: ns, total: results.length)
+      case status
+      when "pass"          then req_pass += 1
+      when "fail"          then req_fail += 1
+      when "not-supported" then req_not_supported += 1
+      else                      req_partial += 1
       end
     end
     { id: adefn[:id], test_pass: test_pass, test_total: test_total,
@@ -562,6 +516,17 @@ class CapabilityMatrix
     TestTypeHandlers.run(adapter, test)
   rescue => e
     { "result" => "error", "notes" => e.message }
+  end
+
+  def run_tests_with_declaration_guard(adapter, tests, declared_bare)
+    tests.map { |t|
+      cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
+      if !declared_bare.empty? && !declared_bare.include?(cc_bare)
+        { "result" => "not-supported", "notes" => "Conformance class not declared" }
+      else
+        run_single_test(adapter, t)
+      end
+    }
   end
 
   def self.strip_details(full_data)
@@ -696,5 +661,18 @@ class CapabilityMatrix
     return paren if paren
     m = name.match(/(\d+(?:\.\d+)*)/)
     m ? m[1] : nil
+  end
+
+  # Classify a capability's overall status from its per-test result tallies.
+  # All-empty input returns "not-applicable"; otherwise majority-rules with
+  # partial as the catch-all when results are mixed.
+  def self.classify_status(pass:, fail:, not_supported:, total:)
+    return "not-applicable" if total.zero?
+    return "pass"          if pass == total
+    return "fail"          if fail == total
+    return "not-supported" if not_supported == total
+    return "partial"       if pass.positive?
+    return "fail"          if fail.positive?
+    "not-supported"
   end
 end
