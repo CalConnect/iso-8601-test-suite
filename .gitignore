@@ -29,5 +29,13 @@ adapters/cpp/cpp-chrono
 adapters/cpp/cpp-chrono-apple
 adapters/cpp/chrono.cpp.bak
 
+# Python cache
+__pycache__/
+*.pyc
+
+# Local backup files
+*.bak
+*.bak_*
+
 # Source artwork (site logos derived from these)
 /*.svg
