@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'time'
 
 # Capability matrix orchestrator.
 #
