@@ -1,8 +1,9 @@
 # TODO.up/01 — Add `req-class:symbols` (Clause 3.2)
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** nothing
 **Unblocks:** TODO.up/03, TODO.up/04 (time-shift split uses designator reqs)
+**Completed by:** `ee723cc feat: add req-class:symbols for ISO 8601-1 Clause 3.2`
 
 ## Problem
 

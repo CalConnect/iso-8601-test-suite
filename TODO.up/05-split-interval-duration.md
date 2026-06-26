@@ -1,8 +1,9 @@
 # TODO.up/05 — Split bundled interval and duration reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/04 (uses date-time split)
 **Unblocks:** TODO.up/08 (tests update)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` and `18c3aaf feat: split extended-interval bundled reqs into implicit/explicit atomic`. Note: actual filenames are `time-interval.yaml` and `duration.yaml` (doc guessed `intervals.yaml`/`durations.yaml`); splits landed there.
 
 ## Problem
 

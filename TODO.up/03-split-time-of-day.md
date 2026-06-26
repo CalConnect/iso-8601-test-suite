@@ -1,8 +1,9 @@
 # TODO.up/03 — Split and expand time-of-day reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/02 (time-shift split is prerequisite — UTC-of-day and local+shift reqs reference the time-shift IDs)
 **Unblocks:** TODO.up/04 (date-and-time expansion uses these)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — `requirements/8601-1/time-of-day.yaml` now holds 35 atomic reqs
 
 ## Problem
 

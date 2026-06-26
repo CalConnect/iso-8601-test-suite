@@ -1,8 +1,9 @@
 # TODO.up/11 — Update profiles for new req-classes and req splits
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/01 through 10 (all req/class changes must land first)
 **Unblocks:** TODO.up/12 (regenerate)
+**Completed by:** `ee723cc feat: add req-class:symbols for ISO 8601-1 Clause 3.2` (wired `conf-class:symbols` into `iso-8601-1-complete` + `iso-8601-2-complete`) and follow-up regen commits. `conf-class:extended-date-forms` and `conf-class:explicit-duration-and-extensions` are wired into `iso-8601-2-complete`.
 
 ## Problem
 

@@ -1,8 +1,9 @@
 # TODO.up/10 — Additional missing Part 2 atomic reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/07 (Part 2 bundle splits), TODO.up/09 (explicit-duration class)
 **Unblocks:** TODO.up/11 (profiles), TODO.up/12 (regenerate)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — `req:negative-year-*` reqs in `requirements/8601-2/negative-values.yaml`, `req:selection-position-i-*` reqs in `requirements/8601-2/date-time-selection.yaml`
 
 ## Problem
 

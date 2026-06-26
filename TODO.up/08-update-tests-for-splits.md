@@ -1,8 +1,9 @@
 # TODO.up/08 — Update all test references for req splits
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/02, 03, 04, 05, 06, 07 (all req splits must land first)
 **Unblocks:** TODO.up/11 (profiles), TODO.up/12 (regenerate)
+**Completed by:** `55543fd chore(results): regenerate all 24 adapter results after atomic req splits` — `ruby scripts/validate` reports 92 files, 0 errors, 0 warnings, confirming no broken test→req references
 
 ## Problem
 

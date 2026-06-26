@@ -1,8 +1,9 @@
 # TODO.up/09 — Conformance class structural reorganization
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/01 (symbols class), TODO.up/06 (missing fundamentals)
 **Unblocks:** TODO.up/11 (profiles), TODO.up/12 (regenerate)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — `requirements/8601-2/extended-date-forms.yaml` and `requirements/8601-2/explicit-duration-and-extensions.yaml` exist as standalone classes
 
 ## Problem
 

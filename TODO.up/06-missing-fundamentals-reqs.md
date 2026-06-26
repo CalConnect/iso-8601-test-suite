@@ -1,8 +1,9 @@
 # TODO.up/06 — Add missing fundamentals reqs (leap seconds, proleptic)
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** nothing
 **Unblocks:** TODO.up/08 (tests update)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — `req:leap-second-positive` and `req:leap-year-rules` present in `requirements/8601-1/fundamentals.yaml`
 
 ## Problem
 

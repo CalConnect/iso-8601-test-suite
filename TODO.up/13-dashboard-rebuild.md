@@ -1,8 +1,9 @@
 # TODO.up/13 — Dashboard rebuild and final QA
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/12 (regenerated JSON)
 **Unblocks:** nothing (this is the last work item)
+**Completed by:** `3b6633a feat(site): dashboard rebuild with atomic req data and AdapterRulesView` and `a7e2500 chore: regenerate all adapter results and dashboard JSON` — `site/dist/` contains `index.html`, `summary.json`, `detail.json`, plus `.gz` pre-compressed assets.
 
 ## Problem
 
