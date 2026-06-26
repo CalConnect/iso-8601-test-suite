@@ -50,27 +50,6 @@ class CapabilityMatrix
   # Adapter registry, loaded from config/adapters.yaml and frozen.
   ADAPTER_DEFS = load_adapter_defs(CONFIG_PATH).freeze
 
-  TEST_TYPE_TO_CAPABILITY = {
-    "validity"    => "parse_general",
-    "parsing"     => "parse_general",
-    "generation"  => "construct",
-    "equivalence" => "parse_general",
-    "arithmetic"  => "arithmetic",
-    "round_trip"  => "parse_general",
-  }.freeze
-
-  PROFILE_ORG_LOGOS = {
-    "profile:rfc-3339"                => "/logos/ietf.svg",
-    "profile:w3c-datetime"            => "/logos/w3c.svg",
-    "profile:edtf-level-0"            => "/logos/loc.svg",
-    "profile:edtf-level-1"            => "/logos/loc.svg",
-    "profile:edtf-level-2"            => "/logos/loc.svg",
-    "profile:iso-8601-1-complete"     => "/logos/iso-red.svg",
-    "profile:iso-8601-1-core"         => "/logos/iso-red.svg",
-    "profile:iso-8601-2-complete"     => "/logos/iso-red.svg",
-    "profile:iso-8601-1-basic-format" => "/logos/iso-red.svg",
-  }.freeze
-
   def initialize(store, index, suite)
     @store = store
     @index = index

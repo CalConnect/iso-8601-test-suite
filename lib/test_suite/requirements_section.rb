@@ -6,6 +6,19 @@
 # type group against every adapter (with declaration guard) and produces
 # the per-(adapter, capability) status + per-test detail entries.
 class RequirementsSection
+  # Maps a test's `test_type` to the capability key under which its
+  # results are bucketed in the matrix output. Tests of types that map
+  # to the same capability are aggregated together (e.g. `validity`,
+  # `parsing`, and `equivalence` all roll up into `parse_general`).
+  TEST_TYPE_TO_CAPABILITY = {
+    "validity"    => "parse_general",
+    "parsing"     => "parse_general",
+    "generation"  => "construct",
+    "equivalence" => "parse_general",
+    "arithmetic"  => "arithmetic",
+    "round_trip"  => "parse_general",
+  }.freeze
+
   def initialize(ctx, on_progress: nil)
     @ctx = ctx
     @on_progress = on_progress
@@ -55,7 +68,7 @@ class RequirementsSection
     capabilities = {}
 
     tests_by_type.each do |test_type, tests|
-      cap_key = CapabilityMatrix::TEST_TYPE_TO_CAPABILITY[test_type] || test_type
+      cap_key = TEST_TYPE_TO_CAPABILITY[test_type] || test_type
       results = runner.call(tests)
       status = TestStatus.from_results(results)
 
