@@ -12,13 +12,11 @@ Dir.chdir(REPO_ROOT)
 options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby scripts/capability-matrix [options]"
-  opts.on("-o", "--output FILE", "Output JSON file") { |f| options[:output] = f }
+  opts.on("-o", "--output DIR", "Output directory for summary.json and detail.json") { |f| options[:output] = f }
   opts.on("-q", "--quiet", "Suppress progress") { options[:quiet] = true }
   opts.on("-h", "--help", "Show help") { puts opts; exit 0 }
 end
 parser.parse!
-
-output_file = options[:output] || File.join(REPO_ROOT, "site", "public", "matrix.json")
 
 unless options[:quiet]
   $stderr.puts ""
