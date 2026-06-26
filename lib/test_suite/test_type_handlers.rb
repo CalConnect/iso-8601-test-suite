@@ -3,14 +3,11 @@
 module TestTypeHandlers
   HANDLERS = {
     "validity" => ->(adapter, test) {
-      expr = test.dig("given", "expression")
-      expected = test.dig("expect", "valid")
+      expr = test.expression
+      expected = test.expected_valid
       return { "result" => "error", "notes" => "Missing expression" } unless expr
 
-      options = {}
-      options[:parse_mode] = test["parse_mode"] if test["parse_mode"]
-
-      parse_result = adapter.try_parse(expr, options)
+      parse_result = adapter.try_parse(expr, test.parse_options)
       actual_valid = parse_result["valid"]
 
       if actual_valid == expected
@@ -22,16 +19,13 @@ module TestTypeHandlers
     },
 
     "parsing" => ->(adapter, test) {
-      expr = test.dig("given", "expression")
+      expr = test.expression
       return { "result" => "error", "notes" => "Missing expression" } unless expr
 
-      expected_valid = test.dig("expect", "valid")
-      expected_components = test.dig("expect", "components")
+      expected_valid = test.expected_valid
+      expected_components = test.expected_components
 
-      options = {}
-      options[:parse_mode] = test["parse_mode"] if test["parse_mode"]
-
-      parse_result = adapter.try_parse(expr, options)
+      parse_result = adapter.try_parse(expr, test.parse_options)
 
       if !parse_result["valid"] && expected_valid == false
         return { "result" => "pass", "actual" => { "valid" => false }, "api" => parse_result["api"] }
@@ -54,15 +48,13 @@ module TestTypeHandlers
     },
 
     "generation" => ->(adapter, test) {
-      given_components = test.dig("given", "components")
-      expected_expr = test.dig("expect", "expression")
+      given_components = test.given_components
+      expected_expr = test.expected_expression
       return { "result" => "error", "notes" => "Missing components or expected expression" } unless given_components && expected_expr
 
       # If the test targets a basic-format requirement, signal that to the adapter
       # via the format hint. Adapters default to extended format otherwise.
-      reqs = test["requirements"] || []
-      wants_basic = reqs.any? { |r| r.to_s.include?("-basic") }
-      if wants_basic && !given_components.key?("format")
+      if test.basic_format? && !given_components.key?("format")
         given_components = given_components.merge("format" => "basic")
       end
 
@@ -78,9 +70,9 @@ module TestTypeHandlers
     },
 
     "equivalence" => ->(adapter, test) {
-      expr_a = test.dig("given", "expression_a")
-      expr_b = test.dig("given", "expression_b")
-      expected = test.dig("expect", "equivalent")
+      expr_a = test.expression_a
+      expr_b = test.expression_b
+      expected = test.expected_equivalent
       return { "result" => "error", "notes" => "Missing expressions" } unless expr_a && expr_b
 
       parse_a = adapter.try_parse(expr_a)
@@ -104,13 +96,10 @@ module TestTypeHandlers
     },
 
     "round_trip" => ->(adapter, test) {
-      expr = test.dig("given", "expression")
+      expr = test.expression
       return { "result" => "error", "notes" => "Missing expression" } unless expr
 
-      options = {}
-      options[:parse_mode] = test["parse_mode"] if test["parse_mode"]
-
-      parse_result = adapter.try_parse(expr, options)
+      parse_result = adapter.try_parse(expr, test.parse_options)
       unless parse_result["valid"]
         return { "result" => "fail", "notes" => "Parse failed: #{parse_result["error"]}",
                  "actual" => { "valid" => false }, "api" => parse_result["api"] }
@@ -125,7 +114,7 @@ module TestTypeHandlers
       end
 
       generated = gen_result["expression"]
-      expected_expr = test.dig("expect", "expression")
+      expected_expr = test.expected_expression
 
       if expected_expr
         if generated == expected_expr
@@ -149,12 +138,12 @@ module TestTypeHandlers
     },
 
     "arithmetic" => ->(adapter, test) {
-      adapter.run_arithmetic(test)
+      adapter.run_arithmetic(test.raw)
     }
   }.freeze
 
   def self.run(adapter, test)
-    type = test["test_type"]
+    type = test.test_type
     handler = HANDLERS[type]
     if handler
       handler.call(adapter, test)

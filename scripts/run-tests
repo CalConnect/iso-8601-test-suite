@@ -56,8 +56,8 @@ class Runner
     declared = adapter.declared_conformance_classes
 
     tests.each do |test|
-      tid = test["id"]
-      desc = test["description"] || ""
+      tid = test.id
+      desc = test.description || ""
 
       if declared && !declared.empty?
         type, id = infer_class(tid, index)

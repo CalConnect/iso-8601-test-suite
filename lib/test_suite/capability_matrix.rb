@@ -183,7 +183,7 @@ class CapabilityMatrix
   def build_req_tests(all_tests, test_reqs)
     req_tests = Hash.new { |h, k| h[k] = [] }
     all_tests.each do |test|
-      (test_reqs[test["id"]] || []).each do |req_id|
+      (test_reqs[test.id] || []).each do |req_id|
         req_tests[req_id] << test
       end
     end
@@ -193,7 +193,7 @@ class CapabilityMatrix
   def build_class_tests(all_tests)
     class_tests = Hash.new { |h, k| h[k] = [] }
     all_tests.each do |test|
-      cc_id = @index.class_for_test(test["id"])
+      cc_id = @index.class_for_test(test.id)
       class_tests[cc_id] << test if cc_id
     end
     class_tests
@@ -204,7 +204,7 @@ class CapabilityMatrix
     @index.profile_ids.each do |pid|
       tests = @suite.tests_for_profile(pid)
       by_req = Hash.new { |h, k| h[k] = [] }
-      tests.each { |t| (test_reqs[t["id"]] || []).each { |rid| by_req[rid] << t } }
+      tests.each { |t| (test_reqs[t.id] || []).each { |rid| by_req[rid] << t } }
       profile_tests[pid] = by_req
     end
     profile_tests
@@ -225,7 +225,7 @@ class CapabilityMatrix
         else
           bare = @index.bare_id(tc[:conformance_class])
           cc_tests = class_tests[bare] || []
-          cc_tests.each { |t| (test_reqs[t["id"]] || []).each { |rid|
+          cc_tests.each { |t| (test_reqs[t.id] || []).each { |rid|
             (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
           }}
         end
@@ -249,7 +249,7 @@ class CapabilityMatrix
       tests_for_req = req_tests[req_id]
       next if tests_for_req.empty?
 
-      tests_by_type = tests_for_req.group_by { |t| t["test_type"] }
+      tests_by_type = tests_for_req.group_by { |t| t.test_type }
 
       req_entry = {
         id: req_id,
@@ -301,8 +301,8 @@ class CapabilityMatrix
           total: total,
           details: tests.zip(results).map { |t, r|
             {
-              test_id: t["id"], description: t["description"], test_type: t["test_type"],
-              given: t["given"], expect: t["expect"],
+              test_id: t.id, description: t.description, test_type: t.test_type,
+              given: t.given, expect: t.expect,
               result: r["result"], api: r["api"], notes: r["notes"], actual: r["actual"],
             }
           },
@@ -350,10 +350,10 @@ class CapabilityMatrix
 
       bare = @index.bare_id(cc_id)
       cc_result = @store.load(@index.conf_class_ids[bare]) if @index.conf_class_ids.key?(bare)
-      cc_tests = cc_result&.success? ? (cc_result.data["tests"] || []) : []
+      cc_tests = cc_result&.success? ? (cc_result.data["tests"] || []).map { |t| Test.new(t) } : []
 
       by_req = Hash.new { |h, k| h[k] = [] }
-      cc_tests.each { |t| (test_reqs[t["id"]] || []).each { |rid| by_req[rid] << t } }
+      cc_tests.each { |t| (test_reqs[t.id] || []).each { |rid| by_req[rid] << t } }
 
       if explicit_reqs && !explicit_reqs.empty?
         by_req = by_req.select { |rid, _| explicit_reqs.include?(rid) }
@@ -367,8 +367,8 @@ class CapabilityMatrix
           section: req_info[:section],
           format: req_info[:format],
           tests: tests.map { |t|
-            { test_id: t["id"], description: t["description"], test_type: t["test_type"],
-              given: t["given"], expect: t["expect"] }
+            { test_id: t.id, description: t.description, test_type: t.test_type,
+              given: t.given, expect: t.expect }
           },
           per_library: adapters.map { |adefn|
             declared = declared_classes[adefn[:id]] || []
@@ -392,8 +392,8 @@ class CapabilityMatrix
     {
       library_id: adefn[:id], status: status, pass: p, total: total,
       details: tests.zip(results).map { |t, r|
-        { test_id: t["id"], result: r["result"],
-          given: t["given"], expect: t["expect"],
+        { test_id: t.id, result: r["result"],
+          given: t.given, expect: t.expect,
           actual: r["actual"], api: r["api"], notes: r["notes"] }
       },
     }
@@ -519,7 +519,7 @@ class CapabilityMatrix
 
   def run_tests_with_declaration_guard(adapter, tests, declared_bare)
     tests.map { |t|
-      cc_bare = @index.bare_id(@index.class_for_test(t["id"]) || "")
+      cc_bare = @index.bare_id(@index.class_for_test(t.id) || "")
       if !declared_bare.empty? && !declared_bare.include?(cc_bare)
         { "result" => "not-supported", "notes" => "Conformance class not declared" }
       else

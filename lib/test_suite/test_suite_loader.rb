@@ -14,7 +14,7 @@ class TestSuiteLoader
     file, _bare = resolved
     result = @store.load(file)
     return [] if result.failure?
-    result.data["tests"] || []
+    (result.data["tests"] || []).map { |t| Test.new(t) }
   end
 
   def tests_for_profile(profile_id)
@@ -27,13 +27,13 @@ class TestSuiteLoader
       cc_tests = tests_for_class(tc[:conformance_class])
       if tc[:requirements] && !tc[:requirements].empty?
         cc_tests = cc_tests.select { |t|
-          (t["requirements"] || []).any? { |r| tc[:requirements].include?(r) }
+          t.requirements.any? { |r| tc[:requirements].include?(r) }
         }
       end
       tests.concat(cc_tests)
     end
 
-    (profile["additional_tests"] || []).each { |t| tests << t }
+    (profile["additional_tests"] || []).each { |t| tests << Test.new(t) }
     tests
   end
 
@@ -43,7 +43,8 @@ class TestSuiteLoader
       next if result.failure?
       data = result.data
       test_list = data["tests"] || data["additional_tests"] || []
-      test_list.find { |t| t["id"] == tid }
+      raw = test_list.find { |t| t["id"] == tid }
+      raw && Test.new(raw)
     }.compact
   end
 
