@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "tempfile"
+require_relative "../../lib/test_suite/load_result"
 require_relative "../../lib/test_suite/yaml_store"
 
 RSpec.describe YamlStore do
@@ -36,26 +37,6 @@ RSpec.describe YamlStore do
         result = store.load(path)
         expect(result).to be_success
         expect(result.data["key"]).to eq(:hello)
-      end
-    end
-  end
-
-  describe "#schema_ref" do
-    it "extracts $schema reference from yaml-language-server comment" do
-      Dir.mktmpdir do |dir|
-        schema_dir = File.join(dir, "schema")
-        FileUtils.mkdir_p(schema_dir)
-        File.write(File.join(schema_dir, "test.yaml"), "type: object")
-        data_path = File.join(dir, "data.yaml")
-        File.write(data_path, "# yaml-language-server: $schema=schema/test.yaml\nkey: value")
-        ref = store.schema_ref(data_path)
-        expect(ref).to end_with("schema/test.yaml")
-      end
-    end
-
-    it "returns nil when no schema reference found" do
-      with_temp_file("key: value") do |path|
-        expect(store.schema_ref(path)).to be_nil
       end
     end
   end

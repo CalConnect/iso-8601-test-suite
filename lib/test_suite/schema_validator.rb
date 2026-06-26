@@ -1,19 +1,20 @@
 # frozen_string_literal: true
 
 class SchemaValidator
-  def initialize(stats, store)
+  def initialize(stats, store, schema_resolver: SchemaRegistry.method(:schema_for))
     @stats = stats
     @store = store
+    @schema_resolver = schema_resolver
   end
 
   def validate_file(data_file)
-    schema_path = @store.schema_ref(data_file)
-    if schema_path.nil?
-      @stats.warn(data_file, "No $schema reference found")
+    schema_rel = @schema_resolver.call(data_file)
+    if schema_rel.nil?
+      @stats.warn(data_file, "No schema registered for this file path")
       return
     end
 
-    schema_result = @store.load(schema_path)
+    schema_result = @store.load(schema_rel)
     if schema_result.failure?
       @stats.error(data_file, "Cannot parse schema: #{schema_result.error_message}")
       return
