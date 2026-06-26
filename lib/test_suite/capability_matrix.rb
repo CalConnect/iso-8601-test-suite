@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-require 'fileutils'
 require 'set'
 require 'yaml'
 
@@ -489,66 +487,6 @@ class CapabilityMatrix
         run_single_test(adapter, t)
       end
     }
-  end
-
-  def self.strip_details(full_data)
-    {
-      generated_at: full_data[:generated_at],
-      libraries: full_data[:libraries],
-      family_stats: full_data[:family_stats],
-      categories: full_data[:categories],
-      profiles: full_data[:profiles].map { |prof|
-        p = {}
-        prof.each { |k, v| p[k] = v unless k == :traceability }
-        p
-      },
-      requirements: full_data[:requirements].map { |req|
-        r = {}
-        req.each { |k, v| r[k] = k == :tests ? self.strip_test_details(v) : v }
-        r
-      },
-    }
-  end
-
-  def self.extract_details(full_data)
-    {
-      requirements: full_data[:requirements].map { |req|
-        details = {}
-        req[:tests].each do |lib_id, caps|
-          lib_details = {}
-          caps.each { |cap_key, cap| lib_details[cap_key] = { details: cap[:details] } if cap[:details] }
-          details[lib_id] = lib_details unless lib_details.empty?
-        end
-        { id: req[:id], tests: details } unless details.empty?
-      }.compact,
-      profiles: full_data[:profiles].map { |prof|
-        { id: prof[:id], traceability: prof[:traceability] } if prof[:traceability]
-      }.compact,
-    }
-  end
-
-  def self.strip_test_details(tests)
-    tests.transform_values { |caps|
-      caps.transform_values { |cap|
-        { status: cap[:status], pass: cap[:pass], total: cap[:total] }
-      }
-    }
-  end
-
-  def self.clean_nils(obj)
-    case obj
-    when Hash
-      obj.each_with_object({}) { |(k, v), h| h[k] = clean_nils(v) unless v.nil? }
-    when Array
-      obj.map { |v| clean_nils(v) }
-    else
-      obj
-    end
-  end
-
-  def self.write_compact(data, path)
-    FileUtils.mkdir_p(File.dirname(path))
-    File.write(path, JSON.generate(clean_nils(data)))
   end
 
   def self.compute_family_divergence(fam_adapters, requirements)
