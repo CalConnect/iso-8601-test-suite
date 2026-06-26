@@ -95,4 +95,19 @@ RSpec.describe TestStatus do
       ])).to be_partial
     end
   end
+
+  describe "#to_result_status" do
+    it "returns the past-tense vocabulary mandated by conformance-result.yaml" do
+      expect(described_class.from_results([{ "result" => "pass" }]).to_result_status).to eq("passed")
+      expect(described_class.from_results([{ "result" => "fail" }]).to_result_status).to eq("failed")
+      expect(described_class.from_results([{ "result" => "not-supported" }]).to_result_status).to eq("not-supported")
+      expect(described_class.from_results([
+        { "result" => "pass" }, { "result" => "fail" },
+      ]).to_result_status).to eq("partial")
+    end
+
+    it "maps not-applicable to not-supported (schema has no N/A value)" do
+      expect(described_class.from_results([]).to_result_status).to eq("not-supported")
+    end
+  end
 end

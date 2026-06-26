@@ -155,7 +155,7 @@ class Runner
       key = type == :profile ? "profile" : "conformance_class"
       entry = {
         key => id,
-        "status" => aggregate_status(tests),
+        "status" => TestStatus.from_results(tests).to_result_status,
         "test_results" => tests.map { |r|
           e = { "test" => r["test"], "result" => r["result"] }
           e["notes"] = r["notes"] if r["notes"]
@@ -197,16 +197,6 @@ class Runner
     return [:conformance_class, class_id] if class_id
 
     [:conformance_class, "unknown"]
-  end
-
-  def aggregate_status(tests)
-    statuses = tests.map { |r| r["result"] }.uniq
-    case
-    when statuses == ["pass"]                                        then "passed"
-    when statuses.include?("fail") || statuses.include?("error")     then "failed"
-    when statuses == ["not-supported"]                               then "not-supported"
-    else                                                                  "partial"
-    end
   end
 end
 
