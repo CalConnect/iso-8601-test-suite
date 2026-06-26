@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
-require 'set'
 require 'yaml'
 
+# Capability matrix orchestrator.
+#
+# Wires together the cross-referenced data (MatrixContext), drives the
+# per-slice section builders, and assembles the final matrix payload.
+# All per-slice logic (requirements, profiles, libraries, family
+# divergence, output projection) lives in dedicated modules; this class
+# only sequences them.
 class CapabilityMatrix
   CONFIG_PATH = File.expand_path(File.join(__dir__, "..", "..", "config", "adapters.yaml"))
   REPO_ROOT   = File.expand_path(File.join(__dir__, "..", ".."))
@@ -72,37 +78,48 @@ class CapabilityMatrix
   end
 
   def generate(adapter_defs: ADAPTER_DEFS, on_progress: nil)
-    req_index = build_requirements_index
-    adapters = load_adapters(adapter_defs, on_progress)
-    declared_classes = adapters.to_h { |a| [a[:id], read_declared_classes(a[:id])] }
-    declared_profiles = adapters.to_h { |a| [a[:id], read_declared_profiles(a[:id])] }
-    all_tests = @suite.all_tests
-    test_reqs = @index.test_reqs
-
-    req_tests = build_req_tests(all_tests, test_reqs)
-    class_tests = build_class_tests(all_tests)
-    profile_tests = build_profile_tests(test_reqs)
-    profile_req_map = build_profile_req_map(class_tests, test_reqs)
-
-    requirements_output = build_requirements(
-      adapters, req_index, req_tests, profile_req_map, declared_classes, on_progress
-    )
-
-    profile_results = build_profile_results(
-      adapters, profile_tests, test_reqs, req_index, declared_classes
-    )
+    ctx = build_context(adapter_defs, on_progress)
+    requirements = RequirementsSection.new(ctx, on_progress: on_progress).build
+    profiles = ProfileSection.new(ctx).build
 
     {
       generated_at: Time.now.utc.iso8601,
-      libraries: build_library_output(adapters, profile_results, declared_classes, declared_profiles),
-      family_stats: build_family_stats(adapters, requirements_output),
-      requirements: requirements_output,
-      profiles: profile_results,
-      categories: build_categories(requirements_output),
+      libraries: LibrarySection.new(ctx, profiles).build,
+      family_stats: FamilyDivergence.build(ctx.adapters, requirements),
+      requirements: requirements,
+      profiles: profiles,
+      categories: build_categories(requirements),
     }
   end
 
   private
+
+  def build_context(adapter_defs, on_progress)
+    adapters = load_adapters(adapter_defs, on_progress)
+    declared_classes = adapters.to_h { |a| [a[:id], read_declared_classes(a[:id])] }
+    declared_profiles = adapters.to_h { |a| [a[:id], read_declared_profiles(a[:id])] }
+
+    req_index = build_requirements_index
+    all_tests = @suite.all_tests
+    test_reqs = @index.test_reqs
+    req_tests = invert_tests_by_req(all_tests, test_reqs)
+    class_tests = group_tests_by_class(all_tests)
+    profile_tests = build_profile_tests(test_reqs)
+    profile_req_map = build_profile_req_map(class_tests, test_reqs)
+
+    MatrixContext.new(
+      store: @store, index: @index,
+      adapters: adapters,
+      declared_classes: declared_classes,
+      declared_profiles: declared_profiles,
+      req_index: req_index,
+      req_tests: req_tests,
+      class_tests: class_tests,
+      profile_tests: profile_tests,
+      profile_req_map: profile_req_map,
+      test_reqs: test_reqs,
+    )
+  end
 
   def load_adapters(adapter_defs, on_progress)
     loaded = []
@@ -154,17 +171,15 @@ class CapabilityMatrix
     reqs
   end
 
-  def build_req_tests(all_tests, test_reqs)
+  def invert_tests_by_req(all_tests, test_reqs)
     req_tests = Hash.new { |h, k| h[k] = [] }
     all_tests.each do |test|
-      (test_reqs[test.id] || []).each do |req_id|
-        req_tests[req_id] << test
-      end
+      (test_reqs[test.id] || []).each { |req_id| req_tests[req_id] << test }
     end
     req_tests
   end
 
-  def build_class_tests(all_tests)
+  def group_tests_by_class(all_tests)
     class_tests = Hash.new { |h, k| h[k] = [] }
     all_tests.each do |test|
       cc_id = @index.class_for_test(test.id)
@@ -174,14 +189,12 @@ class CapabilityMatrix
   end
 
   def build_profile_tests(test_reqs)
-    profile_tests = {}
-    @index.profile_ids.each do |pid|
+    @index.profile_ids.each_with_object({}) do |pid, hash|
       tests = @suite.tests_for_profile(pid)
       by_req = Hash.new { |h, k| h[k] = [] }
       tests.each { |t| (test_reqs[t.id] || []).each { |rid| by_req[rid] << t } }
-      profile_tests[pid] = by_req
+      hash[pid] = by_req
     end
-    profile_tests
   end
 
   def build_profile_req_map(class_tests, test_reqs)
@@ -213,214 +226,20 @@ class CapabilityMatrix
     profile_req_map
   end
 
-  def build_requirements(adapters, req_index, req_tests, profile_req_map, declared_classes, on_progress)
-    all_req_ids = req_index.keys.sort
-    (req_tests.keys - all_req_ids).sort.each { |rid| all_req_ids << rid }
-
-    requirements_output = []
-    all_req_ids.each do |req_id|
-      req = req_index[req_id]
-      tests_for_req = req_tests[req_id]
-      next if tests_for_req.empty?
-
-      tests_by_type = tests_for_req.group_by { |t| t.test_type }
-
-      req_entry = {
-        id: req_id,
-        category: req&.category || "Unknown",
-        statement: req&.statement,
-        format: req&.format,
-        clause: req&.clause,
-        section: req&.section,
-        part: req&.part,
-        pattern: req&.pattern,
-        source_profile: req&.source_profile,
-        profiles: profile_req_map[req_id] || [],
-        tests: {},
-      }
-
-      adapters.each do |adefn|
-        declared = declared_classes[adefn[:id]] || []
-        capabilities = build_adapter_capabilities(adefn, tests_by_type, declared)
-        req_entry[:tests][adefn[:id]] = capabilities unless capabilities.empty?
-      end
-
-      requirements_output << req_entry
-      on_progress&.call(:requirement, req_id, req, adapters, req_entry)
-    end
-    requirements_output
-  end
-
-  def build_adapter_capabilities(adefn, tests_by_type, declared)
-    adapter = adefn[:adapter]
-    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
-    capabilities = {}
-
-    tests_by_type.each do |test_type, tests|
-      cap_key = TEST_TYPE_TO_CAPABILITY[test_type] || test_type
-      results = run_tests_with_declaration_guard(adapter, tests, declared_bare)
-      status = TestStatus.from_results(results)
-
-      if status.total.positive?
-        capabilities[cap_key] = {
-          status: status.to_matrix_symbol,
-          pass: status.pass,
-          total: status.total,
-          details: tests.zip(results).map { |t, r|
-            {
-              test_id: t.id, description: t.description, test_type: t.test_type,
-              given: t.given, expect: t.expect,
-              result: r["result"], api: r["api"], notes: r["notes"], actual: r["actual"],
-            }
-          },
-        }
-      end
-    end
-    capabilities
-  end
-
-  def build_profile_results(adapters, profile_tests, test_reqs, req_index, declared_classes)
-    @index.profile_ids.map do |pid|
-      profile = @index.profiles[pid]
-      next unless profile
-
-      ptests = profile_tests[pid] || {}
-
-      conf_class_details = build_traceability_details(pid, adapters, test_reqs, req_index, declared_classes)
-      req_ids_in_profile = collect_profile_req_ids(profile, conf_class_details)
-
-      adapter_results = adapters.map do |adefn|
-        declared = declared_classes[adefn[:id]] || []
-        compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests, declared)
-      end
-
-      {
-        id: pid,
-        name: profile.name,
-        description: profile.description_stripped,
-        source: profile.source,
-        logo: PROFILE_ORG_LOGOS[pid],
-        traceability_class_count: profile.traceability_count,
-        additional_requirements: profile.additional_requirements.map { |r|
-          { id: r["id"], statement: r["statement"]&.strip }
-        },
-        adapter_results: adapter_results,
-        traceability: conf_class_details,
-      }
-    end.compact
-  end
-
-  def build_traceability_details(profile_id, adapters, test_reqs, req_index, declared_classes)
-    @index.profile_traceability(profile_id).map do |tc|
-      cc_id = tc.conformance_class
-      explicit_reqs = tc.requirements
-
-      bare = @index.bare_id(cc_id)
-      cc_result = @store.load(@index.conf_class_ids[bare]) if @index.conf_class_ids.key?(bare)
-      cc_tests = cc_result&.success? ? (cc_result.data["tests"] || []).map { |t| Test.new(t) } : []
-
-      by_req = Hash.new { |h, k| h[k] = [] }
-      cc_tests.each { |t| (test_reqs[t.id] || []).each { |rid| by_req[rid] << t } }
-
-      if explicit_reqs && !explicit_reqs.empty?
-        by_req = by_req.select { |rid, _| explicit_reqs.include?(rid) }
-      end
-
-      req_chain = by_req.map do |rid, tests|
-        req = req_index[rid]
-        {
-          requirement_id: rid,
-          statement: req&.statement,
-          section: req&.section,
-          format: req&.format,
-          tests: tests.map { |t|
-            { test_id: t.id, description: t.description, test_type: t.test_type,
-              given: t.given, expect: t.expect }
-          },
-          per_library: adapters.map { |adefn|
-            declared = declared_classes[adefn[:id]] || []
-            compute_per_library_detail(adefn, tests, declared)
-          },
-        }
-      end
-
-      { id: cc_id, requirements: req_chain }
-    end
-  end
-
-  def compute_per_library_detail(adefn, tests, declared)
-    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
-    results = run_tests_with_declaration_guard(adefn[:adapter], tests, declared_bare)
-    status = TestStatus.from_results(results)
-    {
-      library_id: adefn[:id], status: status.to_matrix_symbol,
-      pass: status.pass, total: status.total,
-      details: tests.zip(results).map { |t, r|
-        { test_id: t.id, result: r["result"],
-          given: t.given, expect: t.expect,
-          actual: r["actual"], api: r["api"], notes: r["notes"] }
-      },
-    }
-  end
-
-  def collect_profile_req_ids(profile, conf_class_details)
-    ids = conf_class_details.flat_map { |cc| cc[:requirements].map { |r| r[:requirement_id] } }
-    profile.additional_requirements.each { |ar| ids << ar["id"] }
-    ids
-  end
-
-  def compute_adapter_profile_stats(adefn, req_ids_in_profile, ptests, declared)
-    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
-    test_pass = 0; test_total = 0
-    req_pass = 0; req_partial = 0; req_fail = 0; req_not_supported = 0
-    req_ids_in_profile.each do |rid|
-      tests = ptests[rid]
-      next unless tests && !tests.empty?
-      results = run_tests_with_declaration_guard(adefn[:adapter], tests, declared_bare)
-      status = TestStatus.from_results(results)
-      test_pass += status.pass
-      test_total += status.total
-      case status.to_matrix_symbol
-      when "pass"          then req_pass += 1
-      when "fail"          then req_fail += 1
-      when "not-supported" then req_not_supported += 1
-      else                      req_partial += 1
-      end
-    end
-    { id: adefn[:id], test_pass: test_pass, test_total: test_total,
-      req_pass: req_pass, req_partial: req_partial, req_fail: req_fail,
-      req_not_supported: req_not_supported }
-  end
-
-  def build_library_output(adapters, profile_results, declared_classes, declared_profiles)
-    adapters.map do |a|
-      declared = declared_classes[a[:id]] || []
-      profiles = declared_profiles[a[:id]] || []
-      targeted = compute_target_profiles(declared, profile_results, profiles)
-      notes = a[:adapter].qualification_notes || []
-      { id: a[:id], name: a[:name], family: a[:family], logo: a[:logo], language: a[:language], version: a[:version],
-        declared_conformance_classes: declared, target_profiles: targeted, qualification_notes: notes }
-    end
-  end
-
-  def build_family_stats(adapters, requirements)
-    FamilyDivergence.build(adapters, requirements)
-  end
-
   def read_declared_classes(adapter_id)
-    result_file = find_result_file(adapter_id)
-    return [] unless result_file
-    result = @store.load(result_file)
-    return [] if result.failure?
-    result.data["declared_conformance_classes"] || []
+    load_declared(adapter_id, "declared_conformance_classes")
   end
 
   def read_declared_profiles(adapter_id)
+    load_declared(adapter_id, "profiles_tested")
+  end
+
+  def load_declared(adapter_id, key)
     result_file = find_result_file(adapter_id)
     return [] unless result_file
     result = @store.load(result_file)
     return [] if result.failure?
-    result.data["profiles_tested"] || []
+    result.data[key] || []
   end
 
   def find_result_file(adapter_id)
@@ -431,42 +250,9 @@ class CapabilityMatrix
     nil
   end
 
-  def compute_target_profiles(declared, profile_results, declared_profiles = [])
-    if declared_profiles && !declared_profiles.empty?
-      profile_set = declared_profiles.to_set
-      return profile_results.select { |p| profile_set.include?(p[:id]) }
-                         .map { |p| { id: p[:id], name: p[:name] } }
-    end
-
-    return profile_results.map { |p| { id: p[:id], name: p[:name] } } if declared.empty?
-
-    declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
-    profile_results.select { |p|
-      tc = @index.profile_traceability(p[:id])
-      tc.all? { |t| declared_bare.include?(@index.bare_id(t.conformance_class)) }
-    }.map { |p| { id: p[:id], name: p[:name] } }
-  end
-
   def build_categories(requirements)
     requirements.group_by { |r| r[:category] }
                 .map { |name, reqs| { name: name, count: reqs.length } }
                 .sort_by { |c| c[:name] }
-  end
-
-  def run_single_test(adapter, test)
-    TestTypeHandlers.run(adapter, test)
-  rescue => e
-    { "result" => "error", "notes" => e.message }
-  end
-
-  def run_tests_with_declaration_guard(adapter, tests, declared_bare)
-    tests.map { |t|
-      cc_bare = @index.bare_id(@index.class_for_test(t.id) || "")
-      if !declared_bare.empty? && !declared_bare.include?(cc_bare)
-        { "result" => "not-supported", "notes" => "Conformance class not declared" }
-      else
-        run_single_test(adapter, t)
-      end
-    }
   end
 end
