@@ -95,7 +95,6 @@ class SuiteIndex
 
       data = result.data
       id = data["id"]
-      part = part_for_file(f)
       @conf_class_ids[id] = f
       @source_map[f] = data["source"] if data["source"]
 
