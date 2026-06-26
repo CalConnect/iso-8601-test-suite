@@ -2,6 +2,7 @@
 
 require_relative "../../lib/test_suite/yaml_store"
 require_relative "../../lib/test_suite/suite_index"
+require_relative "../../lib/test_suite/test"
 require_relative "../../lib/test_suite/test_suite_loader"
 
 RSpec.describe TestSuiteLoader do
@@ -14,8 +15,9 @@ RSpec.describe TestSuiteLoader do
       tests = loader.tests_for_class("conf-class:calendar-date")
       expect(tests).to be_an(Array)
       expect(tests.length).to be > 0
-      expect(tests.first["id"]).to start_with("conf-test:")
-      expect(tests.first["test_type"]).to be_a(String)
+      expect(tests.first).to be_a(Test)
+      expect(tests.first.id).to start_with("conf-test:")
+      expect(tests.first.test_type).to be_a(String)
     end
 
     it "returns empty array for unknown class" do
@@ -50,7 +52,7 @@ RSpec.describe TestSuiteLoader do
     it "returns every indexed test" do
       tests = loader.all_tests
       expect(tests.length).to eq(index.total_test_count)
-      expect(tests.map { |t| t["id"] }.uniq.length).to eq(tests.length)
+      expect(tests.map { |t| t.id }.uniq.length).to eq(tests.length)
     end
   end
 
