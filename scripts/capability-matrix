@@ -67,8 +67,8 @@ base = options[:output] || File.join(REPO_ROOT, "site", "public")
 summary_path = File.join(base, "summary.json")
 detail_path = File.join(base, "detail.json")
 
-CapabilityMatrix.write_compact(CapabilityMatrix.strip_details(matrix), summary_path)
-CapabilityMatrix.write_compact(CapabilityMatrix.extract_details(matrix), detail_path)
+MatrixOutput.write_summary(matrix, summary_path)
+MatrixOutput.write_detail(matrix, detail_path)
 
 unless options[:quiet]
   total = matrix[:requirements].length
