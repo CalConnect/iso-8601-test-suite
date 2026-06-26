@@ -130,16 +130,16 @@ module SuiteValidations
       result = store.load(f)
       next if result.failure?
 
-      data = result.data
+      profile = Profile.new(result.data)
       before = stats.error_count_snapshot
 
-      (data["conformance_classes"] || []).each do |cc|
+      profile.conformance_classes.each do |cc|
         unless index.conf_class_ids.key?(cc)
           stats.error(f, "references unknown conformance class '#{cc}'")
         end
       end
 
-      (data["additional_tests"] || []).each do |t|
+      profile.additional_tests.each do |t|
         tid = t["id"]
         (t["requirements"] || []).each do |r|
           unless index.req_ids.key?(r) || index.profile_req_ids.key?(r)

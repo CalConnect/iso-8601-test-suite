@@ -60,23 +60,11 @@ class SuiteIndex
     path.include?("8601-1") ? "8601-1" : "8601-2"
   end
 
-  # Returns [{ conformance_class: "conf-class:x", requirements: ["req:a", ...] }]
-  # for a given profile. Handles traceability and legacy conformance_classes.
+  # Returns [Profile::TraceabilityEntry] for a given profile. Handles
+  # traceability and legacy conformance_classes uniformly.
   def profile_traceability(profile_id)
-    data = @profiles[profile_id]
-    return [] unless data
-
-    if data["traceability"] && !data["traceability"].empty?
-      data["traceability"].map { |tc|
-        { conformance_class: tc["conformance_class"], requirements: tc["requirements"] || [] }
-      }
-    elsif data["conformance_classes"]
-      (data["conformance_classes"] || []).map { |cc|
-        { conformance_class: cc, requirements: [] }
-      }
-    else
-      []
-    end
+    profile = @profiles[profile_id]
+    profile ? profile.traceability_entries : []
   end
 
   private
@@ -129,16 +117,17 @@ class SuiteIndex
 
       data = result.data
       id = data["id"]
+      profile = Profile.new(data)
       @profile_ids << id
-      @profiles[id] = data
+      @profiles[id] = profile
       @source_map[f] = data["source"] if data["source"]
 
-      (data["additional_requirements"] || []).each do |r|
+      profile.additional_requirements.each do |r|
         rid = r["id"]
         @profile_req_ids[rid] = f if rid
       end
 
-      (data["additional_tests"] || []).each do |t|
+      profile.additional_tests.each do |t|
         tid = t["id"]
         next unless tid
         @conf_test_ids[tid] = f

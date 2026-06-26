@@ -134,9 +134,7 @@ class Runner
     puts Term.bold("  Profiles:")
     suite.profile_ids.each do |pid|
       p = index.profiles[pid]
-      tc = (p["traceability"] || []).length
-      at = (p["additional_tests"] || []).length
-      puts "    #{Term.cyan(pid)} (#{tc} traceability classes, #{at} additional tests)"
+      puts "    #{Term.cyan(pid)} (#{p.traceability_count} traceability classes, #{p.additional_test_count} additional tests)"
     end
 
     puts ""

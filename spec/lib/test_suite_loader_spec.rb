@@ -3,6 +3,7 @@
 require_relative "../../lib/test_suite/yaml_store"
 require_relative "../../lib/test_suite/suite_index"
 require_relative "../../lib/test_suite/test"
+require_relative "../../lib/test_suite/profile"
 require_relative "../../lib/test_suite/test_suite_loader"
 
 RSpec.describe TestSuiteLoader do
@@ -33,8 +34,8 @@ RSpec.describe TestSuiteLoader do
   describe "#tests_for_profile" do
     it "returns tests for a profile with traceability" do
       profile_id = index.profile_ids.find { |pid|
-        data = index.profiles[pid]
-        data["traceability"] && !data["traceability"].empty?
+        profile = index.profiles[pid]
+        profile.traceability.any?
       }
       skip "No profiles with traceability" unless profile_id
 
