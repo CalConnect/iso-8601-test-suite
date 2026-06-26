@@ -9,6 +9,7 @@ require_relative "../../lib/test_suite/load_result"
 require_relative "../../lib/test_suite/stats"
 require_relative "../../lib/test_suite/yaml_store"
 require_relative "../../lib/test_suite/requirement"
+require_relative "../../lib/test_suite/profile"
 require_relative "../../lib/test_suite/suite_validations"
 require_relative "../../lib/test_suite/suite_index"
 

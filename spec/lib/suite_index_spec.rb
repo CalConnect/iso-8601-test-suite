@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../../lib/test_suite/yaml_store"
+require_relative "../../lib/test_suite/profile"
 require_relative "../../lib/test_suite/suite_index"
 
 RSpec.describe SuiteIndex do
@@ -82,16 +83,16 @@ RSpec.describe SuiteIndex do
   describe "#profile_traceability" do
     it "returns an array for profiles with traceability" do
       profile_with_trace = index.profile_ids.find { |pid|
-        data = index.profiles[pid]
-        data["traceability"] && !data["traceability"].empty?
+        profile = index.profiles[pid]
+        profile.traceability.any?
       }
       skip "No profiles with traceability" unless profile_with_trace
 
       result = index.profile_traceability(profile_with_trace)
       expect(result).to be_an(Array)
       expect(result.length).to be > 0
-      expect(result.first).to have_key(:conformance_class)
-      expect(result.first).to have_key(:requirements)
+      expect(result.first).to respond_to(:conformance_class)
+      expect(result.first).to respond_to(:requirements)
     end
 
     it "returns empty array for unknown profiles" do

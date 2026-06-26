@@ -142,14 +142,12 @@ class CapabilityMatrix
       next if File.basename(f) == "TEMPLATE.yaml"
       result = @store.load(f)
       next unless result.success?
-      data = result.data
-      profile_id = data["id"]
-      profile_name = data["name"]
-      (data["additional_requirements"] || []).each do |r|
+      profile = Profile.new(result.data)
+      profile.additional_requirements.each do |r|
         reqs[r["id"]] = Requirement.new(
           r,
-          source_profile: profile_id,
-          category: "Profile-Specific (#{profile_name})",
+          source_profile: profile.id,
+          category: "Profile-Specific (#{profile.name})",
           part: "profile"
         )
       end
@@ -191,26 +189,26 @@ class CapabilityMatrix
   def build_profile_req_map(class_tests, test_reqs)
     profile_req_map = {}
     @index.profile_ids.each do |pid|
-      data = @index.profiles[pid]
-      next unless data
+      profile = @index.profiles[pid]
+      next unless profile
 
       @index.profile_traceability(pid).each do |tc|
-        explicit_reqs = tc[:requirements]
+        explicit_reqs = tc.requirements
         if explicit_reqs && !explicit_reqs.empty?
           explicit_reqs.each { |rid|
-            (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
+            (profile_req_map[rid] ||= []) << { id: pid, name: profile.name }
           }
         else
-          bare = @index.bare_id(tc[:conformance_class])
+          bare = @index.bare_id(tc.conformance_class)
           cc_tests = class_tests[bare] || []
           cc_tests.each { |t| (test_reqs[t.id] || []).each { |rid|
-            (profile_req_map[rid] ||= []) << { id: pid, name: data["name"] }
+            (profile_req_map[rid] ||= []) << { id: pid, name: profile.name }
           }}
         end
       end
 
-      (data["additional_requirements"] || []).each do |ar|
-        (profile_req_map[ar["id"]] ||= []) << { id: pid, name: data["name"] }
+      profile.additional_requirements.each do |ar|
+        (profile_req_map[ar["id"]] ||= []) << { id: pid, name: profile.name }
       end
     end
     profile_req_map.transform_values! { |v| v.uniq { |p| p[:id] } }
@@ -292,13 +290,13 @@ class CapabilityMatrix
 
   def build_profile_results(adapters, profile_tests, test_reqs, req_index, declared_classes)
     @index.profile_ids.map do |pid|
-      data = @index.profiles[pid]
-      next unless data
+      profile = @index.profiles[pid]
+      next unless profile
 
       ptests = profile_tests[pid] || {}
 
       conf_class_details = build_traceability_details(pid, adapters, test_reqs, req_index, declared_classes)
-      req_ids_in_profile = collect_profile_req_ids(data, conf_class_details)
+      req_ids_in_profile = collect_profile_req_ids(profile, conf_class_details)
 
       adapter_results = adapters.map do |adefn|
         declared = declared_classes[adefn[:id]] || []
@@ -307,12 +305,12 @@ class CapabilityMatrix
 
       {
         id: pid,
-        name: data["name"],
-        description: data["description"]&.strip,
-        source: data["source"],
+        name: profile.name,
+        description: profile.description_stripped,
+        source: profile.source,
         logo: PROFILE_ORG_LOGOS[pid],
-        traceability_class_count: @index.profile_traceability(pid).length,
-        additional_requirements: (data["additional_requirements"] || []).map { |r|
+        traceability_class_count: profile.traceability_count,
+        additional_requirements: profile.additional_requirements.map { |r|
           { id: r["id"], statement: r["statement"]&.strip }
         },
         adapter_results: adapter_results,
@@ -323,8 +321,8 @@ class CapabilityMatrix
 
   def build_traceability_details(profile_id, adapters, test_reqs, req_index, declared_classes)
     @index.profile_traceability(profile_id).map do |tc|
-      cc_id = tc[:conformance_class]
-      explicit_reqs = tc[:requirements]
+      cc_id = tc.conformance_class
+      explicit_reqs = tc.requirements
 
       bare = @index.bare_id(cc_id)
       cc_result = @store.load(@index.conf_class_ids[bare]) if @index.conf_class_ids.key?(bare)
@@ -377,9 +375,9 @@ class CapabilityMatrix
     }
   end
 
-  def collect_profile_req_ids(data, conf_class_details)
+  def collect_profile_req_ids(profile, conf_class_details)
     ids = conf_class_details.flat_map { |cc| cc[:requirements].map { |r| r[:requirement_id] } }
-    (data["additional_requirements"] || []).each { |ar| ids << ar["id"] }
+    profile.additional_requirements.each { |ar| ids << ar["id"] }
     ids
   end
 
@@ -479,7 +477,7 @@ class CapabilityMatrix
     declared_bare = declared.map { |d| @index.bare_id(d) }.to_set
     profile_results.select { |p|
       tc = @index.profile_traceability(p[:id])
-      tc.all? { |t| declared_bare.include?(@index.bare_id(t[:conformance_class])) }
+      tc.all? { |t| declared_bare.include?(@index.bare_id(t.conformance_class)) }
     }.map { |p| { id: p[:id], name: p[:name] } }
   end
 
