@@ -26,22 +26,22 @@ module Term
   BG_GREEN = "\e[42m"
 
   ICONS = {
-    syntax: "  ",
-    schema: "  ",
-    requirements: "  ",
-    tests: "  ",
-    coverage: "  ",
-    profiles: "  ",
-    results: "  ",
-    dag: "  ",
-    source_consistency: "  ",
-    statistics: "  ",
-    orphans: "  ",
-    components: "  ",
-    urn_format: "  ",
-    patterns: "  ",
-    naming: "  ",
-    test_reqs: "  "
+    syntax:            "📝",
+    schema:            "📋",
+    requirements:      "📋",
+    tests:             "🧪",
+    coverage:          "📊",
+    profiles:          "📁",
+    results:           "📈",
+    dag:               "🔗",
+    source_consistency:"🔗",
+    statistics:        "📊",
+    orphans:           "❓",
+    components:        "🧩",
+    urn_format:        "📜",
+    patterns:          "🧩",
+    naming:            "🏷️",
+    test_reqs:         "🧪"
   }.freeze
 
   module_function

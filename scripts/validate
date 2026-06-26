@@ -159,7 +159,7 @@ class Runner
 
   def phase_tests
     count = @index.conf_test_ids.length
-    classes = @index.bare_conf_class_ids.length
+    classes = @index.conf_class_ids.length
     print_counter(classes, "classes", count, "tests")
   end
 

@@ -312,9 +312,9 @@ conformance_class_results:
     result: pass
   - test: conf-test:fundamentals-parse-003
     result: pass
-  - test: conf-test:fundamentals-parse-003b
+  - test: conf-test:fundamentals-parse-011
     result: fail
-  - test: conf-test:fundamentals-parse-003c
+  - test: conf-test:fundamentals-parse-012
     result: pass
   - test: conf-test:fundamentals-parse-004
     result: fail
@@ -343,10 +343,10 @@ conformance_class_results:
   - test: conf-test:fundamentals-valid-025
     result: fail
     notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-025b
+  - test: conf-test:fundamentals-valid-046
     result: fail
     notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-025c
+  - test: conf-test:fundamentals-valid-047
     result: fail
     notes: Expected false, got true
   - test: conf-test:fundamentals-valid-026
@@ -355,15 +355,15 @@ conformance_class_results:
     result: pass
   - test: conf-test:fundamentals-valid-028
     result: pass
-  - test: conf-test:fundamentals-valid-028a
+  - test: conf-test:fundamentals-valid-048
     result: pass
-  - test: conf-test:fundamentals-valid-028b
+  - test: conf-test:fundamentals-valid-049
     result: fail
     notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-028c
+  - test: conf-test:fundamentals-valid-050
     result: fail
     notes: Expected true, got false
-  - test: conf-test:fundamentals-valid-028d
+  - test: conf-test:fundamentals-valid-051
     result: pass
   - test: conf-test:fundamentals-valid-029
     result: pass
@@ -924,6 +924,18 @@ conformance_class_results:
   - test: conf-test:arithmetic-conversion-equivocal-006
     result: not-supported
     notes: Conformance class not declared by implementation
+  - test: conf-test:arithmetic-conversion-equivocal-007
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:arithmetic-conversion-ambiguous-001
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:arithmetic-conversion-ambiguous-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:arithmetic-conversion-ambiguous-003
+    result: not-supported
+    notes: Conformance class not declared by implementation
   - test: conf-test:arithmetic-canonical-001
     result: not-supported
     notes: Conformance class not declared by implementation
@@ -1105,6 +1117,9 @@ conformance_class_results:
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-local-time-parse-002
+    result: not-supported
+    notes: Conformance class not declared by implementation
+  - test: conf-test:explicit-local-time-parse-003
     result: not-supported
     notes: Conformance class not declared by implementation
   - test: conf-test:explicit-local-time-gen-001

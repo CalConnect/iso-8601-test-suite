@@ -412,6 +412,66 @@ tests:
         canonical:
           hour: 3
 
+  - id: conf-test:arithmetic-conversion-equivocal-007
+    description: "Convert seconds to minutes: T2M120S = T4M"
+    requirements:
+      - req:arithmetic-conversion-minute-second
+    test_type: arithmetic
+    given:
+      expression: "T2M120S"
+    expect:
+      valid: true
+      components:
+        canonical:
+          minute: 4
+
+  # --- Ambiguous conversions (Clause 14.6) ---
+  # Year/week, year/day, and month/day conversions depend on a concrete
+  # calendar date, so canonical-form reduction retains the original unit
+  # structure rather than carrying into the higher-order component.
+
+  - id: conf-test:arithmetic-conversion-ambiguous-001
+    description: "Year-week conversion is ambiguous: 52W is not reduced to years without context"
+    requirements:
+      - req:arithmetic-conversion-year-week-ambiguous
+      - req:arithmetic-canonical-form-context-dependent
+    test_type: arithmetic
+    given:
+      expression: "52W"
+    expect:
+      valid: true
+      components:
+        canonical:
+          week: 52
+
+  - id: conf-test:arithmetic-conversion-ambiguous-002
+    description: "Year-day conversion is ambiguous: 365D is not reduced to years without context"
+    requirements:
+      - req:arithmetic-conversion-year-day-ambiguous
+      - req:arithmetic-canonical-form-context-dependent
+    test_type: arithmetic
+    given:
+      expression: "365D"
+    expect:
+      valid: true
+      components:
+        canonical:
+          day: 365
+
+  - id: conf-test:arithmetic-conversion-ambiguous-003
+    description: "Month-day conversion is ambiguous: 30D is not reduced to months without context"
+    requirements:
+      - req:arithmetic-conversion-month-day-ambiguous
+      - req:arithmetic-canonical-form-context-dependent
+    test_type: arithmetic
+    given:
+      expression: "30D"
+    expect:
+      valid: true
+      components:
+        canonical:
+          day: 30
+
   # --- Canonical form (Clause 14.8) ---
   - id: conf-test:arithmetic-canonical-001
     description: "Canonical form of 7Y24M = 9Y"

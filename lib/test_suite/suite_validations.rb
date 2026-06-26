@@ -28,8 +28,7 @@ module SuiteValidations
 
   def check_source_consistency(index, store, stats)
     mismatches = 0
-    index.bare_conf_class_ids.each do |cc_id|
-      cc_file = index.conf_class_ids[cc_id]
+    index.conf_class_ids.each do |cc_id, cc_file|
       cc_source = index.source_map[cc_file]
 
       cc_result = store.load(cc_file)
@@ -56,7 +55,7 @@ module SuiteValidations
         mismatches += 1
       end
     end
-    [index.bare_conf_class_ids.length, mismatches]
+    [index.conf_class_ids.length, mismatches]
   end
 
   def check_pattern_coverage(store, stats)
@@ -115,7 +114,7 @@ module SuiteValidations
   def check_unreferenced_requirements(index, stats)
     referenced = index.test_reqs.values.flatten.to_set
     all_reqs = index.all_req_ids
-    unreferenced = all_reqs - referenced.to_a
+    unreferenced = all_reqs.reject { |r| referenced.include?(r) }
     unreferenced.each do |r|
       source = index.req_ids[r] || index.profile_req_ids[r]
       stats.warn(source, "#{r}: not referenced by any test")
