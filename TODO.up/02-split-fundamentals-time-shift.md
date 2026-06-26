@@ -1,8 +1,9 @@
 # TODO.up/02 — Split bundled fundamentals reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** nothing
 **Unblocks:** TODO.up/08 (tests update)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — all 5 atomic time-shift reqs present in `requirements/8601-1/fundamentals.yaml`
 
 ## Problem
 

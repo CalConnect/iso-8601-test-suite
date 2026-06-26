@@ -1,8 +1,9 @@
 # TODO.up/04 — Expand date-and-time reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/03 (the new time-shift-utc and time-offset-* reqs)
 **Unblocks:** TODO.up/05 (time-interval and duration use these)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — `requirements/8601-1/date-and-time.yaml` now holds 31 atomic reqs
 
 ## Problem
 

@@ -1,8 +1,9 @@
 # TODO.up/12 — Validate, regenerate results, regenerate site JSON
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/01 through 11 (all source changes must land first)
 **Unblocks:** TODO.up/13 (dashboard rebuild)
+**Completed by:** `a7e2500 chore: regenerate all adapter results and dashboard JSON` — `ruby scripts/validate` clean (92 files, 0 errors, 0 warnings); 25 result YAMLs present; `summary.json` + `detail.json` regenerated.
 
 ## Problem
 

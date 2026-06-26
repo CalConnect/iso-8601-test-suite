@@ -1,8 +1,9 @@
 # TODO.up/07 — Split bundled Part 2 reqs
 
-**Status:** PENDING
+**Status:** DONE
 **Depends on:** TODO.up/01 (symbols, since explicit-representation reqs reference designators)
 **Unblocks:** TODO.up/08 (tests update)
+**Completed by:** `10db1c4 feat(reqs): split bundled requirements into atomic per-format requirements` — 15 atomic req-class files now in `requirements/8601-2/`
 
 ## Problem
 
