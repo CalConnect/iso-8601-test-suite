@@ -7,6 +7,7 @@ lib_dir = File.dirname(__FILE__)
 $LOAD_PATH.unshift(lib_dir) unless $LOAD_PATH.include?(lib_dir)
 
 autoload :Test,             "test_suite/test"
+autoload :Requirement,      "test_suite/requirement"
 autoload :LoadResult,       "test_suite/load_result"
 autoload :YamlStore,        "test_suite/yaml_store"
 autoload :SuiteIndex,       "test_suite/suite_index"

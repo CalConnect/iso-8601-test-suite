@@ -40,9 +40,9 @@ else
       name, msg = args
       $stderr.puts "  #{Term.red("FAILED")} to load #{name}: #{msg}"
     when :requirement
-      req_id, req_info, adapters, req_entry = args
+      req_id, req, adapters, req_entry = args
       short_id = req_id.sub("req:", "")
-      section = req_info[:section] || "?"
+      section = (req&.section || "?").to_s
       adapter_summary = adapters.map do |adefn|
         caps = req_entry[:tests][adefn[:id]] || {}
         statuses = caps.values.map { |c| c[:status] }

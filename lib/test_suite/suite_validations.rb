@@ -65,14 +65,14 @@ module SuiteValidations
       result = store.load(f)
       next if result.failure?
       data = result.data
-      (data["requirements"] || []).each do |r|
-        stmt = r["statement"]
-        next unless stmt
-        next if r["format"] == "any"
-        if stmt.match?(FORMAT_KEYWORDS)
+      (data["requirements"] || []).each do |raw|
+        req = Requirement.new(raw)
+        next unless req.statement
+        next if req.format == "any"
+        if req.statement.match?(FORMAT_KEYWORDS)
           total_format += 1
-          unless r.key?("pattern")
-            stats.warn(f, "#{r['id']}: statement references format but has no 'pattern' field")
+          unless req.pattern
+            stats.warn(f, "#{req.id}: statement references format but has no 'pattern' field")
             missing += 1
           end
         end
