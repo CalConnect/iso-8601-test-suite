@@ -59,4 +59,18 @@ class TestStatus
     return "fail"          if fail.positive?
     "not-supported"
   end
+
+  # Past-tense status vocabulary used in conformance-result.yaml for the
+  # per-class and per-profile `status` field. The schema mandates the
+  # enum [passed, failed, partial, not-supported]. Same classification
+  # logic as to_matrix_symbol, different surface vocabulary.
+  def to_result_status
+    case to_matrix_symbol
+    when "pass"          then "passed"
+    when "fail"          then "failed"
+    when "not-supported" then "not-supported"
+    when "partial"       then "partial"
+    else                      "not-supported"
+    end
+  end
 end
