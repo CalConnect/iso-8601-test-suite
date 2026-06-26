@@ -119,19 +119,6 @@ class CapabilityMatrix
     loaded
   end
 
-  def clause_section(clause)
-    return nil unless clause
-    s = clause.to_s
-    if s.include?(":clause:")
-      section = s.sub(/.*:clause:/, "").sub(/:tech:.*$/, "")
-      part_match = s.match(/8601:-([12]):/)
-      part = part_match ? part_match[1] : "?"
-      "Part #{part} §#{section}"
-    else
-      s
-    end
-  end
-
   def build_requirements_index
     reqs = {}
 
@@ -142,16 +129,12 @@ class CapabilityMatrix
       class_name = data["name"] || data["id"]
       part = @index.part_for_file(f).sub("8601-", "")
       (data["requirements"] || []).each do |r|
-        reqs[r["id"]] = {
-          category: class_name,
-          statement: r["statement"]&.strip,
-          format: r["format"],
-          clause: r["clause"],
-          section: clause_section(r["clause"]),
-          pattern: r["pattern"],
-          part: part,
+        reqs[r["id"]] = Requirement.new(
+          r,
           source_class: data["id"],
-        }
+          category: class_name,
+          part: part
+        )
       end
     end
 
@@ -163,17 +146,12 @@ class CapabilityMatrix
       profile_id = data["id"]
       profile_name = data["name"]
       (data["additional_requirements"] || []).each do |r|
-        reqs[r["id"]] = {
-          category: "Profile-Specific (#{profile_name})",
-          statement: r["statement"]&.strip,
-          format: r["format"],
-          clause: r["clause"],
-          section: clause_section(r["clause"]),
-          pattern: r["pattern"],
-          part: "profile",
-          source_class: nil,
+        reqs[r["id"]] = Requirement.new(
+          r,
           source_profile: profile_id,
-        }
+          category: "Profile-Specific (#{profile_name})",
+          part: "profile"
+        )
       end
     end
 
@@ -245,7 +223,7 @@ class CapabilityMatrix
 
     requirements_output = []
     all_req_ids.each do |req_id|
-      req_info = req_index[req_id] || {}
+      req = req_index[req_id]
       tests_for_req = req_tests[req_id]
       next if tests_for_req.empty?
 
@@ -253,14 +231,14 @@ class CapabilityMatrix
 
       req_entry = {
         id: req_id,
-        category: req_info[:category] || "Unknown",
-        statement: req_info[:statement],
-        format: req_info[:format],
-        clause: req_info[:clause],
-        section: req_info[:section],
-        part: req_info[:part],
-        pattern: req_info[:pattern],
-        source_profile: req_info[:source_profile],
+        category: req&.category || "Unknown",
+        statement: req&.statement,
+        format: req&.format,
+        clause: req&.clause,
+        section: req&.section,
+        part: req&.part,
+        pattern: req&.pattern,
+        source_profile: req&.source_profile,
         profiles: profile_req_map[req_id] || [],
         tests: {},
       }
@@ -272,7 +250,7 @@ class CapabilityMatrix
       end
 
       requirements_output << req_entry
-      on_progress&.call(:requirement, req_id, req_info, adapters, req_entry)
+      on_progress&.call(:requirement, req_id, req, adapters, req_entry)
     end
     requirements_output
   end
@@ -360,12 +338,12 @@ class CapabilityMatrix
       end
 
       req_chain = by_req.map do |rid, tests|
-        req_info = req_index[rid] || {}
+        req = req_index[rid]
         {
           requirement_id: rid,
-          statement: req_info[:statement],
-          section: req_info[:section],
-          format: req_info[:format],
+          statement: req&.statement,
+          section: req&.section,
+          format: req&.format,
           tests: tests.map { |t|
             { test_id: t.id, description: t.description, test_type: t.test_type,
               given: t.given, expect: t.expect }
