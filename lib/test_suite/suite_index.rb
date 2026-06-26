@@ -3,7 +3,7 @@
 class SuiteIndex
   attr_reader :req_ids, :req_class_ids, :conf_class_ids, :conf_test_ids
   attr_reader :profile_req_ids, :profile_ids, :source_map, :profiles
-  attr_reader :dependencies, :test_reqs, :bare_conf_class_ids
+  attr_reader :dependencies, :test_reqs
 
   def initialize(store)
     @store = store
@@ -17,7 +17,6 @@ class SuiteIndex
     @profiles = {}
     @dependencies = {}
     @test_reqs = {}
-    @bare_conf_class_ids = []
     @loaded = false
   end
 
@@ -110,7 +109,6 @@ class SuiteIndex
       id = data["id"]
       part = part_for_file(f)
       @conf_class_ids[id] = f
-      @bare_conf_class_ids << id
       @source_map[f] = data["source"] if data["source"]
 
       (data["tests"] || []).each do |t|

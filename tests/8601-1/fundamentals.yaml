@@ -195,7 +195,7 @@ tests:
         calendar:
           year: 9999
 
-  - id: conf-test:fundamentals-parse-003b
+  - id: conf-test:fundamentals-parse-011
     description: "Parse a negative year (year -1)"
     requirements:
       - req:year-minus-sign
@@ -208,7 +208,7 @@ tests:
         calendar:
           year: -1
 
-  - id: conf-test:fundamentals-parse-003c
+  - id: conf-test:fundamentals-parse-012
     description: "Reject a 5-digit year without expansion agreement (10000)"
     requirements:
       - req:year-range-0000-9999
@@ -338,7 +338,7 @@ tests:
     expect:
       valid: true
 
-  - id: conf-test:fundamentals-valid-025b
+  - id: conf-test:fundamentals-valid-046
     description: "Verify basic format hours-only time shift is valid (+05)"
     requirements:
       - req:time-shift-basic-h
@@ -348,7 +348,7 @@ tests:
     expect:
       valid: true
 
-  - id: conf-test:fundamentals-valid-025c
+  - id: conf-test:fundamentals-valid-047
     description: "Verify time shift without sign is invalid (0500)"
     requirements:
       - req:time-shift-sign-mandatory
@@ -390,7 +390,7 @@ tests:
       valid: false
 
   # Leap second tests
-  - id: conf-test:fundamentals-valid-028a
+  - id: conf-test:fundamentals-valid-048
     description: "Verify positive leap second value 60 is valid (2016 had one)"
     requirements:
       - req:leap-second-positive
@@ -400,7 +400,7 @@ tests:
     expect:
       valid: true
 
-  - id: conf-test:fundamentals-valid-028b
+  - id: conf-test:fundamentals-valid-049
     description: "Verify normal second 59 is valid"
     requirements:
       - req:second-range-59-normal
@@ -410,7 +410,7 @@ tests:
     expect:
       valid: true
 
-  - id: conf-test:fundamentals-valid-028c
+  - id: conf-test:fundamentals-valid-050
     description: "Verify negative leap second value 58 as last second is valid"
     requirements:
       - req:leap-second-negative
@@ -421,7 +421,7 @@ tests:
       valid: true
 
   # Proleptic Gregorian tests
-  - id: conf-test:fundamentals-valid-028d
+  - id: conf-test:fundamentals-valid-051
     description: "Verify pre-1582 date is valid under proleptic Gregorian agreement"
     requirements:
       - req:proleptic-gregorian-mutual-agreement

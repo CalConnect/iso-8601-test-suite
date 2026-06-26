@@ -52,6 +52,6 @@ class TestSuiteLoader
   end
 
   def class_ids
-    @index.bare_conf_class_ids.sort
+    @index.conf_class_ids.keys.sort
   end
 end

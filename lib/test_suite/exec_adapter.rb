@@ -79,7 +79,7 @@ class ExecAdapter
 
   def safe_call(method, params = {})
     call(method, params)
-  rescue
+  rescue StandardError
     nil
   end
 end

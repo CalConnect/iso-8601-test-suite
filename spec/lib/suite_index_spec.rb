@@ -17,7 +17,7 @@ RSpec.describe SuiteIndex do
 
     it "indexes tests from the real data" do
       expect(index.conf_test_ids.keys.length).to be > 0
-      expect(index.bare_conf_class_ids.length).to be > 0
+      expect(index.conf_class_ids.keys.length).to be > 0
     end
 
     it "indexes profiles from the real data" do

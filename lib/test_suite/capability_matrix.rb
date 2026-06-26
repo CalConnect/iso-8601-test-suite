@@ -3,49 +3,48 @@
 require 'json'
 require 'fileutils'
 require 'set'
+require 'yaml'
 
 class CapabilityMatrix
-  PYTHON38  = File.expand_path("~/.local/share/mise/installs/python/3.8.20/bin/python3")
-  PYTHON39  = File.expand_path("~/.local/share/mise/installs/python/3.9.25/bin/python3")
-  PYTHON310 = File.expand_path("~/.local/share/mise/installs/python/3.10.5/bin/python3")
-  PYTHON312 = File.expand_path("~/.local/share/mise/installs/python/3.12.11/bin/python3")
-  PYTHON313 = File.expand_path("~/.local/share/mise/installs/python/3.13.6/bin/python3")
-  NODE18    = File.expand_path("~/.local/share/mise/installs/node/18.20.8/bin/node")
-  NODE20    = File.expand_path("~/.local/share/mise/installs/node/20.20.2/bin/node")
-  NODE22    = File.expand_path("~/.local/share/mise/installs/node/22.20.0/bin/node")
-  JAVA8_HOME  = "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home"
-  JAVA15_HOME = "/Library/Java/JavaVirtualMachines/adoptopenjdk-15.jdk/Contents/Home"
-  JAVA21_HOME = File.expand_path("~/.local/share/mise/installs/java/openjdk-21.0.2")
-  APPLE_CLANG_PP  = "/usr/bin/clang++"
-  HOMEBREW_LLVM_PP = "/opt/homebrew/opt/llvm/bin/clang++"
-  REPO_ROOT       = File.expand_path(File.join(__dir__, "..", ".."))
+  CONFIG_PATH = File.expand_path(File.join(__dir__, "..", "..", "config", "adapters.yaml"))
+  REPO_ROOT   = File.expand_path(File.join(__dir__, "..", ".."))
 
-  ADAPTER_DEFS = [
-    { id: "ruby-30",         name: "Ruby 3.0 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.0.7/bin/ruby')} adapters/ruby/date-exec.rb" },
-    { id: "ruby-31",         name: "Ruby 3.1 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.1.6/bin/ruby')} adapters/ruby/date-exec.rb" },
-    { id: "ruby-32",         name: "Ruby 3.2 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.2.10/bin/ruby')} adapters/ruby/date-exec.rb" },
-    { id: "ruby-33",         name: "Ruby 3.3 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/3.3.7/bin/ruby')} adapters/ruby/date-exec.rb" },
-    { id: "ruby-date",       name: "Ruby 3.4 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "ruby-date" },
-    { id: "ruby-date-40",    name: "Ruby 4.0 Date",       family: "Ruby Date",        logo: "/logos/ruby.svg",       adapter: "exec:#{File.expand_path('~/.local/share/mise/installs/ruby/4.0.5/bin/ruby')} adapters/ruby/date-exec.rb" },
-    { id: "python-38",       name: "Python 3.8 datetime", family: "Python datetime",  logo: "/logos/python.svg",     adapter: "exec:#{PYTHON38} adapters/python/datetime.py" },
-    { id: "python-39",       name: "Python 3.9 datetime", family: "Python datetime",  logo: "/logos/python.svg",     adapter: "exec:#{PYTHON39} adapters/python/datetime.py" },
-    { id: "python-datetime", name: "Python 3.10 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON310} adapters/python/datetime.py" },
-    { id: "python-312",      name: "Python 3.12 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON312} adapters/python/datetime.py" },
-    { id: "python-313",      name: "Python 3.13 datetime", family: "Python datetime", logo: "/logos/python.svg",     adapter: "exec:#{PYTHON313} adapters/python/datetime.py" },
-    { id: "node-18",         name: "Node.js 18 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE18} adapters/node/datetime.js" },
-    { id: "node-20",         name: "Node.js 20 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE20} adapters/node/datetime.js" },
-    { id: "node-22",         name: "Node.js 22 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:#{NODE22} adapters/node/datetime.js" },
-    { id: "node-datetime",   name: "Node.js 24 Date",     family: "Node.js Date",     logo: "/logos/javascript.svg", adapter: "exec:node adapters/node/datetime.js" },
-    { id: "c-stdio",         name: "C strftime/strptime (BSD)", family: "C stdio",          logo: "/logos/c.svg",          adapter: "exec:env ADAPTER_LABEL='C strftime/strptime (BSD)' ADAPTER_VERSION='BSD libc' gcc -O2 -Iadapters/c -o /tmp/c-stdio-adapter adapters/c/stdio.c adapters/c/vendor/cjson/cJSON.c && /tmp/c-stdio-adapter" },
-    { id: "c-stdio-glibc",   name: "C strftime/strptime (glibc)", family: "C stdio",        logo: "/logos/c.svg",          adapter: "exec:docker run --rm -i -v #{REPO_ROOT}/adapters:/adapters:ro gcc:15 sh -c 'gcc -O2 -D_GNU_SOURCE -I/adapters/c -o /tmp/c-adapter /adapters/c/stdio.c /adapters/c/vendor/cjson/cJSON.c && ADAPTER_LABEL=\"C strftime/strptime (glibc)\" ADAPTER_VERSION=\"glibc (gcc 15)\" /tmp/c-adapter'" },
-    { id: "cpp-chrono",      name: "C++ std::chrono (LLVM)", family: "C++ chrono",     logo: "/logos/cpp.svg",        adapter: "exec:#{HOMEBREW_LLVM_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (LLVM)\"' -o /tmp/cpp-chrono adapters/cpp/chrono.cpp && /tmp/cpp-chrono" },
-    { id: "cpp-chrono-apple", name: "C++ std::chrono (Apple)", family: "C++ chrono",   logo: "/logos/cpp.svg",        adapter: "exec:#{APPLE_CLANG_PP} -std=c++20 -O2 -DADAPTER_LABEL='\"C++ std::chrono (Apple)\"' -o /tmp/cpp-chrono-apple adapters/cpp/chrono.cpp && /tmp/cpp-chrono-apple" },
-    { id: "rust-chrono",     name: "Rust chrono (latest)", family: "Rust chrono",      logo: "/logos/rust.svg",       adapter: "exec:env ADAPTER_LABEL='Rust chrono (latest)' ADAPTER_VERSION='chrono 0.4 (latest)' adapters/rust/chrono-latest/target/release/rust-chrono" },
-    { id: "rust-chrono-0419", name: "Rust chrono 0.4.19", family: "Rust chrono",       logo: "/logos/rust.svg",       adapter: "exec:env ADAPTER_LABEL='Rust chrono 0.4.19' ADAPTER_VERSION='chrono 0.4.19' adapters/rust/chrono-0419/target/release/rust-chrono-0419" },
-    { id: "java-8",          name: "Java 8 java.time",    family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-8 && #{JAVA8_HOME}/bin/javac -d /tmp/java-adapters-8 adapters/java/JavaDateTime.java && #{JAVA8_HOME}/bin/java -cp /tmp/java-adapters-8 JavaDateTime" },
-    { id: "java-15",         name: "Java 15 java.time",   family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-15 && #{JAVA15_HOME}/bin/javac -d /tmp/java-adapters-15 adapters/java/JavaDateTime.java && #{JAVA15_HOME}/bin/java -cp /tmp/java-adapters-15 JavaDateTime" },
-    { id: "java-time",       name: "Java 21 java.time",   family: "Java java.time",   logo: "/logos/java.svg",       adapter: "exec:mkdir -p /tmp/java-adapters-21 && #{JAVA21_HOME}/bin/javac -d /tmp/java-adapters-21 adapters/java/JavaDateTime.java && #{JAVA21_HOME}/bin/java -cp /tmp/java-adapters-21 JavaDateTime" },
-  ].freeze
+  # Load adapter definitions from a YAML config file.
+  #
+  # The config has two sections:
+  #   paths:    name → filesystem path (may use ~ for home)
+  #   adapters: list of {id, name, family, logo, adapter}
+  #
+  # The `adapter` field may reference path entries via ${name} interpolation,
+  # plus the built-in ${repo_root} for repo-relative references.
+  def self.load_adapter_defs(config_path)
+    raw = YAML.load_file(config_path)
+    paths = (raw["paths"] || {}).each_with_object({}) do |(k, v), h|
+      h[k.to_s] = v.to_s
+    end
+    paths["repo_root"] = REPO_ROOT
+
+    (raw["adapters"] || []).map do |entry|
+      {
+        id:      entry.fetch("id"),
+        name:    entry.fetch("name"),
+        family:  entry.fetch("family"),
+        logo:    entry.fetch("logo"),
+        adapter: interpolate_paths(entry.fetch("adapter"), paths),
+      }
+    end
+  end
+
+  def self.interpolate_paths(template, vars)
+    template.gsub(/\$\{([a-z0-9_]+)\}/i) do
+      key = Regexp.last_match(1)
+      vars.key?(key) ? vars[key] : "${#{key}}"
+    end
+  end
+  private_class_method :interpolate_paths
+
+  # Adapter registry, loaded from config/adapters.yaml and frozen.
+  ADAPTER_DEFS = load_adapter_defs(CONFIG_PATH).freeze
 
   TEST_TYPE_TO_CAPABILITY = {
     "validity"    => "parse_general",

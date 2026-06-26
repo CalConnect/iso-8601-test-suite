@@ -122,6 +122,18 @@ tests:
         hour: 23
         minute: 20
 
+  - id: conf-test:explicit-local-time-parse-003
+    description: "Parse explicit local time reduced to hour precision 'T23H'"
+    requirements:
+      - req:explicit-time-reduced-hour
+    test_type: parsing
+    given:
+      expression: "T23H"
+    expect:
+      valid: true
+      components:
+        hour: 23
+
   - id: conf-test:explicit-local-time-gen-001
     description: "Generate explicit local time from components"
     requirements:

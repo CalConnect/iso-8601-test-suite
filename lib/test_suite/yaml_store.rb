@@ -17,7 +17,7 @@ class YamlStore
     result = begin
       data = YAML.load_file(full_path, permitted_classes: [Symbol])
       LoadResult.success(data)
-    rescue => e
+    rescue StandardError => e
       LoadResult.failure(e.message)
     end
 
