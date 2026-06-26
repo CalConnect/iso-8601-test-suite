@@ -8,6 +8,20 @@
 #   * adapter_results[] — per-adapter aggregate stats across every
 #     requirement that falls inside the profile
 class ProfileSection
+  # Per-profile organization logo path. Keys are profile IDs as they
+  # appear in profiles/*.yaml; values are paths under site/public/logos.
+  PROFILE_ORG_LOGOS = {
+    "profile:rfc-3339"                => "/logos/ietf.svg",
+    "profile:w3c-datetime"            => "/logos/w3c.svg",
+    "profile:edtf-level-0"            => "/logos/loc.svg",
+    "profile:edtf-level-1"            => "/logos/loc.svg",
+    "profile:edtf-level-2"            => "/logos/loc.svg",
+    "profile:iso-8601-1-complete"     => "/logos/iso-red.svg",
+    "profile:iso-8601-1-core"         => "/logos/iso-red.svg",
+    "profile:iso-8601-2-complete"     => "/logos/iso-red.svg",
+    "profile:iso-8601-1-basic-format" => "/logos/iso-red.svg",
+  }.freeze
+
   def initialize(ctx)
     @ctx = ctx
   end
@@ -26,7 +40,7 @@ class ProfileSection
         name: profile.name,
         description: profile.description_stripped,
         source: profile.source,
-        logo: CapabilityMatrix::PROFILE_ORG_LOGOS[pid],
+        logo: PROFILE_ORG_LOGOS[pid],
         traceability_class_count: profile.traceability_count,
         additional_requirements: profile.additional_requirements.map { |r|
           { id: r["id"], statement: r["statement"]&.strip }

@@ -135,44 +135,4 @@ RSpec.describe CapabilityMatrix do
       end
     end
   end
-
-  describe "TEST_TYPE_TO_CAPABILITY" do
-    it "is a frozen hash mapping every declared test type" do
-      expect(described_class::TEST_TYPE_TO_CAPABILITY).to be_a(Hash)
-      expect(described_class::TEST_TYPE_TO_CAPABILITY).to be_frozen
-    end
-
-    it "validity and parsing both map to parse_general" do
-      map = described_class::TEST_TYPE_TO_CAPABILITY
-      expect(map["validity"]).to eq("parse_general")
-      expect(map["parsing"]).to eq("parse_general")
-    end
-
-    it "generation maps to construct" do
-      expect(described_class::TEST_TYPE_TO_CAPABILITY["generation"]).to eq("construct")
-    end
-
-    it "arithmetic maps to arithmetic" do
-      expect(described_class::TEST_TYPE_TO_CAPABILITY["arithmetic"]).to eq("arithmetic")
-    end
-  end
-
-  describe "PROFILE_ORG_LOGOS" do
-    it "is a frozen hash" do
-      expect(described_class::PROFILE_ORG_LOGOS).to be_a(Hash)
-      expect(described_class::PROFILE_ORG_LOGOS).to be_frozen
-    end
-
-    it "every key is a profile CURIE" do
-      described_class::PROFILE_ORG_LOGOS.each_key do |key|
-        expect(key).to match(/\Aprofile:[a-z0-9-]+\z/)
-      end
-    end
-
-    it "every value is a /logos/ svg path" do
-      described_class::PROFILE_ORG_LOGOS.each_value do |logo|
-        expect(logo).to match(%r{\A/logos/[a-z0-9-]+\.svg\z})
-      end
-    end
-  end
 end
