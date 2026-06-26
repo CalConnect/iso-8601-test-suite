@@ -123,11 +123,11 @@ class Runner
   end
 
   def phase_schema_refs(files)
-    missing = files.reject { |f| f.start_with?("schema/") || @store.schema_ref(f) }
+    missing = files.reject { |f| f.start_with?("schema/") || SchemaRegistry.schema_for(f) }
     if missing.empty?
-      print_ok("All #{Term.bold(files.length)} data files have $schema references")
+      print_ok("All #{Term.bold(files.length)} data files have registered schemas")
     else
-      missing.each { |f| print_warn("#{Term.cyan(f)}: missing $schema reference") }
+      missing.each { |f| print_warn("#{Term.cyan(f)}: no schema registered") }
     end
   end
 
