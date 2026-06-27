@@ -11,7 +11,7 @@ module FamilyDivergence
   module_function
 
   def build(adapters, requirements)
-    fam_adapters = adapters.group_by { |a| a[:family] }.map do |family, fam_members|
+    fam_adapters = adapters.group_by { |a| a.family }.map do |family, fam_members|
       range_label = build_family_range_label(fam_members)
 
       stats = if fam_members.size == 1
@@ -22,10 +22,10 @@ module FamilyDivergence
 
       {
         family: family,
-        logo: fam_members.first[:logo],
-        language: fam_members.first[:language],
+        logo: fam_members.first.logo,
+        language: fam_members.first.language,
         version_count: fam_members.size,
-        version_ids: fam_members.map { |a| a[:id] },
+        version_ids: fam_members.map { |a| a.id },
         range_label: range_label,
         **stats,
       }
@@ -35,7 +35,7 @@ module FamilyDivergence
 
   def compute_family_divergence(fam_adapters, requirements)
     divergent = []
-    per_version_delta = fam_adapters.each_with_object(Hash.new(0)) { |a, h| h[a[:id]] = 0 }
+    per_version_delta = fam_adapters.each_with_object(Hash.new(0)) { |a, h| h[a.id] = 0 }
 
     requirements.each do |req|
       tests = req[:tests]
@@ -43,11 +43,11 @@ module FamilyDivergence
 
       test_map = Hash.new { |h, k| h[k] = {} }
       fam_adapters.each do |a|
-        caps = tests[a[:id]]
+        caps = tests[a.id]
         next unless caps
         caps.each do |cap_key, cap|
           (cap[:details] || []).each do |d|
-            test_map[[cap_key, d[:test_id]]][a[:id]] = d[:result] if d.key?(:result)
+            test_map[[cap_key, d[:test_id]]][a.id] = d[:result] if d.key?(:result)
           end
         end
       end
@@ -84,7 +84,7 @@ module FamilyDivergence
   end
 
   def build_family_range_label(fam_adapters)
-    names = fam_adapters.map { |a| a[:name] }
+    names = fam_adapters.map { |a| a.name }
     return names.first if names.size == 1
 
     labels = names.map { |n| version_label_for(n) }.compact

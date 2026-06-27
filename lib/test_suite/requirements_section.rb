@@ -58,13 +58,13 @@ class RequirementsSection
 
     @ctx.adapters.each do |adefn|
       capabilities = build_capabilities(adefn, tests_by_type)
-      entry[:tests][adefn[:id]] = capabilities unless capabilities.empty?
+      entry[:tests][adefn.id] = capabilities unless capabilities.empty?
     end
     entry
   end
 
   def build_capabilities(adefn, tests_by_type)
-    runner = @ctx.runner_for(adefn[:id])
+    runner = @ctx.runner_for(adefn.id)
     capabilities = {}
 
     tests_by_type.each do |test_type, tests|

@@ -42,7 +42,7 @@ else
       short_id = req_id.sub("req:", "")
       section = (req&.section || "?").to_s
       adapter_summary = adapters.map do |adefn|
-        caps = req_entry[:tests][adefn[:id]] || {}
+        caps = req_entry[:tests][adefn.id] || {}
         statuses = caps.values.map { |c| c[:status] }
         if statuses.empty?
           "  "

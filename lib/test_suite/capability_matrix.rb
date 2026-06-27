@@ -76,8 +76,8 @@ class CapabilityMatrix
 
   def build_context(adapter_defs, on_progress)
     adapters = load_adapters(adapter_defs, on_progress)
-    declared_classes = adapters.to_h { |a| [a[:id], read_declared_classes(a[:id])] }
-    declared_profiles = adapters.to_h { |a| [a[:id], read_declared_profiles(a[:id])] }
+    declared_classes = adapters.to_h { |a| [a.id, read_declared_classes(a.id)] }
+    declared_profiles = adapters.to_h { |a| [a.id, read_declared_profiles(a.id)] }
 
     req_index = build_requirements_index
     all_tests = @suite.all_tests
@@ -102,16 +102,21 @@ class CapabilityMatrix
   end
 
   def load_adapters(adapter_defs, on_progress)
-    loaded = []
-    adapter_defs.each do |defn|
-      begin
-        adapter = AdapterLoader.load(defn[:adapter])
-        loaded << { **defn, adapter: adapter, version: adapter.version, language: adapter.language }
-      rescue AdapterNotFoundError, RuntimeError => e
-        on_progress&.call(:adapter_failed, defn[:name], e.message)
-      end
+    adapter_defs.filter_map do |defn|
+      adapter = AdapterLoader.load(defn[:adapter])
+      AdapterDef.new(
+        id: defn[:id],
+        name: defn[:name],
+        family: defn[:family],
+        logo: defn[:logo],
+        adapter: adapter,
+        version: adapter.version,
+        language: adapter.language,
+      )
+    rescue AdapterNotFoundError, RuntimeError => e
+      on_progress&.call(:adapter_failed, defn[:name], e.message)
+      nil
     end
-    loaded
   end
 
   def build_requirements_index
