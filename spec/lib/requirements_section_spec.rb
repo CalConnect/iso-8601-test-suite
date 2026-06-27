@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "set"
+require_relative "../../lib/test_suite/adapter_def"
 require_relative "../../lib/test_suite/matrix_context"
 require_relative "../../lib/test_suite/adapter_runner"
 require_relative "../../lib/test_suite/requirement"
@@ -22,7 +23,13 @@ RSpec.describe RequirementsSection do
   end
 
   let(:adapter) { CannedAdapter.new("1.0", "ruby", [{ "result" => "pass" }]) }
-  let(:adapter_defn) { { id: "lib-a", adapter: adapter } }
+  let(:adapter_defn) do
+    AdapterDef.new(
+      id: "lib-a", name: "Library A", family: "Ruby",
+      logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
+      adapter: adapter,
+    )
+  end
 
   let(:requirement) do
     Requirement.new(
@@ -139,9 +146,14 @@ RSpec.describe RequirementsSection do
       def class_for_test(_tid) = "conf-class:declared"
     end.new
     undeclared_adapter = CannedAdapter.new("1.0", "ruby", [])
+    undeclared_defn = AdapterDef.new(
+      id: "lib-guarded", name: "Guarded", family: "Ruby",
+      logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
+      adapter: undeclared_adapter,
+    )
     ctx_guarded = MatrixContext.new(
       store: nil, index: fake_index_with_class,
-      adapters: [{ id: "lib-guarded", adapter: undeclared_adapter }],
+      adapters: [undeclared_defn],
       declared_classes: { "lib-guarded" => ["conf-class:other"].to_set },
       declared_profiles: {},
       req_index: { "req:cal-date-basic" => requirement },

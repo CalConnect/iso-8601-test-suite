@@ -98,11 +98,11 @@ class ProfileSection
   end
 
   def build_per_library_detail(adefn, tests)
-    runner = @ctx.runner_for(adefn[:id])
+    runner = @ctx.runner_for(adefn.id)
     results = runner.call(tests)
     status = TestStatus.from_results(results)
     {
-      library_id: adefn[:id], status: status.to_matrix_symbol,
+      library_id: adefn.id, status: status.to_matrix_symbol,
       pass: status.pass, total: status.total,
       details: tests.zip(results).map { |t, r|
         { test_id: t.id, result: r["result"],
@@ -119,7 +119,7 @@ class ProfileSection
   end
 
   def build_adapter_stats(adefn, req_ids_in_profile, ptests)
-    runner = @ctx.runner_for(adefn[:id])
+    runner = @ctx.runner_for(adefn.id)
     test_pass = 0; test_total = 0
     req_pass = 0; req_partial = 0; req_fail = 0; req_not_supported = 0
 
@@ -140,7 +140,7 @@ class ProfileSection
       end
     end
 
-    { id: adefn[:id], test_pass: test_pass, test_total: test_total,
+    { id: adefn.id, test_pass: test_pass, test_total: test_total,
       req_pass: req_pass, req_partial: req_partial, req_fail: req_fail,
       req_not_supported: req_not_supported }
   end

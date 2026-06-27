@@ -15,18 +15,18 @@ class LibrarySection
 
   def build
     @ctx.adapters.map do |adefn|
-      declared = @ctx.declared_classes[adefn[:id]] || []
-      declared_profiles = @ctx.declared_profiles_for(adefn[:id])
+      declared = @ctx.declared_classes[adefn.id] || []
+      declared_profiles = @ctx.declared_profiles_for(adefn.id)
       targeted = target_profiles_for(declared, declared_profiles)
-      notes = adefn[:adapter].qualification_notes || []
+      notes = adefn.qualification_notes
 
       {
-        id: adefn[:id],
-        name: adefn[:name],
-        family: adefn[:family],
-        logo: adefn[:logo],
-        language: adefn[:language],
-        version: adefn[:version],
+        id: adefn.id,
+        name: adefn.name,
+        family: adefn.family,
+        logo: adefn.logo,
+        language: adefn.language,
+        version: adefn.version,
         declared_conformance_classes: declared,
         target_profiles: targeted,
         qualification_notes: notes,

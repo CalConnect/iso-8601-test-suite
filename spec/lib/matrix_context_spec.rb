@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "set"
+require_relative "../../lib/test_suite/adapter_def"
 require_relative "../../lib/test_suite/matrix_context"
 require_relative "../../lib/test_suite/adapter_runner"
 
@@ -12,7 +13,13 @@ RSpec.describe MatrixContext do
     end.new
   end
 
-  let(:adapter_a) { { id: "lib-a", adapter: Struct.new(:version, :language).new("1.0", "ruby") } }
+  let(:adapter_a) do
+    AdapterDef.new(
+      id: "lib-a", name: "A", family: "Ruby",
+      logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
+      adapter: Struct.new(:version, :language).new("1.0", "ruby"),
+    )
+  end
 
   let(:ctx) do
     described_class.new(

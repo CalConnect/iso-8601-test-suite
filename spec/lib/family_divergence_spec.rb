@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
+require_relative "../../lib/test_suite/adapter_def"
 require_relative "../../lib/test_suite/family_divergence"
+
+def adapter_def(id:, name:, family:, logo: "/logos/x.svg", language: "x", version: "1.0", adapter: nil)
+  AdapterDef.new(id: id, name: name, family: family, logo: logo,
+                 language: language, version: version, adapter: adapter)
+end
 
 RSpec.describe FamilyDivergence do
   describe ".version_label_for" do
@@ -21,28 +27,44 @@ RSpec.describe FamilyDivergence do
 
   describe ".build_family_range_label" do
     it "returns the single name when the family has one member" do
-      fam = [{ name: "Rust chrono 0.4.19" }]
+      fam = [adapter_def(id: "rust-1", name: "Rust chrono 0.4.19", family: "Rust")]
       expect(described_class.build_family_range_label(fam)).to eq("Rust chrono 0.4.19")
     end
 
     it "renders 'first → last' for a numeric range" do
-      fam = [{ name: "Ruby 3.0 Date" }, { name: "Ruby 3.2 Date" }, { name: "Ruby 3.1 Date" }]
+      fam = [
+        adapter_def(id: "ruby-30", name: "Ruby 3.0 Date", family: "Ruby"),
+        adapter_def(id: "ruby-32", name: "Ruby 3.2 Date", family: "Ruby"),
+        adapter_def(id: "ruby-31", name: "Ruby 3.1 Date", family: "Ruby"),
+      ]
       expect(described_class.build_family_range_label(fam)).to eq("3.0 → 3.2")
     end
 
     it "returns the single distinct label when all members share it" do
-      fam = [{ name: "Adapter (glibc)" }, { name: "Other (glibc)" }]
+      fam = [
+        adapter_def(id: "a", name: "Adapter (glibc)", family: "C"),
+        adapter_def(id: "b", name: "Other (glibc)", family: "C"),
+      ]
       expect(described_class.build_family_range_label(fam)).to eq("glibc")
     end
 
     it "falls back to first → last when labels are non-numeric" do
-      fam = [{ name: "Adapter (BSD)" }, { name: "Other (glibc)" }]
+      fam = [
+        adapter_def(id: "a", name: "Adapter (BSD)", family: "C"),
+        adapter_def(id: "b", name: "Other (glibc)", family: "C"),
+      ]
       expect(described_class.build_family_range_label(fam)).to eq("BSD → glibc")
     end
   end
 
   describe ".compute_family_divergence" do
-    let(:fam_adapters) { [{ id: "lib-a" }, { id: "lib-b" }, { id: "lib-c" }] }
+    let(:fam_adapters) do
+      [
+        adapter_def(id: "lib-a", name: "A", family: "Ruby"),
+        adapter_def(id: "lib-b", name: "B", family: "Ruby"),
+        adapter_def(id: "lib-c", name: "C", family: "Ruby"),
+      ]
+    end
 
     it "reports stability='stable' when all versions agree on every test" do
       requirements = [{
@@ -91,7 +113,8 @@ RSpec.describe FamilyDivergence do
             { test_id: "t#{i}", result: "fail" } ] } } } }
       end
       result = described_class.compute_family_divergence(
-        [{ id: "lib-a" }, { id: "lib-b" }], requirements
+        [adapter_def(id: "lib-a", name: "A", family: "Ruby"),
+         adapter_def(id: "lib-b", name: "B", family: "Ruby")], requirements
       )
       expect(result[:stability]).to eq("divergent")
       expect(result[:delta_count]).to eq(6)
@@ -113,7 +136,8 @@ RSpec.describe FamilyDivergence do
           { test_id: "t1", result: "pass" } ] } } },
       }]
       result = described_class.compute_family_divergence(
-        [{ id: "lib-a" }, { id: "lib-b" }], requirements
+        [adapter_def(id: "lib-a", name: "A", family: "Ruby"),
+         adapter_def(id: "lib-b", name: "B", family: "Ruby")], requirements
       )
       expect(result[:delta_count]).to eq(1)
       expect(result[:divergent_tests].first[:results]["lib-a"]).to eq("unknown")
@@ -123,9 +147,9 @@ RSpec.describe FamilyDivergence do
   describe ".build (full slice assembly)" do
     it "produces one slice per family with range_label and stability metadata" do
       adapters = [
-        { id: "ruby-30", name: "Ruby 3.0 Date", family: "Ruby", logo: "/logos/ruby.svg", language: "ruby" },
-        { id: "ruby-32", name: "Ruby 3.2 Date", family: "Ruby", logo: "/logos/ruby.svg", language: "ruby" },
-        { id: "rust-1",  name: "Rust chrono",   family: "Rust", logo: "/logos/rust.svg", language: "rust" },
+        adapter_def(id: "ruby-30", name: "Ruby 3.0 Date", family: "Ruby", logo: "/logos/ruby.svg", language: "ruby"),
+        adapter_def(id: "ruby-32", name: "Ruby 3.2 Date", family: "Ruby", logo: "/logos/ruby.svg", language: "ruby"),
+        adapter_def(id: "rust-1",  name: "Rust chrono",   family: "Rust", logo: "/logos/rust.svg", language: "rust"),
       ]
       requirements = []
       result = described_class.build(adapters, requirements)

@@ -37,9 +37,9 @@ class MatrixContext
 
   def runner_for(adapter_id)
     @runner_cache[adapter_id] ||= begin
-      adefn = adapters.find { |a| a[:id] == adapter_id }
+      adefn = adapters.find { |a| a.id == adapter_id }
       AdapterRunner.new(
-        adefn[:adapter],
+        adefn.adapter,
         declared_bare: declared_bare_for(adapter_id),
         index: index,
       )

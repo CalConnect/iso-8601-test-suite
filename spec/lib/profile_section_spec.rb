@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "set"
+require_relative "../../lib/test_suite/adapter_def"
 require_relative "../../lib/test_suite/load_result"
 require_relative "../../lib/test_suite/matrix_context"
 require_relative "../../lib/test_suite/adapter_runner"
@@ -54,7 +55,13 @@ RSpec.describe ProfileSection do
     )
   end
 
-  let(:adapter_defn) { { id: "lib-a", adapter: ProfileAdapter.new("1.0", "ruby") } }
+  let(:adapter_defn) do
+    AdapterDef.new(
+      id: "lib-a", name: "Library A", family: "Ruby",
+      logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
+      adapter: ProfileAdapter.new("1.0", "ruby"),
+    )
+  end
 
   let(:fake_index) do
     Class.new do
@@ -184,7 +191,11 @@ RSpec.describe ProfileSection do
     end)
     ctx_breaking = MatrixContext.new(
       store: fake_store, index: fake_index,
-      adapters: [{ id: "lib-broken", adapter: breaking }],
+      adapters: [AdapterDef.new(
+        id: "lib-broken", name: "Broken", family: "Ruby",
+        logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
+        adapter: breaking,
+      )],
       declared_classes: { "lib-broken" => ["conf-class:calendar-date"].to_set },
       declared_profiles: {},
       req_index: { "req:cal-date-basic" => requirement },

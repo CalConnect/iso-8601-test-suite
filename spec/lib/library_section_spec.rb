@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "set"
+require_relative "../../lib/test_suite/adapter_def"
 require_relative "../../lib/test_suite/matrix_context"
 require_relative "../../lib/test_suite/profile"
 require_relative "../../lib/test_suite/library_section"
@@ -13,9 +14,11 @@ RSpec.describe LibrarySection do
   let(:adapter_with_notes) { LibraryAdapter.new("1.0", "ruby", ["ECO-1", "ECO-2"]) }
 
   let(:adapter_defn) do
-    { id: "lib-a", name: "Library A", family: "Ruby",
+    AdapterDef.new(
+      id: "lib-a", name: "Library A", family: "Ruby",
       logo: "/logos/ruby.svg", language: "ruby", version: "1.0",
-      adapter: adapter_with_notes }
+      adapter: adapter_with_notes
+    )
   end
 
   let(:fake_index) do
