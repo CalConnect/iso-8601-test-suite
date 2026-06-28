@@ -71,4 +71,24 @@ RSpec.describe AdapterRunner do
     expect(result["result"]).to eq("error")
     expect(result["notes"]).to eq("adapter blew up")
   end
+
+  it "memoizes results so the same test instance is computed once across calls" do
+    call_count = 0
+    counting_handlers = Module.new do
+      module_function
+      define_method(:run) do |_adapter, _test|
+        call_count += 1
+        { "result" => "pass" }
+      end
+    end
+    stub_const("TestTypeHandlers", counting_handlers)
+    test = Test.new("id" => "conf-test:t-001", "test_type" => "validity")
+    runner = described_class.new(adapter, declared_bare: [], index: fake_index)
+
+    first = runner.call([test])
+    second = runner.call([test])
+
+    expect(call_count).to eq(1)
+    expect(second.first).to be(first.first)
+  end
 end
