@@ -111,7 +111,7 @@ RSpec.describe ProfileSection do
       declared_profiles: {},
       req_index: { "req:cal-date-basic" => requirement },
       req_tests: {},
-      class_tests: {},
+      class_tests: { "conf-class:calendar-date" => [test] },
       profile_tests: {
         "profile:iso-8601-1-core" => { "req:cal-date-basic" => [test] },
       },
@@ -200,7 +200,7 @@ RSpec.describe ProfileSection do
       declared_profiles: {},
       req_index: { "req:cal-date-basic" => requirement },
       req_tests: {},
-      class_tests: {},
+      class_tests: { "conf-class:calendar-date" => [test] },
       profile_tests: { "profile:iso-8601-1-core" => { "req:cal-date-basic" => [test] } },
       profile_req_map: {},
       test_reqs: { "conf-test:cal-date-001" => ["req:cal-date-basic"] },
