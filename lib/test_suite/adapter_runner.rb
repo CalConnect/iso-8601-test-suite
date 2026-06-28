@@ -19,10 +19,11 @@ class AdapterRunner
     @adapter = adapter
     @declared_bare = declared_bare
     @index = index
+    @result_cache = {}
   end
 
   def call(tests)
-    tests.map { |t| single_result(t) }
+    tests.map { |t| @result_cache[t.id] ||= single_result(t) }
   end
 
   private
