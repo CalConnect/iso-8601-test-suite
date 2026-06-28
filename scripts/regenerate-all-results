@@ -20,7 +20,7 @@ OptionParser.new do |opts|
   opts.on("--help", "Show help") { puts opts; exit 0 }
 end.parse!
 
-defs = CapabilityMatrix::ADAPTER_DEFS
+defs = AdapterConfig::ADAPTER_DEFS
 only = options[:only]
 skip = options[:skip] || []
 
