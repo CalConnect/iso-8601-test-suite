@@ -84,13 +84,7 @@ class ProfileSection
 
   def tests_by_requirement(cc_id)
     bare = @ctx.index.bare_id(cc_id)
-    cc_file = @ctx.index.conf_class_ids[bare]
-    cc_tests = if cc_file && @ctx.index.conf_class_ids.key?(bare)
-      result = @ctx.store.load(cc_file)
-      result.success? ? (result.data["tests"] || []).map { |t| Test.new(t) } : []
-    else
-      []
-    end
+    cc_tests = @ctx.class_tests[bare] || []
 
     by_req = Hash.new { |h, k| h[k] = [] }
     cc_tests.each { |t| (@ctx.test_reqs[t.id] || []).each { |rid| by_req[rid] << t } }
