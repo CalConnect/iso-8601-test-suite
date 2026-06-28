@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'yaml'
 require 'time'
 
 # Capability matrix orchestrator.
@@ -10,54 +9,17 @@ require 'time'
 # All per-slice logic (requirements, profiles, libraries, family
 # divergence, output projection) lives in dedicated modules; this class
 # only sequences them.
+#
+# Adapter config loading (paths interpolation, the frozen ADAPTER_DEFS
+# registry) lives in AdapterConfig.
 class CapabilityMatrix
-  CONFIG_PATH = File.expand_path(File.join(__dir__, "..", "..", "config", "adapters.yaml"))
-  REPO_ROOT   = File.expand_path(File.join(__dir__, "..", ".."))
-
-  # Load adapter definitions from a YAML config file.
-  #
-  # The config has two sections:
-  #   paths:    name → filesystem path (may use ~ for home)
-  #   adapters: list of {id, name, family, logo, adapter}
-  #
-  # The `adapter` field may reference path entries via ${name} interpolation,
-  # plus the built-in ${repo_root} for repo-relative references.
-  def self.load_adapter_defs(config_path)
-    raw = YAML.load_file(config_path)
-    paths = (raw["paths"] || {}).each_with_object({}) do |(k, v), h|
-      h[k.to_s] = v.to_s
-    end
-    paths["repo_root"] = REPO_ROOT
-
-    (raw["adapters"] || []).map do |entry|
-      {
-        id:      entry.fetch("id"),
-        name:    entry.fetch("name"),
-        family:  entry.fetch("family"),
-        logo:    entry.fetch("logo"),
-        adapter: interpolate_paths(entry.fetch("adapter"), paths),
-      }
-    end
-  end
-
-  def self.interpolate_paths(template, vars)
-    template.gsub(/\$\{([a-z0-9_]+)\}/i) do
-      key = Regexp.last_match(1)
-      vars.key?(key) ? vars[key] : "${#{key}}"
-    end
-  end
-  private_class_method :interpolate_paths
-
-  # Adapter registry, loaded from config/adapters.yaml and frozen.
-  ADAPTER_DEFS = load_adapter_defs(CONFIG_PATH).freeze
-
   def initialize(store, index, suite)
     @store = store
     @index = index
     @suite = suite
   end
 
-  def generate(adapter_defs: ADAPTER_DEFS, on_progress: nil)
+  def generate(adapter_defs: AdapterConfig::ADAPTER_DEFS, on_progress: nil)
     ctx = build_context(adapter_defs, on_progress)
     requirements = RequirementsSection.new(ctx, on_progress: on_progress).build
     profiles = ProfileSection.new(ctx).build
