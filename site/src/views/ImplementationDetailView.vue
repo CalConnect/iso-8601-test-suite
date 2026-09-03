@@ -12,6 +12,8 @@ const props = defineProps({
 
 const emit = defineEmits(["navigate"]);
 
+const BASE = import.meta.env.BASE_URL;
+
 const stats = computed(() => libStats(props.lib, props.reqs));
 
 const targetIds = computed(() => new Set((props.lib.target_profiles || []).map(p => p.id)));
@@ -94,7 +96,7 @@ const noteCategoryLabel = (cat) =>
         <div class="font-mono text-sm text-ink-muted">{{ lib.language }} · {{ lib.version }}</div>
         <div class="mt-3">
           <a
-            :href="'/results/' + lib.id + '.yaml'"
+            :href="BASE + 'results/' + lib.id + '.yaml'"
             download
             class="btn-ghost text-xs"
           >

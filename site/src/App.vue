@@ -76,11 +76,26 @@ function toggleTheme() {
   localStorage.setItem("theme", isDark.value ? "dark" : "light");
 }
 
-const currentPath = () => location.pathname || "/";
+// "/" in dev, "/iso-8601-test-suite/" in production (GitHub Pages subpath)
+const BASE = import.meta.env.BASE_URL;
+const currentPath = () => {
+  const p = location.pathname;
+  // strip the base prefix so routes stay root-absolute ("/matrix", not ".../matrix")
+  return p.startsWith(BASE) ? (p.slice(BASE.length - 1) || "/") : p;
+};
 const hash = ref(currentPath());
 window.addEventListener("popstate", () => { hash.value = currentPath(); });
 
 const route = computed(() => hash.value || "/");
+
+// restore route after a 404.html bounce (GitHub Pages has no SPA fallback)
+try {
+  const redirect = sessionStorage.getItem("route-redirect");
+  if (redirect) {
+    sessionStorage.removeItem("route-redirect");
+    nav(redirect);
+  }
+} catch {}
 
 const needsDetail = computed(() => {
   const r = route.value;
@@ -125,7 +140,7 @@ const implId = computed(() => {
 
 async function loadSummary() {
   try {
-    const r = await fetch("/summary.json");
+    const r = await fetch(BASE + "summary.json");
     if (!r.ok) throw 0;
     summary.value = await r.json();
   } catch {}
@@ -134,7 +149,7 @@ async function loadSummary() {
 async function loadDetail() {
   if (detail.value) return;
   try {
-    const r = await fetch("/detail.json");
+    const r = await fetch(BASE + "detail.json");
     if (!r.ok) throw 0;
     const d = await r.json();
     if (summary.value) mergeDetail(d);
@@ -220,7 +235,7 @@ const activeReqSection = computed(() => {
 });
 
 function nav(path) {
-  history.pushState(null, "", path);
+  history.pushState(null, "", BASE.slice(0, -1) + path);
   hash.value = path;
   modalDetail.value = null;
   mobileMenuOpen.value = false;
@@ -236,7 +251,7 @@ watch(route, () => { window.scrollTo(0, 0); });
     <nav class="sticky top-0 z-50 bg-paper/95 backdrop-blur-md border-b border-rule">
       <div class="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center gap-4">
         <a @click.prevent="nav('/')" class="flex items-center gap-3 no-underline group shrink-0 cursor-pointer">
-          <img src="/logos/iso-red.svg" alt="ISO" class="h-7 w-auto" />
+          <img :src="BASE + 'logos/iso-red.svg'" alt="ISO" class="h-7 w-auto" />
           <div class="hidden sm:block leading-none">
             <div class="font-display text-lg font-medium tracking-tight text-ink">ISO 8601</div>
             <div class="clause-label mt-0.5">Conformance Test Suite</div>

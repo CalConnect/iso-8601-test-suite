@@ -5,6 +5,7 @@ import compression from "vite-plugin-compression";
 
 export default defineConfig({
   root: ".",
+  base: "/iso-8601-test-suite/",
   plugins: [
     vue(),
     compression({ algorithm: "gzip", threshold: 1024, ext: ".gz" }),

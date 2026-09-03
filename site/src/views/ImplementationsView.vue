@@ -12,6 +12,8 @@ const props = defineProps({
 
 const emit = defineEmits(["navigate"]);
 
+const BASE = import.meta.env.BASE_URL;
+
 const families = computed(() => {
   const groups = groupByFamily(props.libs);
   return groups.slice().sort((a, b) => (a.language || "").localeCompare(b.language || ""));
@@ -186,7 +188,7 @@ function pctBarTone(pct) {
 
             <div class="px-5 pb-4 mt-auto">
               <a
-                :href="'/results/' + lib.id + '.yaml'"
+                :href="BASE + 'results/' + lib.id + '.yaml'"
                 download
                 @click.stop
                 class="btn-ghost text-xs"

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ISO 8601 — Conformance Test Suite</title>
+  <script>
+    // GitHub Pages serves this page for any unknown path (no SPA fallback).
+    // Hand the intended route to the app via sessionStorage and bounce to the root.
+    var base = "/iso-8601-test-suite/";
+    var path = decodeURIComponent(location.pathname);
+    if (path.indexOf(base) === 0) path = path.slice(base.length);
+    try { sessionStorage.setItem("route-redirect", path || "/"); } catch (e) {}
+    location.replace(base);
+  </script>
+</head>
+<body></body>
+</html>
