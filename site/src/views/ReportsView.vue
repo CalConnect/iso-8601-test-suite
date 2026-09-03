@@ -8,6 +8,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["navigate"]);
+
+const BASE = import.meta.env.BASE_URL;
 </script>
 
 <template>
@@ -76,7 +78,7 @@ const emit = defineEmits(["navigate"]);
           </div>
 
           <a
-            :href="'/results/' + lib.id + '.yaml'"
+            :href="BASE + 'results/' + lib.id + '.yaml'"
             download
             class="btn-ghost w-full justify-center text-xs no-underline"
           >
