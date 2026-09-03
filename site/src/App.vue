@@ -138,11 +138,19 @@ const implId = computed(() => {
   return m ? m[1] : null;
 });
 
+// logo paths are root-absolute in the generated JSON ("/logos/x.svg"); rebase onto the deploy base
+function rebaseLogos(data) {
+  const fix = (p) => (typeof p === "string" && p.startsWith("/")) ? BASE + p.slice(1) : p;
+  (data.libraries || []).forEach(l => { l.logo = fix(l.logo); });
+  (data.profiles || []).forEach(p => { p.logo = fix(p.logo); });
+}
+
 async function loadSummary() {
   try {
     const r = await fetch(BASE + "summary.json");
     if (!r.ok) throw 0;
     summary.value = await r.json();
+    rebaseLogos(summary.value);
   } catch {}
 }
 
